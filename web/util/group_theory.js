@@ -8,6 +8,7 @@ function range(n) {
     for (i = 0; i < n; i++) { 
         result.push(i);
     }
+    return result;
 }
 
 // Groups /////////////////////////////////////////////////////////////////////
@@ -47,6 +48,11 @@ dicyclic_group_12.prototype.get_elements = function() {
     return this.elements;
 }
 
+// gets *SOME* generating set (actually the canonical one)
+dicyclic_group_12.prototype.get_some_generators = function() {
+    return [0, 4];
+}
+
 dicyclic_group_12.prototype.operation = function(x, y) {
     var rx = x % 4;
     var sx = Math.floor(x / 4);
@@ -84,6 +90,11 @@ dihedral_group.prototype.get_order = function() {
 
 dihedral_group.prototype.get_elements = function() {
     return this.elements;
+}
+
+// gets *SOME* generating set (actually the canonical one)
+dihedral_group.prototype.get_some_generators = function() {
+    return [0, this.num_sides];
 }
 
 dihedral_group.prototype.operation = function(x, y) {
