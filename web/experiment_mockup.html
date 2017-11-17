@@ -1,12 +1,35 @@
 <!doctype html>
 <html>
 <head>
-    <title>My experiment</title>
+    <title>Navigation</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="./jspsych/jspsych.js"></script>
-    <link href="./jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <script src="util/group_theory.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
 </head>
 <body>
-TODO
 </body>
+    <script>
+    function choice(a) {
+        return a[Math.floor(Math.random() * a.length)];
+    }
+
+    let this_group =  new dihedral_group(6);
+    var elements = this_group.get_elements();
+
+    var test_room = {
+        type: 'two-door-navigation',
+        group: this_group,
+        room_assignment: ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"],
+        door_color_assignment: ["white", "black"],
+        door_position_assignment: [0, 1],
+        goal: 1,
+        start: 0
+    }
+
+    jsPsych.init({
+        timeline: [test_room]
+    })
+    </script>
 </html>
