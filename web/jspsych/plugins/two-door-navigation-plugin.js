@@ -11,12 +11,12 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.group = the group
     //trial.room_assignment = assignment of room colors to elements
     //trial.door_color_assignment = assignment of colors white and black to left and right doors, resp. 
-    //trial.door_position_assignment = assignment of door positions to generators (should be [0, 1] or [1, 0])
+    //trial.door_generator_assignment = assignment of door positions to generators (should be [0, 1] or [1, 0])
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
     trial.action_noise = trial.action_noise || 0.2; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
-        trial.canvas_width = trial.canvas_width || 600;
+    trial.canvas_width = trial.canvas_width || 600;
 
     display_element.append($('<canvas>', {
         "id": "room-canvas",
@@ -69,6 +69,9 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var door_inlay1_offset_y = door_height/11;
     var door_inlay2_offset_y = 3*door_height/11;
     var door_inlay3_offset_y = 7 * door_height/11;
+    var doorknob_radius = door_height/33;
+    var doorknob_offset_x = trial.canvas_width/50;
+    var doorknob_offset_y = 6.5*door_height/11;
 
     function draw_door(door_loc) {
         var door_color = trial.door_color_assignment[door_loc];
@@ -107,10 +110,31 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                         door_offset + door_inlay3_offset_y,
                         door_inlay_width,
                         door_inlay_height);
+
+        draw.fillStyle = "gold";
+        draw.arc(curr_door_loc + door_width - doorknob_offset_x,
+                 door_offset + doorknob_offset_y,
+                 doorknob_radius,
+                 0,
+                 2*Math.PI);
+        draw.fill();
+
     }
+
+
+    function door_contains(door_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the door 
+        if (door_loc == 0) {
+            curr_door_loc = left_door_loc; 
+        } else {
+            curr_door_loc = right_door_loc; 
+        }
+        return x >= curr_door_loc && x <= curr_door_loc + door_width && y >= door_offset && y <= door_offset + door_height; 
+    }
+
     
 
     // Room event handlers
+    var clickable = true;
 
     var getMouse = function(e,canvas) { //Gets mouse location relative to canvas, code stolen from https://github.com/simonsarris/Canvas-tutorials/blob/master/shapes.js 
 	    var element = canvas;
@@ -141,9 +165,68 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 	    return {x: mx, y: my};
     };
 
+    function next_room(current_location, action) {
+        if (Math.random() < trial.action_noise) {
+            action = 1 - action;
+        }
+        var generators = trial.group.get_some_generators()
+        new_location = trial.group.operation(current_location, generators[trial.door_generator_assignment[action]]); 
+        return new_location;
+    }
+
+    function display_congratulations() {
+        // reduce opacity of background
+        draw.globalAlpha = 0.9;
+        draw.fillStyle = "gray";
+        draw.fillRect(0, 0, canvas.width, canvas.height);
+
+        draw.globalAlpha = 1;
+        draw.textAlign = "center";
+        draw.fillStyle = "white";
+        draw.font = "40px Arial";
+        draw.fillText("Congratulations!", canvas.width/2, canvas.height/2);
+    }
+
+    canvas.addEventListener('mousedown', function(e) {
+        if (!clickable) {
+            return;
+        }
+        var mouse = getMouse(e, canvas);
+        if (door_contains(0, mouse.x, mouse.y)) {
+            //go through left door
+            current_location = next_room(current_location, 0)
+            action_history.push(0); 
+
+        } else if (door_contains(1, mouse.x, mouse.y)) {
+            //go through right door
+            current_location = next_room(current_location, 1)
+            action_history.push(1); 
+        } else {
+            //mis-click, ignore
+            return;
+        }
+        // update everything
+        var curr_time = (new Date()).getTime();
+        room_rts.push(curr_time - this_room_time);
+        draw_current_room(current_location);
+        location_history.push(current_location);
+        this_room_time = (new Date()).getTime();
+
+        if (current_location == trial.goal) {
+            clickable = false;
+            setTimeout(function() {
+                display_congratulations();
+                setTimeout(end_function, 2000); 
+            }, 500);
+        }
+
+        return;
+    }, true);
+
     // putting it all together
 
     function draw_current_room(current_location) {
+        draw.clearRect(0, 0, canvas.width, canvas.height);
         var room_color = trial.room_assignment[current_location];
         draw.fillStyle = room_color;
         draw.fillRect(0, 0, canvas.width, canvas.height);
@@ -152,7 +235,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
     ////// End room stuff /////////////////////////////////////////////////////////
     
-    function endTrial() {
+    function end_function() {
 
       display_element.html('');
 
