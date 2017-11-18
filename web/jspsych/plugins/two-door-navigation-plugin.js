@@ -35,7 +35,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var draw = canvas.getContext("2d");
 
 
-    display_element.append('<div id="instruction-div">'+''+'<br /><br /></div>');
+    display_element.append('<div id="instruction-div">Goal: find your way to the ' + trial.room_assignment[trial.goal] + ' room!<br /><br /></div>');
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -56,6 +56,32 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var this_room_time = start_time;
 
     /////// Room graphics ////////////////////////////////////////////////////
+    // helpers for drawing vertically oriented trapezoids
+    function draw_trapezoid(x, y, width, left_height, right_height, offset) {
+        offset = offset || Math.abs(left_height  - right_height) / 2;
+        draw.beginPath();
+        if (left_height >= right_height) {
+            draw.moveTo(x, y);
+            draw.lineTo(x, y + left_height);
+            draw.lineTo(x + width, y + right_height + offset);
+            draw.lineTo(x + width, y + offset);
+            draw.closePath();
+        } else {
+            draw.moveTo(x + width, y);
+            draw.lineTo(x + width, y + right_height);
+            draw.lineTo(x, y + left_height + offset);
+            draw.lineTo(x, y + offset);
+            draw.closePath();
+        }
+    }
+
+    var shrink_constant = 0.2;
+    function draw_foreshortened_trapezoid(x, y, original_width, left_height, angle) {
+        var width = Math.cos(angle)*original_width;
+        var right_height = left_height - 2*shrink_constant*Math.sin(angle)*width;
+        draw_trapezoid(x, y, width, left_height, right_height);
+    }
+
     // Making doors
     var door_width = trial.canvas_width/5;
     var door_height = 2*trial.canvas_height/3;
@@ -73,7 +99,10 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var doorknob_offset_x = trial.canvas_width/50;
     var doorknob_offset_y = 6.5*door_height/11;
 
-    function draw_door(door_loc) {
+    function draw_door(door_loc, angle) {
+        angle = angle || 0;
+        var cos_angle = Math.cos(angle);
+        var van_dist = (door_height / 2) * (door_width * cos_angle / (shrink_constant * Math.sin(angle)));
         var door_color = trial.door_color_assignment[door_loc];
         var curr_door_loc = 0;
         if (door_loc == 0) {
@@ -81,37 +110,58 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         } else {
             curr_door_loc = right_door_loc; 
         }
+        draw.fillStyle = "black";
+        draw.fillRect(curr_door_loc, door_offset, door_width, door_height);
         
         draw.fillStyle = door_color;
-        draw.fillRect(curr_door_loc, door_offset, door_width, door_height);
         draw.strokeStyle = trial.door_color_assignment[1-door_loc]; 
-        draw.strokeRect(curr_door_loc, door_offset, door_width, door_height);
-        draw.strokeRect(curr_door_loc + door_inlay_offset_x,
-                        door_offset + door_inlay1_offset_y,
-                        door_inlay_width,
-                        door_inlay_width);
-        draw.strokeRect(curr_door_loc + door_inlay_offset_x,
-                        door_offset + door_inlay2_offset_y,
-                        door_inlay_width,
-                        door_inlay_height);
-        draw.strokeRect(curr_door_loc + door_inlay_offset_x,
-                        door_offset + door_inlay3_offset_y,
-                        door_inlay_width,
-                        door_inlay_height);
-        draw.strokeRect(curr_door_loc + door_width - door_inlay_width - door_inlay_offset_x,
-                        door_offset + door_inlay1_offset_y,
-                        door_inlay_width,
-                        door_inlay_width);
-        draw.strokeRect(curr_door_loc + door_width - door_inlay_width - door_inlay_offset_x,
-                        door_offset + door_inlay2_offset_y,
-                        door_inlay_width,
-                        door_inlay_height);
-        draw.strokeRect(curr_door_loc + door_width - door_inlay_width - door_inlay_offset_x,
-                        door_offset + door_inlay3_offset_y,
-                        door_inlay_width,
-                        door_inlay_height);
+        draw_foreshortened_trapezoid(curr_door_loc, door_offset, door_width, door_height, angle);
+        draw.fill();
+        draw.stroke();
+
+        var door_half_height = door_height / 2;
+        draw_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
+                       door_offset + door_half_height - (door_half_height - door_inlay1_offset_y) * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+                       door_inlay_width * cos_angle,
+                       door_inlay_width * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+                       door_inlay_width * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist,
+                       (door_half_height - (door_inlay1_offset_y + door_inlay_width)) * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist);
+        draw.stroke();
+//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
+//                                     door_offset + door_inlay2_offset_y + door_inlay_offset_x * this_shrink,
+//                                     door_inlay_width * cos_angle,
+//                                     door_inlay_height - 2 * (door_inlay_width + door_inlay_offset_x) * this_shrink,
+//                                     angle);
+//        draw.stroke();
+//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
+//                                     door_offset + door_inlay3_offset_y + door_inlay_offset_x * this_shrink,
+//                                     door_inlay_width * cos_angle,
+//                                     door_inlay_height - 2 * (door_inlay_width + door_inlay_offset_x) * this_shrink,
+//                                     angle);
+//        draw.stroke();
+//
+//        var door_right_inlay_offset_x = door_width - door_inlay_width - door_inlay_offset_x;
+//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle * door_right_inlay_offset_x,
+//                                     door_offset + door_inlay1_offset_y + door_right_inlay_offset_x * this_shrink,
+//                                     door_inlay_width * cos_angle,
+//                                     door_inlay_width - 2 * (door_right_inlay_offset_x + door_inlay_width) * this_shrink,
+//                                     angle);
+//        draw.stroke();
+//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
+//                                     door_offset + door_inlay2_offset_y + door_right_inlay_offset_x * this_shrink,
+//                                     door_inlay_width * cos_angle,
+//                                     door_inlay_height - 2 * (door_right_inlay_offset_x + door_inlay_width) * this_shrink,
+//                                     angle);
+//        draw.stroke();
+//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
+//                                     door_offset + door_inlay3_offset_y + door_right_inlay_offset_x * this_shrink,
+//                                     door_inlay_width * cos_angle,
+//                                     door_inlay_height - 2 * (door_right_inlay_offset_x + door_inlay_width)* this_shrink,
+//                                     angle);
+//        draw.stroke();
 
         draw.fillStyle = "gold";
+        draw.beginPath()
         draw.arc(curr_door_loc + door_width - doorknob_offset_x,
                  door_offset + doorknob_offset_y,
                  doorknob_radius,
@@ -230,7 +280,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         var room_color = trial.room_assignment[current_location];
         draw.fillStyle = room_color;
         draw.fillRect(0, 0, canvas.width, canvas.height);
-        draw_door(0); draw_door(1);
+        draw_door(0, 0.25*Math.PI); draw_door(1);
     }
 
     ////// End room stuff /////////////////////////////////////////////////////////
