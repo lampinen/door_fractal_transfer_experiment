@@ -50,7 +50,7 @@ dicyclic_group_12.prototype.get_elements = function() {
 
 // gets *SOME* generating set (actually the canonical one)
 dicyclic_group_12.prototype.get_some_generators = function() {
-    return [0, 4];
+    return [1, 4];
 }
 
 dicyclic_group_12.prototype.operation = function(x, y) {
@@ -94,7 +94,7 @@ dihedral_group.prototype.get_elements = function() {
 
 // gets *SOME* generating set (actually the canonical one)
 dihedral_group.prototype.get_some_generators = function() {
-    return [0, this.num_sides];
+    return [1, this.num_sides];
 }
 
 dihedral_group.prototype.operation = function(x, y) {
