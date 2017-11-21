@@ -95,14 +95,15 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var door_inlay1_offset_y = door_height/11;
     var door_inlay2_offset_y = 3*door_height/11;
     var door_inlay3_offset_y = 7 * door_height/11;
-    var doorknob_radius = door_height/33;
+    var doorknob_diameter = door_height/33;
     var doorknob_offset_x = trial.canvas_width/50;
     var doorknob_offset_y = 6.5*door_height/11;
+    var doorknob_offset_z = trial.canvas_width/150;
 
     function draw_door(door_loc, angle) {
         angle = angle || 0;
         var cos_angle = Math.cos(angle);
-        var van_dist = (door_height / 2) * (door_width * cos_angle / (shrink_constant * Math.sin(angle)));
+        var van_dist = (door_height/2) * (cos_angle/ (shrink_constant * Math.sin(angle) ));
         var door_color = trial.door_color_assignment[door_loc];
         var curr_door_loc = 0;
         if (door_loc == 0) {
@@ -110,64 +111,111 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         } else {
             curr_door_loc = right_door_loc; 
         }
-        draw.fillStyle = "black";
-        draw.fillRect(curr_door_loc, door_offset, door_width, door_height);
-        
-        draw.fillStyle = door_color;
-        draw.strokeStyle = trial.door_color_assignment[1-door_loc]; 
-        draw_foreshortened_trapezoid(curr_door_loc, door_offset, door_width, door_height, angle);
-        draw.fill();
-        draw.stroke();
+        if (angle == 0) {
+	    draw.fillStyle = door_color;
+	    draw.fillRect(curr_door_loc, door_offset, door_width, door_height);
+	    draw.strokeStyle = trial.door_color_assignment[1-door_loc]; 
+	    draw.strokeRect(curr_door_loc, door_offset, door_width, door_height);
+	    draw.strokeRect(curr_door_loc + door_inlay_offset_x,
+                            door_offset + door_inlay1_offset_y,
+                            door_inlay_width,
+                            door_inlay_width);
+	    draw.strokeRect(curr_door_loc + door_inlay_offset_x,
+	       	            door_offset + door_inlay2_offset_y,
+	       	            door_inlay_width,
+	       	            door_inlay_height);
+	    draw.strokeRect(curr_door_loc + door_inlay_offset_x,
+	       	            door_offset + door_inlay3_offset_y,
+	       	            door_inlay_width,
+	       	            door_inlay_height);
+	    draw.strokeRect(curr_door_loc + door_width - door_inlay_width - door_inlay_offset_x,
+	       	            door_offset + door_inlay1_offset_y,
+	       	            door_inlay_width,
+	       	            door_inlay_width);
+	    draw.strokeRect(curr_door_loc + door_width - door_inlay_width - door_inlay_offset_x,
+	       	            door_offset + door_inlay2_offset_y,
+	       	            door_inlay_width,
+	       	            door_inlay_height);
+	    draw.strokeRect(curr_door_loc + door_width - door_inlay_width - door_inlay_offset_x,
+	       	            door_offset + door_inlay3_offset_y,
+	       	            door_inlay_width,
+	       	            door_inlay_height);
+	    draw.fillStyle = "gold";
+	    draw.beginPath()
+	    draw.ellipse(curr_door_loc + (door_width - doorknob_offset_x),
+			 door_offset + doorknob_offset_y,
+			 doorknob_diameter,
+			 doorknob_diameter,
+			 0,
+			 0,
+			 2*Math.PI);
+	    draw.fill();
+        } else {
 
-        var door_half_height = door_height / 2;
-        draw_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
-                       door_offset + door_half_height - (door_half_height - door_inlay1_offset_y) * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
-                       door_inlay_width * cos_angle,
-                       door_inlay_width * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
-                       door_inlay_width * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist,
-                       (door_half_height - (door_inlay1_offset_y + door_inlay_width)) * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist);
-        draw.stroke();
-//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
-//                                     door_offset + door_inlay2_offset_y + door_inlay_offset_x * this_shrink,
-//                                     door_inlay_width * cos_angle,
-//                                     door_inlay_height - 2 * (door_inlay_width + door_inlay_offset_x) * this_shrink,
-//                                     angle);
-//        draw.stroke();
-//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
-//                                     door_offset + door_inlay3_offset_y + door_inlay_offset_x * this_shrink,
-//                                     door_inlay_width * cos_angle,
-//                                     door_inlay_height - 2 * (door_inlay_width + door_inlay_offset_x) * this_shrink,
-//                                     angle);
-//        draw.stroke();
-//
-//        var door_right_inlay_offset_x = door_width - door_inlay_width - door_inlay_offset_x;
-//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle * door_right_inlay_offset_x,
-//                                     door_offset + door_inlay1_offset_y + door_right_inlay_offset_x * this_shrink,
-//                                     door_inlay_width * cos_angle,
-//                                     door_inlay_width - 2 * (door_right_inlay_offset_x + door_inlay_width) * this_shrink,
-//                                     angle);
-//        draw.stroke();
-//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
-//                                     door_offset + door_inlay2_offset_y + door_right_inlay_offset_x * this_shrink,
-//                                     door_inlay_width * cos_angle,
-//                                     door_inlay_height - 2 * (door_right_inlay_offset_x + door_inlay_width) * this_shrink,
-//                                     angle);
-//        draw.stroke();
-//        draw_foreshortened_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
-//                                     door_offset + door_inlay3_offset_y + door_right_inlay_offset_x * this_shrink,
-//                                     door_inlay_width * cos_angle,
-//                                     door_inlay_height - 2 * (door_right_inlay_offset_x + door_inlay_width)* this_shrink,
-//                                     angle);
-//        draw.stroke();
+	    draw.fillStyle = "black";
+	    draw.fillRect(curr_door_loc, door_offset, door_width, door_height);
+	    
+	    draw.fillStyle = door_color;
+	    draw.strokeStyle = trial.door_color_assignment[1-door_loc]; 
+	    draw_foreshortened_trapezoid(curr_door_loc, door_offset, door_width, door_height, angle);
+	    draw.fill();
+	    draw.stroke();
 
-        draw.fillStyle = "gold";
-        draw.beginPath()
-        draw.arc(curr_door_loc + door_width - doorknob_offset_x,
-                 door_offset + doorknob_offset_y,
-                 doorknob_radius,
-                 0,
-                 2*Math.PI);
-        draw.fill();
+	    var door_half_height = door_height / 2;
+	    draw_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
+			   door_offset + door_half_height - (door_half_height - door_inlay1_offset_y) * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+			   door_inlay_width * cos_angle,
+			   door_inlay_width * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+			   door_inlay_width * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist,
+			   (door_half_height - (door_inlay1_offset_y)) * (cos_angle*(door_inlay_width) / van_dist));
+	    draw.stroke();
+	    draw_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
+			   door_offset + door_half_height - (door_half_height - door_inlay2_offset_y) * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+			   door_inlay_width * cos_angle,
+			   door_inlay_height * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+			   door_inlay_height * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist,
+			   (door_half_height - (door_inlay2_offset_y)) * (cos_angle*(door_inlay_width) / van_dist));
+	    draw.stroke();
+	    draw_trapezoid(curr_door_loc + cos_angle*door_inlay_offset_x,
+			   door_offset + door_half_height - (door_half_height - door_inlay3_offset_y) * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+			   door_inlay_width * cos_angle,
+			   door_inlay_height * (van_dist - cos_angle*door_inlay_offset_x) / van_dist,
+			   door_inlay_height * (van_dist - cos_angle*(door_inlay_offset_x + door_inlay_width)) / van_dist,
+			   (door_half_height - (door_inlay3_offset_y)) * (cos_angle*(door_inlay_width) / van_dist));
+	    draw.stroke();
+	    var door_right_inlay_offset_x = door_width - door_inlay_width - door_inlay_offset_x;
+	    draw_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
+			   door_offset + door_half_height - (door_half_height - door_inlay1_offset_y) * (van_dist - cos_angle*door_right_inlay_offset_x) / van_dist,
+			   door_inlay_width * cos_angle,
+			   door_inlay_width * (van_dist - cos_angle*door_right_inlay_offset_x) / van_dist,
+			   door_inlay_width * (van_dist - cos_angle*(door_right_inlay_offset_x + door_inlay_width)) / van_dist,
+			   (door_half_height - (door_inlay1_offset_y)) * (cos_angle*(door_inlay_width) / van_dist));
+	    draw.stroke();
+	    draw_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
+			   door_offset + door_half_height - (door_half_height - door_inlay2_offset_y) * (van_dist - cos_angle*door_right_inlay_offset_x) / van_dist,
+			   door_inlay_width * cos_angle,
+			   door_inlay_height * (van_dist - cos_angle*door_right_inlay_offset_x) / van_dist,
+			   door_inlay_height * (van_dist - cos_angle*(door_right_inlay_offset_x + door_inlay_width)) / van_dist,
+			   (door_half_height - (door_inlay2_offset_y)) * (cos_angle*(door_inlay_width) / van_dist));
+	    draw.stroke();
+	    draw_trapezoid(curr_door_loc + cos_angle*door_right_inlay_offset_x,
+			   door_offset + door_half_height - (door_half_height - door_inlay3_offset_y) * (van_dist - cos_angle*door_right_inlay_offset_x) / van_dist,
+			   door_inlay_width * cos_angle,
+			   door_inlay_height * (van_dist - cos_angle*door_right_inlay_offset_x) / van_dist,
+			   door_inlay_height * (van_dist - cos_angle*(door_right_inlay_offset_x + door_inlay_width)) / van_dist,
+			   (door_half_height - (door_inlay3_offset_y)) * (cos_angle*(door_inlay_width) / van_dist));
+	    draw.stroke();
+	    draw.fillStyle = "gold";
+	    draw.beginPath()
+	    draw.ellipse(curr_door_loc + (door_width - doorknob_offset_x) * cos_angle + doorknob_offset_z * Math.sin(angle),
+			 door_offset + door_half_height + (doorknob_offset_y - door_half_height) * (van_dist - cos_angle * (door_width - doorknob_offset_x)) / van_dist,
+			 doorknob_diameter * 0.5 * (1 + cos_angle),
+			 doorknob_diameter,
+			 0,
+			 0,
+			 2*Math.PI);
+	    draw.fill();
+        }
 
     }
 
