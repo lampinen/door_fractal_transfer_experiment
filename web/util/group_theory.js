@@ -51,7 +51,7 @@ dicyclic_group_12.prototype.get_elements = function() {
     return this.elements;
 }
 
-dicyclic_group.prototype.get_name = function() {
+dicyclic_group_12.prototype.get_name = function() {
     return "dicyclic group of order " + this.order;
 }
 
