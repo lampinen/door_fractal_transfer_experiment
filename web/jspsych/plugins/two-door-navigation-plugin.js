@@ -362,8 +362,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
       var trial_data = {
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
-        "room_rts": JSON.stringify(room_rts),
-        "total_rt": (new Date()).getTime() - start_time
+        "room_rts": JSON.stringify(room_rts)
       };
 
       jsPsych.finishTrial(trial_data);
