@@ -50,7 +50,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var action_history = [];
     var door_history = []; // redundant but nevertheless may be informative if there is e.g. a L-R click bias
 
-    var room_rts = [];
+    var location_rts = [];
 
     var start_time = (new Date()).getTime();
 
@@ -323,7 +323,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         }
         // update everything 
         var curr_time = (new Date()).getTime();
-        room_rts.push(curr_time - this_room_time);
+        location_rts.push(curr_time - this_room_time);
         door_history.push(door_loc);
         var this_action = trial.door_generator_assignment[door_loc]; 
         current_location = next_room(current_location, this_action);
@@ -376,7 +376,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
         "door_history": JSON.stringify(door_history),
-        "room_rts": JSON.stringify(room_rts)
+        "location_rts": JSON.stringify(location_rts)
       };
 
       jsPsych.finishTrial(trial_data);
