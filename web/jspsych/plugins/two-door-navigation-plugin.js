@@ -75,7 +75,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         }
     }
 
-    var shrink_constant = 0.2;
+    var shrink_constant = 0.25;
     function draw_foreshortened_trapezoid(x, y, original_width, left_height, angle) {
         var width = Math.cos(angle)*original_width;
         var right_height = left_height - 2*shrink_constant*Math.sin(angle)*width;
@@ -157,7 +157,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 	    
 	    draw.fillStyle = door_color;
 	    draw.strokeStyle = trial.door_color_assignment[1-door_loc]; 
-	    draw_foreshortened_trapezoid(curr_door_loc, door_offset, door_width, door_height, angle);
+	    draw_trapezoid(curr_door_loc, door_offset, cos_angle * door_width, door_height,  door_height - 2*shrink_constant*Math.sin(angle)*door_width);
 	    draw.fill();
 	    draw.stroke();
 
@@ -217,6 +217,24 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 	    draw.fill();
         }
 
+    }
+
+    
+    
+    var animation_time = 500; //length of animation in ms
+    var post_animation_delay = 500; // how long to wait on last frame
+    var num_frames = 20;
+    var frame_time = animation_time/num_frames;
+    function animate_door_opening(door_loc, callback, remaining_frames) {
+            if (remaining_frames === 0) {
+                setTimeout(callback, post_animation_delay);
+                return;
+            }
+            remaining_frames = remaining_frames || num_frames;
+            draw_door(door_loc, 0.5 * Math.PI * (1 - remaining_frames/num_frames)); 
+            setTimeout(function() {
+                animate_door_opening(door_loc, callback, remaining_frames-1);
+            }, frame_time);
     }
 
 
@@ -292,31 +310,35 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         var mouse = getMouse(e, canvas);
         if (door_contains(0, mouse.x, mouse.y)) {
             //go through left door
-            current_location = next_room(current_location, 0)
-            action_history.push(0); 
+            door_loc = 0;
 
         } else if (door_contains(1, mouse.x, mouse.y)) {
             //go through right door
-            current_location = next_room(current_location, 1)
-            action_history.push(1); 
+            door_loc = 1;
         } else {
             //mis-click, ignore
             return;
         }
-        // update everything
+        // update everything 
+        current_location = next_room(current_location, door_loc)
+        action_history.push(door_loc); 
         var curr_time = (new Date()).getTime();
         room_rts.push(curr_time - this_room_time);
-        draw_current_room(current_location);
-        location_history.push(current_location);
-        this_room_time = (new Date()).getTime();
 
-        if (current_location == trial.goal) {
-            clickable = false;
-            setTimeout(function() {
-                display_congratulations();
-                setTimeout(end_function, 2000); 
-            }, 500);
-        }
+        // animate
+        animate_door_opening(door_loc, function() {
+            draw_current_room(current_location);
+            location_history.push(current_location);
+            this_room_time = (new Date()).getTime();
+
+            if (current_location == trial.goal) {
+                clickable = false;
+                setTimeout(function() {
+                    display_congratulations();
+                    setTimeout(end_function, 2000); 
+                }, 500);
+            }
+        })
 
         return;
     }, true);
@@ -328,7 +350,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         var room_color = trial.room_assignment[current_location];
         draw.fillStyle = room_color;
         draw.fillRect(0, 0, canvas.width, canvas.height);
-        draw_door(0, 0.25*Math.PI); draw_door(1);
+        draw_door(0); draw_door(1);
     }
 
     ////// End room stuff /////////////////////////////////////////////////////////
