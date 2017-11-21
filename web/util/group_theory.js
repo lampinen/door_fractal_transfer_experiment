@@ -25,6 +25,9 @@ cyclic_group.prototype.get_elements = function() {
     return this.elements;
 }
 
+cyclic_group.prototype.get_name = function() {
+    return "cyclic group of order " + this.order;
+}
 
 cyclic_group.prototype.operation = function(x, y) {
     return (x + y) % this.order;
@@ -46,6 +49,10 @@ dicyclic_group_12.prototype.get_order = function() {
 
 dicyclic_group_12.prototype.get_elements = function() {
     return this.elements;
+}
+
+dicyclic_group.prototype.get_name = function() {
+    return "dicyclic group of order " + this.order;
 }
 
 // gets *SOME* generating set (actually the canonical one)
@@ -90,6 +97,10 @@ dihedral_group.prototype.get_order = function() {
 
 dihedral_group.prototype.get_elements = function() {
     return this.elements;
+}
+
+dihedral_group.prototype.get_name = function() {
+    return "dihedral group of order " + this.order;
 }
 
 // gets *SOME* generating set (actually the canonical one)
