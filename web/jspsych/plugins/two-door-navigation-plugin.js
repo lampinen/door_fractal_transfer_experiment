@@ -48,6 +48,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     location_history.push(current_location);
 
     var action_history = [];
+    var door_history = []; // redundant but nevertheless may be informative if there is e.g. a L-R click bias
 
     var room_rts = [];
 
@@ -308,6 +309,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
             return;
         }
         var mouse = getMouse(e, canvas);
+        var door_loc;
         if (door_contains(0, mouse.x, mouse.y)) {
             //go through left door
             door_loc = 0;
@@ -320,23 +322,27 @@ jsPsych.plugins['two-door-navigation'] = (function() {
             return;
         }
         // update everything 
-        current_location = next_room(current_location, door_loc)
-        action_history.push(door_loc); 
         var curr_time = (new Date()).getTime();
         room_rts.push(curr_time - this_room_time);
+        door_history.push(door_loc);
+        var this_action = trial.door_generator_assignment[door_loc]; 
+        current_location = next_room(current_location, this_action);
+        action_history.push(this_action); 
 
         // animate
+        clickable = false;
         animate_door_opening(door_loc, function() {
             draw_current_room(current_location);
             location_history.push(current_location);
             this_room_time = (new Date()).getTime();
 
             if (current_location == trial.goal) {
-                clickable = false;
                 setTimeout(function() {
                     display_congratulations();
                     setTimeout(end_function, 2000); 
                 }, 500);
+            } else {
+                clickable = true;
             }
         })
 
@@ -360,8 +366,16 @@ jsPsych.plugins['two-door-navigation'] = (function() {
       display_element.html('');
 
       var trial_data = {
+        "group": trial.group.get_name(),
+        "room_assignment": trial.room_assignment,
+        "door_color_assignment": trial.door_color_assignment,
+        "door_generator_assignment": trial.door_generator_assignment,
+        "goal": trial.goal,
+        "start": trial.start,
+        "action_noise": trial.action_noise,
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
+        "door_history": JSON.stringify(door_history),
         "room_rts": JSON.stringify(room_rts)
       };
 
