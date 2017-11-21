@@ -23,13 +23,16 @@
         group: this_group,
         room_assignment: ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"],
         door_color_assignment: ["white", "black"],
-        door_position_assignment: [0, 1],
-        goal: 1,
+        door_generator_assignment: [0, 1],
+        goal: 10,
         start: 0
     }
 
     jsPsych.init({
-        timeline: [test_room]
+        timeline: [test_room],
+        on_finish: function() {
+            jsPsych.data.displayData('json');
+        }
     })
     </script>
 </html>
