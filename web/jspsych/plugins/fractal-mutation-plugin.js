@@ -61,7 +61,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var ef_height = 1;
     var ef_neck_length = 0.4; 
     var ef_bottom_curve = 0.1;
-    var ef_grad_width = 0.2
+    var ef_grad_width = 0.15;
     var x_pad = 0.2;
     
     function draw_erlenmeyer(x, y, size) {
@@ -72,11 +72,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         var cos_phi = Math.cos(phi);
         var sin_phi = Math.sin(phi);
 
-        var ef_path = function() {
-            draw.beginPath();
-            draw.moveTo(x + size * (ef_bot_width-ef_top_width) / 2, y);
-            draw.lineTo(x  + size * (ef_bot_width-ef_top_width) / 2, y + size * ef_neck_length); 
-            draw.lineTo(x, y + size * ef_height_exclusive) 
+        var ef_path = function(partial) {
+            if (!partial) {
+                draw.beginPath();
+                draw.moveTo(x + size * (ef_bot_width-ef_top_width) / 2, y);
+                draw.lineTo(x  + size * (ef_bot_width-ef_top_width) / 2, y + size * ef_neck_length); 
+                draw.lineTo(x, y + size * ef_height_exclusive) 
+            } else {
+                draw.beginPath();
+                draw.moveTo(x + size * ((ef_slope_height / 3) * cos_phi), y + size * (ef_height_exclusive- (ef_slope_height / 3) * sin_phi));
+                draw.lineTo(x, y + size * ef_height_exclusive) 
+            }
             draw.arcTo(x - size * 2 *ef_bottom_curve * cos_phi, 
                        y + size * (ef_height_exclusive + 2 * ef_bottom_curve * sin_phi),  
                        x + size * (ef_bottom_curve * sin_phi),
@@ -88,8 +94,12 @@ jsPsych.plugins['fractal-mutation'] = (function() {
                        x + size * (ef_bot_width),
                        y + size * ef_height_exclusive,
                        size * ef_bottom_curve);
-            draw.lineTo(x  + size * (ef_bot_width + ef_top_width) / 2, y + size * ef_neck_length); 
-            draw.lineTo(x  + size * (ef_bot_width + ef_top_width) / 2, y); 
+            if (!partial) {
+                draw.lineTo(x  + size * (ef_bot_width + ef_top_width) / 2, y + size * ef_neck_length); 
+                draw.lineTo(x  + size * (ef_bot_width + ef_top_width) / 2, y); 
+            } else {
+                draw.lineTo(x + size * (ef_bot_width - (ef_slope_height / 3) * cos_phi), y + size * (ef_height_exclusive- (ef_slope_height / 3) * sin_phi));
+            }
             draw.closePath();
         }
         ef_path();
@@ -98,7 +108,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.lineWidth = 5;
         draw.stroke()
         ef_path();
-        draw.globalAlpha = 0.3;
         draw.strokeStyle = "CadetBlue";
         draw.lineWidth = 2;
         draw.stroke()
@@ -107,16 +116,19 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.strokeStyle = "DarkSlateGray";
         draw.lineWidth = 1;
         draw.stroke()
-        //TODO: fill w/ liquid
+        ef_path(true);
+        draw.globalAlpha = 0.7
+        draw.fillStyle = "Red"; 
+        draw.fill();
         ef_path();
-        draw.globalAlpha = 0.3;
+        draw.globalAlpha = 0.2;
         draw.fillStyle = "LightBlue";
         draw.fill();
         draw.globalAlpha = 1;
 
 
         draw.lineWidth = 2;
-        draw.strokeStyle = "SlateGray";
+        draw.strokeStyle = "DarkSlateGray";
         draw.beginPath();
         draw.moveTo(x + size * ef_bot_width, y + size * ef_height_exclusive);
         draw.lineTo(x + size * (ef_bot_width - ef_grad_width), y + size * ef_height_exclusive);
@@ -133,6 +145,16 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.stroke()
     }
 
+    var gamma_ray_1_rad = 0.2;
+    var gamma_ray_2_rad = 0.1;
+    var gamma_ray_3_rad = 0.05;
+    var gamma_ray_rod_length = 0.3;
+    var gamma_ray_rod_width = 0.1;
+    function draw_gamma_ray(x, y, size) {
+
+        draw.beginPath()
+        draw.arc(x + gamma_ray_1_rad * size, y - gamma_ray_1_rad * size, gamm_ray1_rad * size, 0, 2 * Math.PI); 
+    }
 
     function mutagen_contains(mutagen_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the mutagen 
         if (mutagen_loc == 0) {
