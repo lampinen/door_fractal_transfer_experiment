@@ -289,6 +289,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         draw_erlenmeyer(10, 50, 125);
         draw_gamma_ray(10, canvas.height - 10, 125)
+        draw_petri_dish(canvas.width/2, canvas.height/2, trial.fractal_assignment[current_location])
     }
 
     ////// End fractal stuff /////////////////////////////////////////////////////////
