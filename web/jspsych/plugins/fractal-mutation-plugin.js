@@ -146,14 +146,40 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     }
 
     var gamma_ray_1_rad = 0.2;
-    var gamma_ray_2_rad = 0.1;
-    var gamma_ray_3_rad = 0.05;
-    var gamma_ray_rod_length = 0.3;
-    var gamma_ray_rod_width = 0.1;
+    var gamma_ray_2_rad = 0.15;
+    var gamma_ray_3_rad = 0.1;
+    var gamma_ray_rod_length = 0.15;
+    var gamma_ray_rod_width = 0.075;
     function draw_gamma_ray(x, y, size) {
 
+        var theta = 0.2 * Math.PI;
+        var sin_theta = Math.sin(theta);
+        var cos_theta = Math.cos(theta);
+        draw.setTransform(cos_theta, -sin_theta, sin_theta, cos_theta, x + gamma_ray_1_rad * size, y - gamma_ray_1_rad * size);
+        draw.strokeStyle = "Indigo";
+        draw.fillStyle = "Gold";
+        draw.beginPath();
+        draw.rect(gamma_ray_1_rad * size, - 0.5 * gamma_ray_rod_width * size, size * gamma_ray_rod_length, size*gamma_ray_rod_width); 
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect((gamma_ray_1_rad+2*gamma_ray_2_rad+gamma_ray_rod_length) * size, - 0.5 * gamma_ray_rod_width * size, size * gamma_ray_rod_length, size*gamma_ray_rod_width); 
+        draw.fill();
+        draw.stroke();
+        draw.fillStyle = "Silver";
         draw.beginPath()
-        draw.arc(x + gamma_ray_1_rad * size, y - gamma_ray_1_rad * size, gamm_ray1_rad * size, 0, 2 * Math.PI); 
+        draw.arc(0, 0, gamma_ray_1_rad * size, 0, 2 * Math.PI); 
+        draw.fill();
+        draw.stroke();
+        draw.beginPath()
+        draw.arc((gamma_ray_1_rad+gamma_ray_2_rad+gamma_ray_rod_length) * size, 0, gamma_ray_2_rad * size, 0, 2 * Math.PI); 
+        draw.fill();
+        draw.stroke();
+        draw.beginPath()
+        draw.arc((gamma_ray_1_rad+2 *gamma_ray_2_rad+ 2 * gamma_ray_rod_length + gamma_ray_3_rad) * size, 0, gamma_ray_3_rad * size, 0, 2 * Math.PI); 
+        draw.fill();
+        draw.stroke();
+        draw.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     function mutagen_contains(mutagen_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the mutagen 
@@ -262,6 +288,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     function draw_current_fractal(current_location) {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         draw_erlenmeyer(10, 50, 125);
+        draw_gamma_ray(10, canvas.height - 10, 125)
     }
 
     ////// End fractal stuff /////////////////////////////////////////////////////////
