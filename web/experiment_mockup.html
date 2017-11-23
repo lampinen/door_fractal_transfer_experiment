@@ -5,6 +5,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="util/group_theory.js"></script>
     <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugins/fractal-mutation-plugin.js"></script>
     <script src="jspsych/plugins/two-door-navigation-plugin.js"></script>
     <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
 </head>
@@ -18,18 +19,34 @@
     let this_group =  new dihedral_group(6);
     var elements = this_group.get_elements();
 
-    var test_room = {
-        type: 'two-door-navigation',
+    var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/grn_blu.png', 'images/grn_prp.png', 'images/grn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/red_prp.png', 'images/wht_red.png', 'images/ylw_pnk.png', 'images/ylw_slt.png'];
+    var this_mutagen_assignment = [1, 0];
+    var this_room_assignment = ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"];
+    var this_door_generator_assignment = [1, 0];
+    var this_door_color_assignment = ["white", "black"];
+
+    var test_fractal = {
+        type: 'fractal-mutation',
         group: this_group,
-        room_assignment: ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"],
-        door_color_assignment: ["white", "black"],
-        door_generator_assignment: [0, 1],
+        fractal_assignment: this_fractal_assignment,
+        mutagen_assignment: this_mutagen_assignment,
         goal: 10,
         start: 0
     }
 
+    var test_room = {
+        type: 'two-door-navigation',
+        group: this_group,
+        room_assignment: this_room_assignment,
+        door_color_assignment: this_door_color_assignment,
+        door_generator_assignment: this_door_generator_assignment,
+        goal: 10,
+        start: 0
+    }
+
+    jsPsych.data.add_properties
     jsPsych.init({
-        timeline: [test_room],
+        timeline: [test_fractal, test_room],
         on_finish: function() {
             jsPsych.data.displayData('json');
         }
