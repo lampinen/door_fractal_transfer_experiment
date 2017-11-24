@@ -192,9 +192,13 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
     }
 
-    var draw_drop(size) {
+    function draw_drop(size) {
         draw.beginPath();
         draw.moveTo(drop_x, drop_y);
+        draw.lineTo(drop_x, drop_y + size);
+        draw.arcTo(drop_x, drop_y + 2 * size, drop_x + size, drop_y + 0.707 * size, 0.5 * size);
+        draw.arcTo(drop_x + 2 * size, drop_y, drop_x, drop_y, 0.5 * size);
+
         draw.closePath()
         draw.globalAlpha = 0.7
         draw.fillStyle = "Red"; 
