@@ -16,6 +16,8 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     trial.action_noise = trial.action_noise || 0.2; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
+    trial.image_height = trial.image_height || 300;
+    trial.image_width = trial.image_width || 300;
 
     display_element.append($('<canvas>', {
         "id": "mutation-canvas",
@@ -29,6 +31,12 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     }).width(trial.canvas_width).height(trial.canvas_height));
     $('#mutation-canvas')[0].width = trial.canvas_width;
     $('#mutation-canvas')[0].height = trial.canvas_height;
+
+    var image_objects = trial.fractal_assignment.map(function(x) {
+        var this_image = new Image(trial.image_width, trial.image_height);
+        this_image.src = x;
+        return this_image;
+        });
 
     var canvas = $('#mutation-canvas')[0];
     var draw = canvas.getContext("2d");
@@ -62,15 +70,53 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var ef_neck_length = 0.4; 
     var ef_bottom_curve = 0.1;
     var ef_grad_width = 0.15;
-    var x_pad = 0.2;
+    var ef_x_pad = 0.2;
+    var tube_width = 0.1;
+    var tube_bend_start = 0.1;
+    var tube_bend_radius = 0.25;
+    var tube_bend_angle = -0.25 * Math.PI;
+    var tube_bend_fudge = -0.05; // slop to make bezier curve tube approx. same width throughout
+    var tube_2_len = 0.7;
+    
+    // to hold drop location
+    var drop_x, drop_y;
     
     function draw_erlenmeyer(x, y, size) {
-        x = x + size * x_pad; //because I'm lazy 
+        x = x + size * ef_x_pad; //because I'm lazy 
         var ef_height_exclusive = ef_height - 2 * ef_bottom_curve; //conservative 
         var ef_slope_height = (ef_height_exclusive - ef_neck_length);
         var phi = Math.atan(ef_slope_height / (( ef_bot_width-ef_top_width) / 2)); 
         var cos_phi = Math.cos(phi);
         var sin_phi = Math.sin(phi);
+        
+        // tube stuff
+        var cos_theta = Math.cos(tube_bend_angle);
+        var sin_theta = Math.sin(tube_bend_angle);
+        draw.beginPath()
+        draw.fillStyle = "#151515";
+        draw.moveTo(x + size * (ef_bot_width - tube_width) / 2, y + size * ef_height_exclusive);
+        draw.lineTo(x + size * (ef_bot_width - tube_width) / 2, y - size * tube_bend_start);
+        draw.bezierCurveTo(x + size * (ef_bot_width - tube_width) / 2, y - size * (tube_bend_start + tube_bend_radius + tube_width),
+                           x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta + sin_theta) * (tube_bend_radius + tube_width)), y - size * (tube_bend_start + tube_bend_radius + tube_width + (sin_theta + cos_theta) * (tube_bend_radius + tube_width)),
+                           x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta) * (tube_bend_radius + tube_width)), y - size * (tube_bend_start + tube_bend_radius + tube_width + sin_theta * (tube_bend_radius + tube_width)));
+
+        draw.lineTo(x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta) * (tube_bend_radius + tube_width) - sin_theta * tube_2_len), y - size * (tube_bend_start + tube_bend_radius + tube_width + sin_theta * (tube_bend_radius + tube_width) - cos_theta * tube_2_len));
+        drop_x = x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta) * (tube_bend_radius + tube_width) - cos_theta * 0.5 * tube_width - sin_theta * tube_2_len),
+        drop_y = y - size * (tube_bend_start + tube_bend_radius + tube_width + sin_theta * (tube_bend_radius + 1.5 * tube_width) -cos_theta * tube_2_len);
+
+
+        draw.lineTo(x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta) * (tube_bend_radius + tube_width) - cos_theta * tube_width - sin_theta * tube_2_len), y - size * (tube_bend_start + tube_bend_radius + tube_width + sin_theta * (tube_bend_radius + 2 * tube_width) -cos_theta * tube_2_len));
+
+
+        draw.lineTo(x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta) * (tube_bend_radius + tube_width) - cos_theta * tube_width), y - size * (tube_bend_start + tube_bend_radius + tube_width + sin_theta * (tube_bend_radius + 2 * tube_width)));
+        draw.bezierCurveTo(x + size * ((ef_bot_width - tube_width) / 2 + (1 + cos_theta + sin_theta) * (tube_bend_radius)), y - size * (tube_bend_start + tube_bend_radius +  (sin_theta + cos_theta) * (tube_bend_radius)),
+                           x + size * (ef_bot_width + tube_width) / 2, y - size * (tube_bend_start + tube_bend_radius + tube_bend_fudge),
+                           x + size * (tube_width + ef_bot_width) / 2, y - size * tube_bend_start);
+        draw.lineTo(x + size * (tube_width + ef_bot_width) / 2, y + size * ef_height_exclusive);
+        draw.closePath();
+        draw.fill();
+
+        // flask stuff
 
         var ef_path = function(partial) {
             if (!partial) {
@@ -121,7 +167,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.fillStyle = "Red"; 
         draw.fill();
         ef_path();
-        draw.globalAlpha = 0.2;
+        draw.globalAlpha = 0.3;
         draw.fillStyle = "LightBlue";
         draw.fill();
         draw.globalAlpha = 1;
@@ -143,6 +189,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.moveTo(x + size * (ef_bot_width - (2 * ef_slope_height / 3) * cos_phi), y + size * (ef_height_exclusive- (2 * ef_slope_height / 3) * sin_phi));
         draw.lineTo(x + size * (ef_bot_width  - (2 * ef_slope_height / 3) * cos_phi - ef_grad_width), y + size * (ef_height_exclusive - (2 * ef_slope_height / 3) * sin_phi));
         draw.stroke()
+
+    }
+
+    var draw_drop(size) {
+        draw.beginPath();
+        draw.moveTo(drop_x, drop_y);
+        draw.closePath()
+        draw.globalAlpha = 0.7
+        draw.fillStyle = "Red"; 
+        draw.fill();
+        draw.globalAlpha = 1;
     }
 
     var gamma_ray_1_rad = 0.2;
@@ -181,6 +238,161 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.stroke();
         draw.setTransform(1, 0, 0, 1, 0, 0);
     }
+
+    var petri_dish_rad = 20;
+
+    function draw_petri_dish(current_location) {
+        draw.drawImage(image_objects[current_location],
+                       (canvas.width - trial.image_width)/2,
+                       (canvas.height - trial.image_width)/2,
+                       trial.image_width,
+                       trial.image_height); 
+        var pd_path = function(stroke) {
+            if (stroke) {
+                draw.beginPath();
+                draw.arc(canvas.width/2, canvas.height/2, petri_dish_rad+trial.image_width/2, 0, 2*Math.PI);
+                draw.stroke();
+                draw.beginPath();
+                draw.arc(canvas.width/2, canvas.height/2, trial.image_width/2, 0, 2*Math.PI, true);
+                draw.stroke();
+            } else {
+                draw.beginPath();
+                draw.arc(canvas.width/2, canvas.height/2, petri_dish_rad+trial.image_width/2, 0, 2*Math.PI);
+                draw.arc(canvas.width/2, canvas.height/2, trial.image_width/2, 0, 2*Math.PI, true);
+                draw.fill();
+            }
+        };
+        draw.globalAlpha = 0.3;
+        draw.strokeStyle = "SlateGray";
+        draw.lineWidth = 5;
+        pd_path(true);
+        draw.strokeStyle = "CadetBlue";
+        draw.lineWidth = 2;
+        pd_path(true);
+        draw.globalAlpha = 1;
+        draw.strokeStyle = "DarkSlateGray";
+        draw.lineWidth = 1;
+        pd_path(true);
+        draw.globalAlpha = 0.2;
+        draw.fillStyle = "LightBlue";
+        pd_path(false);
+        draw.globalAlpha = 1;
+    }
+    
+    var num_pages = 3;
+    var page_offset = 0.02;
+    var nb_ring_ry = 0.1;
+    var nb_ring_rx = 0.05;
+    var nb_ring_hole_r = 0.02;
+    var nb_width = 0.85; // relative to size 
+    var nb_length = 1.2; // ehhhh
+    var num_lines = 9;
+    var line_spacing = (nb_length - 2 * nb_ring_ry)/(1 + num_lines)
+    var num_rings = 4;
+    var ring_half_spacing = nb_width / (2 * (num_rings))
+    var nb_image_size = 0.6
+    var nb_tape_offset = 0.1;
+    var nb_tape_width = 0.1;
+
+    function draw_notebook(x, y, size, goal) {
+        // pages
+        draw.lineWidth = 1;
+        draw.strokeStyle = "Black";
+        draw.fillStyle = "LightYellow";
+        for (var i = 0; i < num_pages; i++) {
+            draw.beginPath();
+            draw.rect(x + page_offset * i * size , y + (nb_ring_ry + page_offset * i) * size, size * nb_width, size * (nb_length - nb_ring_ry));
+            draw.fill();
+            draw.stroke();
+        }
+
+        // lines
+
+        draw.strokeStyle = "LightBlue";
+        for (var i = 1; i <= num_lines; i++) {
+           draw.beginPath();
+           draw.moveTo(x + page_offset * (num_pages - 1) * size , y + (2.5 * nb_ring_ry + line_spacing * i) * size);
+           draw.lineTo(x + (page_offset * (num_pages - 1) + nb_width) * size , y + (2.5 * nb_ring_ry + line_spacing * i) * size);
+           draw.stroke();
+        }
+        // rings 
+        draw.lineWidth = 3;
+        draw.strokeStyle = "Silver";
+        var draw_ring = function(x) {
+            draw.beginPath();
+            draw.arc(x, y + 2 * nb_ring_ry * size, nb_ring_hole_r  * size, 0, 2*Math.PI);
+            draw.fillStyle = "Black";
+            draw.fill();
+            draw.beginPath();
+            draw.ellipse(x, y + nb_ring_ry * size, nb_ring_rx * size, nb_ring_ry  * size, 0, -Math.PI, 0.5*Math.PI);
+            draw.stroke()
+        };
+        for (var i = 0; i < num_rings; i++) {
+            draw_ring(x + size * (page_offset * num_pages/2 +  ring_half_spacing * (1 + 2 * i))); 
+        }
+        
+        // text
+        draw.lineWidth = 1;
+        draw.font = "20px Helvetica";
+        draw.fillStyle = "Black";
+        draw.textAlign = "center";
+        draw.fillText("Make this:", x + (page_offset * num_pages/2 + 0.5 * nb_width) *size, y + 4 * nb_ring_ry * size);
+
+        // image
+        draw.drawImage(image_objects[goal],
+                       x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size)) *size,
+                       y + (5.25 * nb_ring_ry) *size,
+                       nb_image_size*size,
+                       nb_image_size*size); 
+        // tape
+        draw.globalAlpha = 0.33;
+        draw.fillStyle = "LightGray";
+        draw.beginPath()
+        draw.moveTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) - nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry + nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) + nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry - nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) + nb_tape_offset + 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry - nb_tape_offset + 0.71 * nb_tape_width) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) - nb_tape_offset + 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry + nb_tape_offset + 0.71 * nb_tape_width) *size);
+        draw.closePath();
+        draw.fill();
+        draw.beginPath()
+        draw.moveTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) - nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry - nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) + nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry + nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) + nb_tape_offset - 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry + nb_tape_offset + 0.71 * nb_tape_width) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) - nb_tape_offset - 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry - nb_tape_offset + 0.71 * nb_tape_width) *size);
+        draw.closePath();
+        draw.fill();
+        draw.beginPath()
+        draw.moveTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) - nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry  + nb_image_size - nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) + nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size + nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) + nb_tape_offset + 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size + nb_tape_offset - 0.71 * nb_tape_width) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width - nb_image_size) - nb_tape_offset + 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size - nb_tape_offset - 0.71 * nb_tape_width) *size);
+        draw.closePath();
+        draw.fill();
+        draw.beginPath()
+        draw.moveTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) - nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size + nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) + nb_tape_offset) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size - nb_tape_offset) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) + nb_tape_offset - 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size - nb_tape_offset - 0.71 * nb_tape_width) *size);
+        draw.lineTo(x + (page_offset * num_pages/2 + 0.5 * (nb_width + nb_image_size) - nb_tape_offset - 0.71 * nb_tape_width) *size,
+                    y + (5.25 * nb_ring_ry + nb_image_size + nb_tape_offset - 0.71 * nb_tape_width) *size);
+        draw.closePath();
+        draw.fill();
+        draw.globalAlpha = 1;
+    };
 
     function mutagen_contains(mutagen_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the mutagen 
         if (mutagen_loc == 0) {
@@ -235,7 +447,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     }
 
     function display_congratulations() {
-        // reduce opacity of background
     }
 
     canvas.addEventListener('mousedown', function(e) {
@@ -287,9 +498,10 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
     function draw_current_fractal(current_location) {
         draw.clearRect(0, 0, canvas.width, canvas.height);
-        draw_erlenmeyer(10, 50, 125);
-        draw_gamma_ray(10, canvas.height - 10, 125)
-        draw_petri_dish(canvas.width/2, canvas.height/2, trial.fractal_assignment[current_location])
+        draw_petri_dish(current_location);
+        draw_erlenmeyer(-15, 50, 125);
+        draw_gamma_ray(5, canvas.height - 5, 125);
+        draw_notebook(canvas.width - 120, 125, 125, trial.goal);
     }
 
     ////// End fractal stuff /////////////////////////////////////////////////////////
