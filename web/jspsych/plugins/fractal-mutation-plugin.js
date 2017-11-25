@@ -166,6 +166,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.globalAlpha = 0.7
         draw.fillStyle = "Red"; 
         draw.fill();
+        
+        var draw_bubble = function(x, y, r, lw) {
+            draw.beginPath();
+            draw.arc(x, y, r, 0, 2* Math.PI);
+            draw.strokeStyle = "MistyRose";
+            draw.lineWidth = lw;
+            draw.stroke();
+        };
+
+        draw_bubble(x + 0.33 * ef_bot_width * size, y + size * ef_height_exclusive) 
+        //TODO: draw bubbles
         ef_path();
         draw.globalAlpha = 0.3;
         draw.fillStyle = "LightBlue";
@@ -212,11 +223,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var gamma_ray_rod_length = 0.15;
     var gamma_ray_rod_width = 0.075;
 
+    var grb_start_x, grb_start_y, grb_theta, grb_size;
+
     // for animation
     function draw_gamma_ray(x, y, size, stage) {
         stage = stage || 0;
+        grb_start_x = x;
+        grb_start_y = y;
+        grb_size = size;
 
-        var theta = 0.2 * Math.PI;
+        var theta = 0.18 * Math.PI;
+        grb_theta = theta;
         var sin_theta = Math.sin(theta);
         var cos_theta = Math.cos(theta);
         draw.setTransform(cos_theta, -sin_theta, sin_theta, cos_theta, x + gamma_ray_1_rad * size, y - gamma_ray_1_rad * size);
@@ -259,6 +276,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.stroke();
         draw.setTransform(1, 0, 0, 1, 0, 0);
     }
+
 
 
     var petri_dish_rad = 20;
@@ -455,6 +473,25 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             }, frame_time);
     }
 
+    var grb_width = 0.075;
+    var grb_length = 1.5;
+    function draw_grb(remaining_frames) {
+        var grb_num_frames = 0.1 * num_frames;
+        var step_size = grb_length / (grb_num_frames);
+        var sin_theta = Math.sin(grb_theta);
+        var cos_theta = Math.cos(grb_theta);
+        draw.setTransform(cos_theta, -sin_theta, sin_theta, cos_theta, grb_start_x + gamma_ray_1_rad * grb_size, grb_start_y - gamma_ray_1_rad * grb_size);
+        draw.beginPath()
+        draw.moveTo((gamma_ray_1_rad+ 2 *gamma_ray_2_rad+ 2 *gamma_ray_rod_length + 2 * gamma_ray_3_rad) * grb_size, - grb_size * grb_width * 0.5); 
+        draw.lineTo((gamma_ray_1_rad+ 2 *gamma_ray_2_rad+ 2 *gamma_ray_rod_length + 2 * gamma_ray_3_rad + step_size * (grb_num_frames - remaining_frames + 1)) * grb_size, - grb_size * grb_width *0.5); 
+        draw.lineTo((gamma_ray_1_rad+ 2 *gamma_ray_2_rad+ 2 *gamma_ray_rod_length + 2 * gamma_ray_3_rad + step_size * (grb_num_frames - remaining_frames + 1)) * grb_size, + grb_size * grb_width *0.5); 
+        draw.lineTo((gamma_ray_1_rad+ 2 *gamma_ray_2_rad+ 2 *gamma_ray_rod_length + 2 * gamma_ray_3_rad) * grb_size, + grb_size * grb_width *0.5); 
+        draw.closePath();
+        draw.fillStyle = "#FFBBFF";
+        draw.fill();
+        draw.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
     function animate_grb(callback, remaining_frames) {
             if (remaining_frames === 0) {
                 draw_current_setup(current_location, 0, "Magenta");
@@ -463,15 +500,15 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             }
             remaining_frames = remaining_frames || num_frames;
             draw_current_setup(current_location);
-            if (remaining_frames > 0.75 * num_frames) {
+            if (remaining_frames > 0.7* num_frames) {
                 draw_current_setup(current_location, 1);
-            } else if (remaining_frames > 0.5 * num_frames) {
+            } else if (remaining_frames > 0.4 * num_frames) {
                 draw_current_setup(current_location, 2);
-            } else if (remaining_frames > 0.25 * num_frames) {
+            } else if (remaining_frames > 0.1 * num_frames) {
                 draw_current_setup(current_location, 3);
             } else { 
                 draw_current_setup(current_location);
-                //TODO : GRB
+                draw_grb(remaining_frames);
             }
  
             setTimeout(function() {
@@ -602,8 +639,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     }
 
     draw_current_setup(current_location);
-    setTimeout(animate_grb, 500);
-
   };
 
   return plugin;
