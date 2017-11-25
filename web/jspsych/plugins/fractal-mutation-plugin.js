@@ -211,7 +211,10 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var gamma_ray_3_rad = 0.1;
     var gamma_ray_rod_length = 0.15;
     var gamma_ray_rod_width = 0.075;
-    function draw_gamma_ray(x, y, size) {
+
+    // for animation
+    function draw_gamma_ray(x, y, size, stage) {
+        stage = stage || 0;
 
         var theta = 0.2 * Math.PI;
         var sin_theta = Math.sin(theta);
@@ -227,15 +230,29 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.rect((gamma_ray_1_rad+2*gamma_ray_2_rad+gamma_ray_rod_length) * size, - 0.5 * gamma_ray_rod_width * size, size * gamma_ray_rod_length, size*gamma_ray_rod_width); 
         draw.fill();
         draw.stroke();
-        draw.fillStyle = "Silver";
+        if (stage === 1) {
+            draw.fillStyle = "#AA00AA";
+        } else {
+            draw.fillStyle = "Silver";
+        }
         draw.beginPath()
         draw.arc(0, 0, gamma_ray_1_rad * size, 0, 2 * Math.PI); 
         draw.fill();
         draw.stroke();
+        if (stage === 2) {
+            draw.fillStyle = "#DD33DD";
+        } else {
+            draw.fillStyle = "Silver";
+        }
         draw.beginPath()
         draw.arc((gamma_ray_1_rad+gamma_ray_2_rad+gamma_ray_rod_length) * size, 0, gamma_ray_2_rad * size, 0, 2 * Math.PI); 
         draw.fill();
         draw.stroke();
+        if (stage === 3) {
+            draw.fillStyle = "#FF55FF";
+        } else {
+            draw.fillStyle = "Silver";
+        }
         draw.beginPath()
         draw.arc((gamma_ray_1_rad+2 *gamma_ray_2_rad+ 2 * gamma_ray_rod_length + gamma_ray_3_rad) * size, 0, gamma_ray_3_rad * size, 0, 2 * Math.PI); 
         draw.fill();
@@ -243,15 +260,16 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.setTransform(1, 0, 0, 1, 0, 0);
     }
 
+
     var petri_dish_rad = 20;
 
-    function draw_petri_dish(current_location) {
+    function draw_petri_dish(current_location, fillcenter_color) {
         draw.drawImage(image_objects[current_location],
                        (canvas.width - trial.image_width)/2,
                        (canvas.height - trial.image_width)/2,
                        trial.image_width,
                        trial.image_height); 
-        var pd_path = function(stroke) {
+        var pd_path = function(stroke, fillcenter) {
             if (stroke) {
                 draw.beginPath();
                 draw.arc(canvas.width/2, canvas.height/2, petri_dish_rad+trial.image_width/2, 0, 2*Math.PI);
@@ -259,6 +277,10 @@ jsPsych.plugins['fractal-mutation'] = (function() {
                 draw.beginPath();
                 draw.arc(canvas.width/2, canvas.height/2, trial.image_width/2, 0, 2*Math.PI, true);
                 draw.stroke();
+            } else if (fillcenter) {
+                draw.beginPath();
+                draw.arc(canvas.width/2, canvas.height/2, trial.image_width/2, 0, 2*Math.PI, true);
+                draw.fill();
             } else {
                 draw.beginPath();
                 draw.arc(canvas.width/2, canvas.height/2, petri_dish_rad+trial.image_width/2, 0, 2*Math.PI);
@@ -280,6 +302,11 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.globalAlpha = 0.2;
         draw.fillStyle = "LightBlue";
         pd_path(false);
+        if (fillcenter_color) {
+            draw.globalAlpha = 0.4;
+            draw.fillStyle = fillcenter_color;
+            pd_path(false, true);
+        }
         draw.globalAlpha = 1;
     }
     
@@ -398,6 +425,62 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.globalAlpha = 1;
     };
 
+    // putting it all together
+
+    function draw_current_setup(current_location, gamma_ray_stage, petri_dish_fill_color) {
+        draw.clearRect(0, 0, canvas.width, canvas.height);
+            draw_petri_dish(current_location, petri_dish_fill_color);
+        draw_erlenmeyer(-15, 50, 125);
+        draw_gamma_ray(5, canvas.height - 5, 125, gamma_ray_stage);
+        draw_notebook(canvas.width - 120, 125, 125, trial.goal);
+    }
+
+    // animation
+    var animation_time = 500; //length of animation in ms
+    var post_animation_delay = 500; // how long to wait on last frame
+    var drop_step_size = 2;
+    var num_frames = 20;
+    var frame_time = animation_time/num_frames;
+    function animate_drop(callback, remaining_frames) {
+            remaining_frames = remaining_frames || num_frames;
+            if (remaining_frames === 0) {
+                draw_current_setup(current_location, 0, "Red");
+                setTimeout(callback, post_animation_delay);
+                return;
+            }
+            draw_current_setup(current_location);
+            draw_drop(drop_step_size * (num_frames - remaining_frames))
+            setTimeout(function() {
+                animate_drop(callback, remaining_frames-1);
+            }, frame_time);
+    }
+
+    function animate_grb(callback, remaining_frames) {
+            if (remaining_frames === 0) {
+                draw_current_setup(current_location, 0, "Magenta");
+                setTimeout(callback, post_animation_delay);
+                return;
+            }
+            remaining_frames = remaining_frames || num_frames;
+            draw_current_setup(current_location);
+            if (remaining_frames > 0.75 * num_frames) {
+                draw_current_setup(current_location, 1);
+            } else if (remaining_frames > 0.5 * num_frames) {
+                draw_current_setup(current_location, 2);
+            } else if (remaining_frames > 0.25 * num_frames) {
+                draw_current_setup(current_location, 3);
+            } else { 
+                draw_current_setup(current_location);
+                //TODO : GRB
+            }
+ 
+            setTimeout(function() {
+                animate_grb(callback, remaining_frames-1);
+            }, frame_time);
+    }
+
+    // Room event handlers
+
     function mutagen_contains(mutagen_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the mutagen 
         if (mutagen_loc == 0) {
             curr_mutagen_loc = liquid_mutagen_loc; 
@@ -407,9 +490,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         return ; 
     }
 
-    
-
-    // Room event handlers
     var clickable = true;
 
     var getMouse = function(e,canvas) { //Gets mouse location relative to canvas, code stolen from https://github.com/simonsarris/Canvas-tutorials/blob/master/shapes.js 
@@ -481,7 +561,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         // animate
         clickable = false;
         animate_mutation(mutagen_loc, function() {
-            draw_current_fractal(current_location);
+            draw_current_setup(current_location);
             location_history.push(current_location);
             this_location_time = (new Date()).getTime();
 
@@ -498,15 +578,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         return;
     }, true);
 
-    // putting it all together
-
-    function draw_current_fractal(current_location) {
-        draw.clearRect(0, 0, canvas.width, canvas.height);
-        draw_petri_dish(current_location);
-        draw_erlenmeyer(-15, 50, 125);
-        draw_gamma_ray(5, canvas.height - 5, 125);
-        draw_notebook(canvas.width - 120, 125, 125, trial.goal);
-    }
 
     ////// End fractal stuff /////////////////////////////////////////////////////////
     
@@ -530,7 +601,8 @@ jsPsych.plugins['fractal-mutation'] = (function() {
       jsPsych.finishTrial(trial_data);
     }
 
-    draw_current_fractal(current_location);
+    draw_current_setup(current_location);
+    setTimeout(animate_grb, 500);
 
   };
 
