@@ -53,7 +53,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     location_history.push(current_location);
 
     var action_history = [];
-    var door_history = []; // redundant but nevertheless may be informative if there is e.g. a L-R click bias
+    var mutagen_history = []; // redundant but nevertheless may be informative if there is e.g. a L-R click bias
 
     var location_rts = [];
 
@@ -62,6 +62,10 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var this_location_time = start_time;
 
     /////// graphics ////////////////////////////////////////////////////
+
+    // global size parameters
+    var ef_size = 125;
+    var gr_size = 125;
 
     // all relative to size parameter 
     var ef_bot_width = 0.75;
@@ -163,10 +167,11 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.lineWidth = 1;
         draw.stroke()
         ef_path(true);
-        draw.globalAlpha = 0.7
+        draw.globalAlpha = 0.7;
         draw.fillStyle = "Red"; 
         draw.fill();
         
+        draw.globalAlpha = 0.3;
         var draw_bubble = function(x, y, r, lw) {
             draw.beginPath();
             draw.arc(x, y, r, 0, 2* Math.PI);
@@ -175,7 +180,19 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             draw.stroke();
         };
 
-        draw_bubble(x + 0.33 * ef_bot_width * size, y + size * ef_height_exclusive) 
+        draw_bubble(x + 0.33 * ef_bot_width * size, y + size * (ef_height_exclusive - 0.06), 0.015 * size, 1);
+        draw_bubble(x + 0.42 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.02), 0.04 * size, 1);
+        draw_bubble(x + 0.25 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.01), 0.025 * size, 1);
+        draw_bubble(x + 0.2 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.09), 0.035 * size, 1);
+        draw_bubble(x + 0.11 * ef_bot_width * size, y + size * (ef_height_exclusive - 0.02), 0.02 * size, 1);
+        draw_bubble(x + 0.88 * ef_bot_width * size, y + size * (ef_height_exclusive - 0.03), 0.02 * size, 1);
+        draw_bubble(x + 0.6 * ef_bot_width * size, y + size * (ef_height_exclusive - 0.03), 0.04 * size, 1);
+        draw_bubble(x + 0.77 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.05), 0.025 * size, 1);
+        draw_bubble(x + 0.93 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.07), 0.03 * size, 1);
+        draw_bubble(x + 0.67 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.08), 0.02 * size, 1);
+        draw_bubble(x + 0.53 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.06), 0.02 * size, 1);
+        draw_bubble(x + 0.36 * ef_bot_width * size, y + size * (ef_height_exclusive + 0.1), 0.015 * size, 1);
+        draw_bubble(x + 0.75 * ef_bot_width * size, y + size * (ef_height_exclusive - 0.07), 0.02 * size, 1);
         //TODO: draw bubbles
         ef_path();
         draw.globalAlpha = 0.3;
@@ -447,9 +464,9 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
     function draw_current_setup(current_location, gamma_ray_stage, petri_dish_fill_color) {
         draw.clearRect(0, 0, canvas.width, canvas.height);
-            draw_petri_dish(current_location, petri_dish_fill_color);
-        draw_erlenmeyer(-15, 50, 125);
-        draw_gamma_ray(5, canvas.height - 5, 125, gamma_ray_stage);
+        draw_petri_dish(current_location, petri_dish_fill_color);
+        draw_erlenmeyer(-15, 50, ef_size);
+        draw_gamma_ray(5, canvas.height - 5, gr_size, gamma_ray_stage);
         draw_notebook(canvas.width - 120, 125, 125, trial.goal);
     }
 
@@ -516,15 +533,23 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             }, frame_time);
     }
 
+    function animate_mutation(mutagen_loc,  callback) {
+        if (mutagen_loc === 0) { //liquid
+            animate_drop(callback);
+        } else { //ray
+            animate_grb(callback);
+        }
+    }
+
     // Room event handlers
 
     function mutagen_contains(mutagen_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the mutagen 
-        if (mutagen_loc == 0) {
-            curr_mutagen_loc = liquid_mutagen_loc; 
-        } else {
-            curr_mutagen_loc = ray_mutagen_loc; 
+        if (mutagen_loc == 0) { //Liquid
+            return ((x < 0.9 * ef_size) && (y < 1.4 * ef_size)) || ((x < 1.5 * ef_size) && (y < 0.8 * ef_size))
+        } else { //Ray
+            return ((x < 0.5 * gr_size) && (y > canvas.height - 0.5 * gr_size)) || (((x < 1.15 * gr_size) && (x > 0.4*gr_size)) && ((y < canvas.height - 0.3 * gr_size)  && (y > canvas.height - 0.85 * gr_size)))
         }
-        return ; 
+        return false; 
     }
 
     var clickable = true;
@@ -563,11 +588,12 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             action = 1 - action;
         }
         var generators = trial.group.get_some_generators()
-        new_location = trial.group.operation(current_location, generators[trial.door_generator_assignment[action]]); 
+        new_location = trial.group.operation(current_location, generators[trial.mutagen_generator_assignment[action]]); 
         return new_location;
     }
 
     function display_congratulations() {
+        alert('Congratulations!');
     }
 
     canvas.addEventListener('mousedown', function(e) {
