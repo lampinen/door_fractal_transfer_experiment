@@ -588,7 +588,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             action = 1 - action;
         }
         var generators = trial.group.get_some_generators()
-        new_location = trial.group.operation(current_location, generators[trial.mutagen_generator_assignment[action]]); 
+        new_location = trial.group.operation(current_location, generators[action]); 
         return new_location;
     }
 
