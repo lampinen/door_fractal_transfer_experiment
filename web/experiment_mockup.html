@@ -20,6 +20,8 @@
     var elements = this_group.get_elements();
 
     var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/grn_blu.png', 'images/grn_prp.png', 'images/grn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/red_prp.png', 'images/wht_red.png', 'images/ylw_pnk.png', 'images/ylw_slt.png'];
+    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+        
     var this_mutagen_assignment = [1, 0];
     var this_room_assignment = ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"];
     var this_door_generator_assignment = [1, 0];
@@ -29,10 +31,10 @@
         type: 'fractal-mutation',
         group: this_group,
         fractal_assignment: this_fractal_assignment,
-        mutagen_assignment: this_mutagen_assignment,
+        mutagen_generator_assignment: this_mutagen_assignment,
         goal: 10,
         start: 0
-    }
+    };
 
     var test_room = {
         type: 'two-door-navigation',
@@ -42,14 +44,15 @@
         door_generator_assignment: this_door_generator_assignment,
         goal: 10,
         start: 0
-    }
+    };
 
-    jsPsych.data.add_properties
-    jsPsych.init({
-        timeline: [test_fractal, test_room],
-        on_finish: function() {
-            jsPsych.data.displayData('json');
-        }
-    })
+    var start_experiment = function() {
+        jsPsych.init({
+            timeline: [test_fractal, test_room],
+            on_finish: function() {
+                jsPsych.data.displayData('json');
+            }
+        })
+    };
     </script>
 </html>

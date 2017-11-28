@@ -476,17 +476,19 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var drop_step_size = 2;
     var num_frames = 20;
     var frame_time = animation_time/num_frames;
+
+
     function animate_drop(callback, remaining_frames) {
-            remaining_frames = remaining_frames || num_frames;
             if (remaining_frames === 0) {
                 draw_current_setup(current_location, 0, "Red");
                 setTimeout(callback, post_animation_delay);
                 return;
             }
+            remaining_frames = remaining_frames || num_frames;
             draw_current_setup(current_location);
             draw_drop(drop_step_size * (num_frames - remaining_frames))
             setTimeout(function() {
-                animate_drop(callback, remaining_frames-1);
+                animate_drop(callback, remaining_frames - 1); 
             }, frame_time);
     }
 
@@ -603,11 +605,11 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         var mouse = getMouse(e, canvas);
         var mutagen_loc;
         if (mutagen_contains(0, mouse.x, mouse.y)) {
-            //go through left mutagen
+            //liquid
             mutagen_loc = 0;
 
         } else if (mutagen_contains(1, mouse.x, mouse.y)) {
-            //go through right mutagen
+            //ray
             mutagen_loc = 1;
         } else {
             //mis-click, ignore
@@ -618,12 +620,12 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         location_rts.push(curr_time - this_location_time);
         mutagen_history.push(mutagen_loc);
         var this_action = trial.mutagen_generator_assignment[mutagen_loc]; 
-        current_location = next_fractal(current_location, this_action);
         action_history.push(this_action); 
 
         // animate
         clickable = false;
         animate_mutation(mutagen_loc, function() {
+            current_location = next_fractal(current_location, this_action);
             draw_current_setup(current_location);
             location_history.push(current_location);
             this_location_time = (new Date()).getTime();
