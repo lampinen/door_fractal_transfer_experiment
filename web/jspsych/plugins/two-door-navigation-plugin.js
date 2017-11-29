@@ -57,6 +57,10 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var this_room_time = start_time;
 
     /////// Room graphics ////////////////////////////////////////////////////
+
+    var floor_height = 0.1;
+    var ceiling_height = 0.1;
+    var wall_width = 0.1;
     // helpers for drawing vertically oriented trapezoids
     function draw_trapezoid(x, y, width, left_height, right_height, offset) {
         offset = offset || Math.abs(left_height  - right_height) / 2;
@@ -83,12 +87,22 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw_trapezoid(x, y, width, left_height, right_height);
     }
 
+    // horizontal 
+    function draw_trapezoid_h(x, y, bottom_width, top_width, height) {
+        draw.beginPath();
+        draw.moveTo(x, y);
+        draw.lineTo(x + bottom_width, y);
+        draw.lineTo(x + (bottom_width + top_width) / 2, y - height);
+        draw.lineTo(x + (bottom_width - top_width) / 2, y - height);
+        draw.closePath();
+    }
+
     // Making doors
     var door_width = trial.canvas_width/5;
     var door_height = 2*trial.canvas_height/3;
     var left_door_loc = trial.canvas_width/5;
     var right_door_loc = 3*trial.canvas_width/5;
-    var door_offset = trial.canvas_height/3;
+    var door_offset = trial.canvas_height/3 - (floor_height * trial.canvas_height);
 
     var door_inlay_width = trial.canvas_width/25;
     var door_inlay_height = 3*door_height/11; 
@@ -241,15 +255,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.lineWidth  = 1;
     }
 
-    // assumes bottom_width > top_width
-    function draw_trapezoid_h(x, y, bottom_width, top_width, height) {
-        draw.beginPath();
-        draw.moveTo(x, y);
-        draw.lineTo(x + bottom_width, y);
-        draw.lineTo(x + (bottom_width + top_width) / 2, y - height);
-        draw.lineTo(x + (bottom_width - top_width) / 2, y - height);
-        draw.closePath();
-    }
+    var table_offset = 0.05 * canvas.height;
     var table_height = 0.15 * canvas.height;
     var table_width = 0.15 * canvas.width;
     var table_top_height = 0.2;
@@ -259,49 +265,49 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     
     var table_leg_side_thickness = 0.25; //relative
     var table_leg_height = table_height * (1-table_top_height - table_top_thickness);
-    var table_leg_height = table_height * (1-table_top_height - table_top_thickness);
+
     function draw_table(x, fill_color, stroke_color) {
         draw.fillStyle = fill_color;
         draw.strokeStyle = stroke_color || "Black";
         //legs
-        draw_trapezoid(x + (table_leg_thickness + (1-table_top_width) * 0.5) * table_width, canvas.height - table_leg_height - table_top_height * table_height, table_leg_side_thickness * table_leg_thickness * table_width, table_leg_height, table_leg_height, -0.05 * table_leg_height);
+        draw_trapezoid(x + (table_leg_thickness + (1-table_top_width) * 0.5) * table_width, canvas.height - table_leg_height - table_top_height * table_height - table_offset, table_leg_side_thickness * table_leg_thickness * table_width, table_leg_height, table_leg_height, -0.05 * table_leg_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x + (1-table_top_width) * 0.5 * table_width, canvas.height - table_leg_height - table_top_height * table_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.rect(x + (1-table_top_width) * 0.5 * table_width, canvas.height - table_leg_height - table_top_height * table_height - table_offset, table_width * table_leg_thickness, table_leg_height); 
         draw.fill();
         draw.stroke();
 
-        draw_trapezoid(x + (1- (1-table_top_width) * 0.5 - (1 + table_leg_side_thickness) * table_leg_thickness) * table_width, canvas.height - 1.05 * table_leg_height - table_top_height * table_height, 0.25 * table_leg_thickness * table_width, table_leg_height, table_leg_height, 0.05 * table_leg_height);
+        draw_trapezoid(x + (1- (1-table_top_width) * 0.5 - (1 + table_leg_side_thickness) * table_leg_thickness) * table_width, canvas.height - 1.05 * table_leg_height - table_top_height * table_height - table_offset, 0.25 * table_leg_thickness * table_width, table_leg_height, table_leg_height, 0.05 * table_leg_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x + (1- (1-table_top_width) * 0.5-table_leg_thickness) * table_width, canvas.height - table_leg_height - table_top_height * table_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.rect(x + (1- (1-table_top_width) * 0.5-table_leg_thickness) * table_width, canvas.height - table_leg_height - table_top_height * table_height - table_offset, table_width * table_leg_thickness, table_leg_height); 
         draw.fill();
         draw.stroke();
 
-        draw_trapezoid(x + table_leg_thickness * table_width, canvas.height - table_leg_height, table_leg_side_thickness * table_leg_thickness * table_width, table_leg_height, table_leg_height, -0.05 * table_leg_height);
+        draw_trapezoid(x + table_leg_thickness * table_width, canvas.height - table_leg_height - table_offset, table_leg_side_thickness * table_leg_thickness * table_width, table_leg_height, table_leg_height, -0.05 * table_leg_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x, canvas.height - table_leg_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.rect(x, canvas.height - table_leg_height - table_offset, table_width * table_leg_thickness, table_leg_height); 
         draw.fill();
         draw.stroke();
 
-        draw_trapezoid(x + (1- (1 + table_leg_side_thickness) * table_leg_thickness) * table_width, canvas.height - 1.05 * table_leg_height, 0.25 * table_leg_thickness * table_width, table_leg_height, table_leg_height, 0.05 * table_leg_height);
+        draw_trapezoid(x + (1- (1 + table_leg_side_thickness) * table_leg_thickness) * table_width, canvas.height - 1.05 * table_leg_height - table_offset, 0.25 * table_leg_thickness * table_width, table_leg_height, table_leg_height, 0.05 * table_leg_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x + (1-table_leg_thickness) * table_width, canvas.height - table_leg_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.rect(x + (1-table_leg_thickness) * table_width, canvas.height - table_leg_height - table_offset, table_width * table_leg_thickness, table_leg_height); 
         draw.fill();
         draw.stroke();
 
         // Top
-        draw_trapezoid_h(x, canvas.height - table_height * (1-table_top_height),  table_width, table_width * table_top_width, table_top_height * table_height);
+        draw_trapezoid_h(x, canvas.height - table_height * (1-table_top_height) - table_offset,  table_width, table_width * table_top_width, table_top_height * table_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x,canvas.height - table_height * (1-table_top_height), table_width, table_top_thickness * table_height); 
+        draw.rect(x,canvas.height - table_height * (1-table_top_height) - table_offset, table_width, table_top_thickness * table_height); 
         draw.fill();
         draw.stroke();
     }
@@ -439,8 +445,23 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     function draw_current_room(current_location) {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         var room_color = trial.room_assignment[current_location];
+
+        // walls
         draw.fillStyle = room_color;
+        draw.strokeStyle = "Black";
+        draw.lineWidth = 2;
         draw.fillRect(0, 0, canvas.width, canvas.height);
+        draw_trapezoid(0, 0, canvas.width * wall_width, canvas.height, (1-(floor_height + ceiling_height)) * canvas.height); 
+        draw.stroke();
+        draw_trapezoid(canvas.width * (1- wall_width), 0, canvas.width * wall_width, (1-(floor_height + ceiling_height)) * canvas.height, canvas.height); 
+        draw.stroke();
+        draw_trapezoid_h(canvas.width * wall_width, canvas.height * ceiling_height, canvas.width * (1 - 2 * wall_width), canvas.width, canvas.height * ceiling_height); 
+        draw.stroke();
+        draw_trapezoid_h(0, canvas.height, canvas.width, canvas.width * (1 - 2 * wall_width), canvas.height * ceiling_height); 
+        draw.stroke();
+        draw.lineWidth = 1;
+
+        // Doors
         draw_door(0); draw_door(1);
         // Room eye candy
         if (room_color === "red") {
