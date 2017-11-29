@@ -220,6 +220,91 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
     }
 
+    var window_width = 0.15 * canvas.width;
+    var window_height = 0.22 * canvas.height;
+    function draw_window(x, y) {
+        draw.beginPath();
+        draw.rect(x, y, window_width, window_height);
+        draw.fillStyle = "LightCyan";
+        draw.fill();
+        draw.strokeStyle = "Black";
+        draw.lineWidth  = 5;
+        draw.stroke();
+        draw.beginPath();
+        draw.moveTo(x + window_width/2, y);
+        draw.lineTo(x + window_width/2, y + window_height);
+        draw.stroke();
+        draw.beginPath();
+        draw.moveTo(x, y + window_height/2);
+        draw.lineTo(x + window_width, y + window_height/2);
+        draw.stroke();
+        draw.lineWidth  = 1;
+    }
+
+    // assumes bottom_width > top_width
+    function draw_trapezoid_h(x, y, bottom_width, top_width, height) {
+        draw.beginPath();
+        draw.moveTo(x, y);
+        draw.lineTo(x + bottom_width, y);
+        draw.lineTo(x + (bottom_width + top_width) / 2, y - height);
+        draw.lineTo(x + (bottom_width - top_width) / 2, y - height);
+        draw.closePath();
+    }
+    var table_height = 0.15 * canvas.height;
+    var table_width = 0.15 * canvas.width;
+    var table_top_height = 0.2;
+    var table_top_thickness = 0.1;
+    var table_top_width = 0.8;
+    var table_leg_thickness = 0.12;
+    
+    var table_leg_side_thickness = 0.25; //relative
+    var table_leg_height = table_height * (1-table_top_height - table_top_thickness);
+    var table_leg_height = table_height * (1-table_top_height - table_top_thickness);
+    function draw_table(x, fill_color, stroke_color) {
+        draw.fillStyle = fill_color;
+        draw.strokeStyle = stroke_color || "Black";
+        //legs
+        draw_trapezoid(x + (table_leg_thickness + (1-table_top_width) * 0.5) * table_width, canvas.height - table_leg_height - table_top_height * table_height, table_leg_side_thickness * table_leg_thickness * table_width, table_leg_height, table_leg_height, -0.05 * table_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1-table_top_width) * 0.5 * table_width, canvas.height - table_leg_height - table_top_height * table_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + (1- (1-table_top_width) * 0.5 - (1 + table_leg_side_thickness) * table_leg_thickness) * table_width, canvas.height - 1.05 * table_leg_height - table_top_height * table_height, 0.25 * table_leg_thickness * table_width, table_leg_height, table_leg_height, 0.05 * table_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1- (1-table_top_width) * 0.5-table_leg_thickness) * table_width, canvas.height - table_leg_height - table_top_height * table_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + table_leg_thickness * table_width, canvas.height - table_leg_height, table_leg_side_thickness * table_leg_thickness * table_width, table_leg_height, table_leg_height, -0.05 * table_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x, canvas.height - table_leg_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + (1- (1 + table_leg_side_thickness) * table_leg_thickness) * table_width, canvas.height - 1.05 * table_leg_height, 0.25 * table_leg_thickness * table_width, table_leg_height, table_leg_height, 0.05 * table_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1-table_leg_thickness) * table_width, canvas.height - table_leg_height, table_width * table_leg_thickness, table_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        // Top
+        draw_trapezoid_h(x, canvas.height - table_height * (1-table_top_height),  table_width, table_width * table_top_width, table_top_height * table_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x,canvas.height - table_height * (1-table_top_height), table_width, table_top_thickness * table_height); 
+        draw.fill();
+        draw.stroke();
+    }
     
     
     var animation_time = 500; //length of animation in ms
@@ -357,6 +442,11 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.fillStyle = room_color;
         draw.fillRect(0, 0, canvas.width, canvas.height);
         draw_door(0); draw_door(1);
+        // Room eye candy
+        if (room_color === "red") {
+//            draw_window(10, canvas.height/3);
+            draw_table(canvas.width * 0.425, "DarkRed"); 
+        }
     }
 
     ////// End room stuff /////////////////////////////////////////////////////////
