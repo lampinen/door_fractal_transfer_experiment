@@ -595,7 +595,14 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     }
 
     function display_congratulations() {
-        alert('Congratulations!');
+        draw.clearRect(0, 0, canvas.width, canvas.height);
+        draw.fillStyle = "White";
+        draw.fillRect(0, 0, canvas.width, canvas.height);
+        draw.fillStyle = "Black";
+        draw.textAlign = "center";
+        draw.font = "50px Helvetica";
+        draw.fillText("You did it!", canvas.width/2, canvas.height/2);
+
     }
 
     canvas.addEventListener('mousedown', function(e) {
@@ -666,7 +673,8 @@ jsPsych.plugins['fractal-mutation'] = (function() {
       jsPsych.finishTrial(trial_data);
     }
 
-    draw_current_setup(current_location);
+    // start trial once images are loaded
+    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {draw_current_setup(current_location);});
   };
 
   return plugin;
