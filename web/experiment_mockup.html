@@ -36,6 +36,15 @@
         start: 0
     };
 
+    var test_fractal_2 = {
+        type: 'fractal-mutation',
+        group: this_group,
+        fractal_assignment: this_fractal_assignment,
+        mutagen_generator_assignment: this_mutagen_assignment,
+        goal: 1,
+        start: 3
+    };
+
     var test_room = {
         type: 'two-door-navigation',
         group: this_group,
@@ -45,10 +54,19 @@
         goal: 10,
         start: 0
     };
+    var test_room_2 = {
+        type: 'two-door-navigation',
+        group: this_group,
+        room_assignment: this_room_assignment,
+        door_color_assignment: this_door_color_assignment,
+        door_generator_assignment: this_door_generator_assignment,
+        goal: 1,
+        start: 3
+    };
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [test_fractal, test_room],
+            timeline: [test_room, test_room_2, test_fractal, test_fractal_2],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
