@@ -347,6 +347,83 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.stroke();
     }
     
+    var chair_offset = 0.05 * canvas.height;
+    var chair_height = 0.2 * canvas.height;
+    var chair_width = 0.12 * canvas.width;
+    var chair_back_height = 0.2 * canvas.height;
+    var chair_top_height = 0.15;
+    var chair_top_thickness = 0.1;
+    var chair_top_width = 0.8;
+    var chair_leg_thickness = 0.12;
+    
+    var chair_leg_side_thickness = 0.25; //relative
+    var chair_leg_height = chair_height * (1-chair_top_height - chair_top_thickness);
+
+    function draw_chair(fill_color, stroke_color) {
+        var x = 0.5 * (canvas.width - chair_width);
+        draw.fillStyle = fill_color;
+        draw.strokeStyle = stroke_color || "Black";
+        //legs
+        draw_trapezoid(x + (chair_leg_thickness + (1-chair_top_width) * 0.5) * chair_width, canvas.height - chair_leg_height - chair_top_height * chair_height - chair_offset, chair_leg_side_thickness * chair_leg_thickness * chair_width, chair_leg_height, chair_leg_height, -0.05 * chair_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1-chair_top_width) * 0.5 * chair_width, canvas.height - chair_leg_height - chair_top_height * chair_height - chair_offset, chair_width * chair_leg_thickness, chair_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + (1- (1-chair_top_width) * 0.5 - (1 + chair_leg_side_thickness) * chair_leg_thickness) * chair_width, canvas.height - 1.05 * chair_leg_height - chair_top_height * chair_height - chair_offset, 0.25 * chair_leg_thickness * chair_width, chair_leg_height, chair_leg_height, 0.05 * chair_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1- (1-chair_top_width) * 0.5-chair_leg_thickness) * chair_width, canvas.height - chair_leg_height - chair_top_height * chair_height - chair_offset, chair_width * chair_leg_thickness, chair_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + chair_leg_thickness * chair_width, canvas.height - chair_leg_height - chair_offset, chair_leg_side_thickness * chair_leg_thickness * chair_width, chair_leg_height, chair_leg_height, -0.05 * chair_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x, canvas.height - chair_leg_height - chair_offset, chair_width * chair_leg_thickness, chair_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + (1- (1 + chair_leg_side_thickness) * chair_leg_thickness) * chair_width, canvas.height - 1.05 * chair_leg_height - chair_offset, 0.25 * chair_leg_thickness * chair_width, chair_leg_height, chair_leg_height, 0.05 * chair_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1-chair_leg_thickness) * chair_width, canvas.height - chair_leg_height - chair_offset, chair_width * chair_leg_thickness, chair_leg_height); 
+        draw.fill();
+        draw.stroke();
+
+        // seat
+        draw_trapezoid_h(x, canvas.height - chair_height * (1-chair_top_height) - chair_offset,  chair_width, chair_width * chair_top_width, chair_top_height * chair_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x,canvas.height - chair_height * (1-chair_top_height) - chair_offset, chair_width, chair_top_thickness * chair_height); 
+        draw.fill();
+        draw.stroke();
+
+
+        // back
+        draw_trapezoid(x + (chair_leg_thickness + (1-chair_top_width) * 0.5) * chair_width, canvas.height - chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, chair_leg_side_thickness * chair_leg_thickness * chair_width, chair_leg_height, chair_back_height, -0.05 * chair_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1-chair_top_width) * 0.5 * chair_width, canvas.height - chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, chair_width * chair_leg_thickness, chair_back_height); 
+        draw.fill();
+        draw.stroke();
+
+        draw_trapezoid(x + (1- (1-chair_top_width) * 0.5 - (1 + chair_leg_side_thickness) * chair_leg_thickness) * chair_width, canvas.height - 1.05 * chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, 0.25 * chair_leg_thickness * chair_width, chair_leg_height, chair_back_height, 0.05 * chair_leg_height);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(x + (1- (1-chair_top_width) * 0.5-chair_leg_thickness) * chair_width, canvas.height - chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, chair_width * chair_leg_thickness, chair_back_height); 
+        draw.fill();
+        draw.stroke();
+    }
+    
     
     var animation_time = 500; //length of animation in ms
     var post_animation_delay = 500; // how long to wait on last frame
@@ -501,11 +578,11 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         // Room eye candy
         if (room_color === "red") {
 //            draw_window(10, canvas.height/3);
-            draw_chair("SaddleBrown"); 
+            draw_table(canvas.width * 0.425, "SaddleBrown"); 
             draw_window("DarkRed");
             draw_painting("LightCoral", "FireBrick", "Crimson", "DarkRed");
         } else if (room_color === "cyan") {
-            draw_table(canvas.width * 0.425, "SaddleBrown"); 
+            draw_chair("SaddleBrown"); 
         }
     }
 
