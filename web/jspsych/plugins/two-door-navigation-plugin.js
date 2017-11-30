@@ -234,25 +234,60 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
     }
 
-    var window_width = 0.15 * canvas.width;
-    var window_height = 0.22 * canvas.height;
-    function draw_window(x, y) {
+    var window_width = 0.05 * canvas.width;
+    var window_height = 0.4 * canvas.height;
+    var window_x_offset = 0.025 * canvas.width;
+    var window_y_offset = 0.3 * canvas.height;
+    var window_slope = 0.85;
+    function draw_window(trim_color) {
         draw.beginPath();
-        draw.rect(x, y, window_width, window_height);
+        draw_trapezoid(window_x_offset, window_y_offset, window_width, window_height, window_slope * window_height)
         draw.fillStyle = "LightCyan";
         draw.fill();
-        draw.strokeStyle = "Black";
-        draw.lineWidth  = 5;
+        draw.strokeStyle = trim_color;
+        draw.lineWidth = 5;
+        draw.stroke();
+        draw.lineWidth = 3;
+        draw.beginPath();
+        draw.moveTo(window_x_offset + 0.5 * window_width, window_y_offset + window_height * (1 - window_slope) * 0.25);
+        draw.lineTo(window_x_offset + 0.5 * window_width, window_y_offset + window_height* (0.75 + window_slope * 0.25));
         draw.stroke();
         draw.beginPath();
-        draw.moveTo(x + window_width/2, y);
-        draw.lineTo(x + window_width/2, y + window_height);
-        draw.stroke();
-        draw.beginPath();
-        draw.moveTo(x, y + window_height/2);
-        draw.lineTo(x + window_width, y + window_height/2);
+        draw.moveTo(window_x_offset, window_y_offset + 0.5 * window_height);
+        draw.lineTo(window_x_offset + window_width, window_y_offset + 0.5 * window_height);
         draw.stroke();
         draw.lineWidth  = 1;
+    }
+
+    var painting_width = 0.05 * canvas.width;
+    var painting_height = 0.4 * canvas.height;
+    var painting_x_offset = 0.925 * canvas.width;
+    var painting_y_offset = 0.3 * canvas.height;
+    var painting_slope = 0.85;
+    var painting_side_width = 0.005 * canvas.width;
+    var painting_r_y = 0.25 * painting_width;
+    var painting_r_x = 0.25 * painting_height;
+    function draw_painting(color_1, color_2, color_3, color_4) {
+        draw.fillStyle = color_1;
+        draw.strokeStyle = "Black";
+        draw.beginPath();
+        draw_trapezoid(painting_x_offset, painting_y_offset, painting_width, painting_slope *painting_height, painting_height)
+        draw.fill();
+        draw.stroke();
+        draw.rect(painting_x_offset + painting_width, painting_y_offset, painting_side_width, painting_height); 
+        draw.fill();
+        draw.stroke();
+        draw.globalAlpha = 0.5;
+        draw_trapezoid(painting_x_offset + 0.1 * painting_width, painting_y_offset + 0.2 * painting_height, 0.5 * painting_width, painting_slope *0.25 *painting_height, 0.25 * painting_height, 0.04 * painting_height)
+        draw.fillStyle = color_2;
+        draw.fill();
+        draw_trapezoid(painting_x_offset + 0.3 * painting_width, painting_y_offset + 0.1 * painting_height, 0.3 * painting_width, painting_slope *0.6 *painting_height, 0.6 * painting_height)
+        draw.fillStyle = color_3;
+        draw.fill();
+        draw_trapezoid(painting_x_offset + 0.3 * painting_width, painting_y_offset + 0.6 * painting_height, 0.6 * painting_width, painting_slope *0.3 *painting_height, 0.3 * painting_height, -0.005 * painting_height)
+        draw.fillStyle = color_4;
+        draw.fill();
+        draw.globalAlpha = 1;
     }
 
     var table_offset = 0.05 * canvas.height;
@@ -466,7 +501,11 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         // Room eye candy
         if (room_color === "red") {
 //            draw_window(10, canvas.height/3);
-            draw_table(canvas.width * 0.425, "DarkRed"); 
+            draw_chair("SaddleBrown"); 
+            draw_window("DarkRed");
+            draw_painting("LightCoral", "FireBrick", "Crimson", "DarkRed");
+        } else if (room_color === "cyan") {
+            draw_table(canvas.width * 0.425, "SaddleBrown"); 
         }
     }
 
