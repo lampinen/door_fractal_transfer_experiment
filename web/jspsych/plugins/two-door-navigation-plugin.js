@@ -350,7 +350,8 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var chair_offset = 0.05 * canvas.height;
     var chair_height = 0.2 * canvas.height;
     var chair_width = 0.12 * canvas.width;
-    var chair_back_height = 0.2 * canvas.height;
+    var chair_back_height = 0.1 * canvas.height;
+    var chair_back_back_height = 0.07 * canvas.height;
     var chair_top_height = 0.15;
     var chair_top_thickness = 0.1;
     var chair_top_width = 0.8;
@@ -407,21 +408,59 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
 
         // back
-        draw_trapezoid(x + (chair_leg_thickness + (1-chair_top_width) * 0.5) * chair_width, canvas.height - chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, chair_leg_side_thickness * chair_leg_thickness * chair_width, chair_leg_height, chair_back_height, -0.05 * chair_leg_height);
+        draw_trapezoid(x + (chair_leg_thickness + (1-chair_top_width) * 0.75) * chair_width, canvas.height - chair_leg_height -chair_back_height - (chair_top_height + chair_top_thickness) * chair_height - chair_offset + 0.05 * chair_leg_height, chair_leg_side_thickness * chair_leg_thickness * chair_width, chair_back_height, chair_back_height, -0.05 * chair_leg_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x + (1-chair_top_width) * 0.5 * chair_width, canvas.height - chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, chair_width * chair_leg_thickness, chair_back_height); 
+        draw.rect(x + (1-chair_top_width) * 0.75 * chair_width, canvas.height - chair_leg_height -chair_back_height - (chair_top_height + chair_top_thickness) * chair_height - chair_offset + 0.05 * chair_leg_height, chair_width * chair_leg_thickness, chair_back_height); 
         draw.fill();
         draw.stroke();
 
-        draw_trapezoid(x + (1- (1-chair_top_width) * 0.5 - (1 + chair_leg_side_thickness) * chair_leg_thickness) * chair_width, canvas.height - 1.05 * chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, 0.25 * chair_leg_thickness * chair_width, chair_leg_height, chair_back_height, 0.05 * chair_leg_height);
+        draw_trapezoid(x + (1- (1-chair_top_width) * 0.75 - (1 + chair_leg_side_thickness) * chair_leg_thickness) * chair_width, canvas.height - 1.05 * chair_leg_height -chair_back_height - (chair_top_height + chair_top_thickness) * chair_height - chair_offset + 0.05 * chair_leg_height, 0.25 * chair_leg_thickness * chair_width, chair_back_height, chair_back_height, 0.05 * chair_leg_height);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.rect(x + (1- (1-chair_top_width) * 0.5-chair_leg_thickness) * chair_width, canvas.height - chair_leg_height -chair_back_height - chair_top_height * chair_height - chair_offset, chair_width * chair_leg_thickness, chair_back_height); 
+        draw.rect(x + (1- (1-chair_top_width) * 0.75-chair_leg_thickness) * chair_width, canvas.height - chair_leg_height -chair_back_height - (chair_top_height + chair_top_thickness) * chair_height - chair_offset + 0.05 * chair_leg_height, chair_width * chair_leg_thickness, chair_back_height); 
         draw.fill();
         draw.stroke();
+
+        draw.beginPath();
+        draw.rect(x + (1- chair_top_width) * 0.5 * chair_width, canvas.height - chair_leg_height -chair_back_height  - chair_back_back_height- (chair_top_height + chair_top_thickness) * chair_height - chair_offset + 0.05 * chair_leg_height, chair_top_width * chair_width, chair_back_back_height);
+        draw.fill();
+        draw.stroke()
+        draw_trapezoid_h(x + (1- chair_top_width) * 0.5 * chair_width, canvas.height - chair_leg_height -chair_back_height  - chair_back_back_height- (chair_top_height + chair_top_thickness) * chair_height - chair_offset + 0.05 * chair_leg_height, chair_top_width * chair_width, chair_top_width * chair_width * 0.95, 0.05*chair_back_back_height);
+        draw.fill();
+        draw.stroke();
+    }
+
+
+    var rug_ry = 0.05 * canvas.height;
+    var rug_rx = 0.25  * canvas.width;
+    var rug_inner_radius = 0.5;
+    var rug_thickness = 0.01 * canvas.height;
+    var rug_y = 0.95 * canvas.height;
+
+    function draw_rug(color_1, color_2) {
+        draw.fillStyle = color_1;
+        draw.strokeStyle = "Black";
+        draw.beginPath();
+        draw.ellipse(0.5 * canvas.width, rug_y, rug_rx, rug_ry, 0, 0, 2 * Math.PI);
+        draw.fill();
+//        draw.stroke()
+        draw.beginPath();
+        draw.ellipse(0.5 * canvas.width, rug_y, rug_rx, rug_ry, 0, 0, Math.PI);
+        draw.lineTo(0.5 * canvas.width - rug_rx, rug_y + rug_thickness);
+        draw.ellipse(0.5 * canvas.width, rug_y + rug_thickness, rug_rx, rug_ry, 0, Math.PI, 0, true);
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+
+        draw.fillStyle = color_2;
+        draw.beginPath();
+        draw.ellipse(0.5 * canvas.width, rug_y - 0.15 * rug_ry, rug_rx * rug_inner_radius, rug_ry * rug_inner_radius, 0, 0, 2*Math.PI);
+        draw.fill();
+
+
     }
     
     
@@ -558,8 +597,13 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         var room_color = trial.room_assignment[current_location];
 
+        if (room_color === "brown") {
+
+            draw.fillStyle = "sienna";
+        } else {
+            draw.fillStyle = room_color;
+        }
         // walls
-        draw.fillStyle = room_color;
         draw.strokeStyle = "Black";
         draw.lineWidth = 2;
         draw.fillRect(0, 0, canvas.width, canvas.height);
@@ -578,12 +622,31 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         // Room eye candy
         if (room_color === "red") {
 //            draw_window(10, canvas.height/3);
-            draw_table(canvas.width * 0.425, "SaddleBrown"); 
-            draw_window("DarkRed");
             draw_painting("LightCoral", "FireBrick", "Crimson", "DarkRed");
         } else if (room_color === "cyan") {
+            draw_table(canvas.width * 0.425, "SaddleBrown"); 
+        } else if (room_color === "green") {
+            draw_painting("PaleGreen", "DarkGreen", "ForestGreen", "SeaGreen");
+        } else if (room_color === "blue") {
             draw_chair("SaddleBrown"); 
+        } else if (room_color === "grey") {
+            draw_window("Black");
+        } else if (room_color === "ivory") {
+            draw_table(canvas.width * 0.425, "SaddleBrown"); 
+        } else if (room_color === "orange") {
+            draw_chair("SaddleBrown"); 
+        } else if (room_color === "pink") {
+            draw_window("PaleVioletRed");
+        } else if (room_color === "brown") {
+            draw_window("#553322");
+        } else if (room_color === "yellow") {
+            draw_rug("LemonChiffon", "Gold");
+        } else if (room_color === "purple") {
+            draw_rug("Indigo", "MediumOrchid");
+        } else if (room_color === "olive") {
+            draw_rug("OliveDrab", "DarkOliveGreen");
         }
+        // "olive"
     }
 
     ////// End room stuff /////////////////////////////////////////////////////////
