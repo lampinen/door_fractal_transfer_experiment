@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+    <title>Pilots</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="util/group_theory.js"></script>
+    <script src="util/etc.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugins/fractal-mutation-plugin.js"></script>
+    <script src="jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+</head>
+<body>
+</body>
+    <script>
+    var first_dihedral = true; // will first task be dihedral group? (otherwise dicyclic)
+    var isomorphic = true; // will two tasks be isomorphic?
+
+    if (first_dihedral) {
+        var this_group_a = new dihedral_group(6);
+        if (isomorphic) {
+            var this_group_b = new dihedral_group(6);
+        } else {
+            var this_group_b = new dicyclic_group_12();
+        }
+    } else {
+        var this_group_a = new dicyclic_group_12;
+        if (isomorphic) {
+            var this_group_b = new dicyclic_group_12();
+        } else {
+            var this_group_b = new dihedral_group(6);
+        }
+    }
+
+    var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/grn_blu.png', 'images/grn_prp.png', 'images/grn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/red_prp.png', 'images/wht_red.png', 'images/ylw_pnk.png', 'images/ylw_slt.png'];
+    shuffle(this_fractal_assignment);
+    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+        
+    var this_mutagen_assignment = [1, 0];
+    shuffle(this_mutagen_assignment);
+    var this_room_assignment = ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"];
+    shuffle(this_room_assignment);
+    var this_door_generator_assignment = [1, 0];
+    shuffle(this_door_generator_assignment);
+    var this_door_color_assignment = ["white", "black"];
+    shuffle(this_door_color_assignment);
+
+    var block_timeline = [
+        {goal: 2, start: 0},
+        {goal: 6, start: 2},
+        {goal: 9, start: 6},
+        {goal: 1, start: 9},
+        {goal: 7, start: 1},
+        {goal: 11, start: 7},
+        {goal: 8, start: 11},
+        {goal: 5, start: 8},
+        {goal: 10, start: 5},
+        {goal: 4, start: 10},
+        {goal: 3, start: 4}
+    ]
+
+    var fractal_trials = {
+        type: 'fractal-mutation',
+        group: this_group_a,
+        fractal_assignment: this_fractal_assignment,
+        mutagen_generator_assignment: this_mutagen_assignment,
+        timeline: block_timeline 
+    };
+
+    var room_trials = {
+        type: 'two-door-navigation',
+        group: this_group_b,
+        room_assignment: this_room_assignment,
+        door_color_assignment: this_door_color_assignment,
+        door_generator_assignment: this_door_generator_assignment,
+        timeline: block_timeline 
+    };
+
+    var start_experiment = function() {
+        jsPsych.init({
+            timeline: [room_trials, fractal_trials],
+            on_finish: function() {
+                jsPsych.data.displayData('json');
+            }
+        })
+    };
+    </script>
+</html>
