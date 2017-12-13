@@ -89,8 +89,8 @@
         jsPsych.init({
             timeline: [room_trials, fractal_trials],
             on_finish: function() {
-		saveData("test.json", jsPsych.data.dataAsJSON());
-                jsPsych.data.displayData('json');
+		saveData("il_pilot/pilot" + getTime() + ".json", jsPsych.data.dataAsJSON());
+//                jsPsych.data.displayData('json');
             }
         })
     };
