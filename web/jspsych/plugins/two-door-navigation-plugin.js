@@ -346,6 +346,39 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.fill();
         draw.stroke();
     }
+
+    var lamp_ball_r = 0.03 * canvas.width;
+    var lamp_shade_rx = 0.045 * canvas.width;
+    var lamp_shade_ry = 0.3 * lamp_shade_rx; // relative
+    var lamp_shade_h = 0.075 * canvas.height;
+    var lamp_top = 0.67 * canvas.height;
+    var lamp_shade_top_rx = 0.025 * canvas.width; 
+    var lamp_shade_top_ry = 0.16 * lamp_shade_top_rx; // relative
+
+    function draw_lamp(ball_color, shade_color, shade_top_color) {
+        shade_color = shade_color || "BlanchedAlmond";
+        shade_top_color = shade_top_color || "#CCAA99";
+        draw.fillStyle = ball_color;
+        draw.strokeStyle = "black";
+        draw.beginPath();
+        draw.arc(canvas.width * 0.5, lamp_top + lamp_shade_h + 0.7 * lamp_ball_r, lamp_ball_r, 0, 2 * Math.PI);
+        draw.fill();
+        draw.stroke();
+        draw.fillStyle = shade_color;
+        draw.beginPath();
+        draw.ellipse(canvas.width * 0.5, lamp_top + lamp_shade_h, lamp_shade_rx, lamp_shade_ry, 0, 0, Math.PI);
+        draw.lineTo(canvas.width * 0.5 - lamp_shade_top_rx, lamp_top + lamp_shade_top_ry)
+        draw.lineTo(canvas.width * 0.5 + lamp_shade_top_rx, lamp_top + lamp_shade_top_ry)
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+        draw.fillStyle = shade_top_color;
+        draw.beginPath();
+        draw.ellipse(canvas.width * 0.5, lamp_top + lamp_shade_top_ry, lamp_shade_top_rx, lamp_shade_top_ry, 0, 0, 2 * Math.PI);
+        draw.fill();
+        draw.stroke();
+    }
+
     
     var chair_offset = 0.05 * canvas.height;
     var chair_height = 0.2 * canvas.height;
@@ -622,21 +655,27 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         // Room eye candy
         if (room_color === "red") {
 //            draw_window(10, canvas.height/3);
+            draw_table(canvas.width * 0.425, "SaddleBrown"); 
+            draw_lamp("DarkRed");
             draw_painting("LightCoral", "FireBrick", "Crimson", "DarkRed");
         } else if (room_color === "cyan") {
             draw_table(canvas.width * 0.425, "SaddleBrown"); 
+            draw_lamp("Teal");
         } else if (room_color === "green") {
             draw_painting("PaleGreen", "DarkGreen", "ForestGreen", "SeaGreen");
         } else if (room_color === "blue") {
             draw_chair("SaddleBrown"); 
         } else if (room_color === "grey") {
             draw_window("Black");
+            draw_table(canvas.width * 0.425, "#444444"); 
         } else if (room_color === "ivory") {
             draw_table(canvas.width * 0.425, "SaddleBrown"); 
         } else if (room_color === "orange") {
             draw_chair("SaddleBrown"); 
         } else if (room_color === "pink") {
             draw_window("PaleVioletRed");
+            draw_table(canvas.width * 0.425, "SaddleBrown"); 
+            draw_lamp("PaleVioletRed");
         } else if (room_color === "brown") {
             draw_window("#553322");
         } else if (room_color === "yellow") {
