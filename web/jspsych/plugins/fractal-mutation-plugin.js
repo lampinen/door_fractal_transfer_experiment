@@ -41,6 +41,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var canvas = $('#mutation-canvas')[0];
     var draw = canvas.getContext("2d");
 
+    display_element.append('<div id="instruction-div">Remember, press the \'a\' key to use acid, and \'g\' to use the gamma ray.<br /><br /></div>');
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -554,7 +555,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         return false; 
     }
 
-    var clickable = true;
+    var keyable = true;
 
     var getMouse = function(e,canvas) { //Gets mouse location relative to canvas, code stolen from https://github.com/simonsarris/Canvas-tutorials/blob/master/shapes.js 
 	    var element = canvas;
@@ -605,17 +606,16 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
     }
 
-    canvas.addEventListener('mousedown', function(e) {
-        if (!clickable) {
+    var keyboard_callback = function(info) {
+        if (!keyable) {
             return;
         }
-        var mouse = getMouse(e, canvas);
         var mutagen_loc;
-        if (mutagen_contains(0, mouse.x, mouse.y)) {
+        if (info.key === 65) {
             //liquid
             mutagen_loc = 0;
 
-        } else if (mutagen_contains(1, mouse.x, mouse.y)) {
+        } else if (info.key === 71) {
             //ray
             mutagen_loc = 1;
         } else {
@@ -630,7 +630,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         action_history.push(this_action); 
 
         // animate
-        clickable = false;
+        keyable = false;
         animate_mutation(mutagen_loc, function() {
             current_location = next_fractal(current_location, this_action);
             draw_current_setup(current_location);
@@ -643,12 +643,12 @@ jsPsych.plugins['fractal-mutation'] = (function() {
                     setTimeout(end_function, 2000); 
                 }, 500);
             } else {
-                clickable = true;
+                keyable = true;
             }
         })
 
         return;
-    }, true);
+    };
 
 
     ////// End fractal stuff /////////////////////////////////////////////////////////
@@ -673,8 +673,18 @@ jsPsych.plugins['fractal-mutation'] = (function() {
       jsPsych.finishTrial(trial_data);
     }
 
+    var keyboard_listener;
     // start trial once images are loaded
-    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {draw_current_setup(current_location);});
+    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {
+        draw_current_setup(current_location);
+        keyboard_listener = jsPsych.pluginAPI.getKeyboardResponse({
+            callback_function: keyboard_callback,
+            valid_responses: [65, 71],
+            rt_method: 'date',
+            persist: true 
+        });
+        keyable = true; 
+    });
   };
 
   return plugin;

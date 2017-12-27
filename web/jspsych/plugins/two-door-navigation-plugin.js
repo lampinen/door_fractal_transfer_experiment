@@ -496,6 +496,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
     }
     
+    
     var animation_time = 500; //length of animation in ms
     var post_animation_delay = 500; // how long to wait on last frame
     var num_frames = 20;
@@ -513,8 +514,48 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     }
 
 
+    function door_contains(door_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the door 
+        if (door_loc == 0) {
+            curr_door_loc = left_door_loc; 
+        } else {
+            curr_door_loc = right_door_loc; 
+        }
+        return x >= curr_door_loc && x <= curr_door_loc + door_width && y >= door_offset && y <= door_offset + door_height; 
+    }
+
+    
+
     // Room event handlers
-    var keyable = true;
+    var clickable = true;
+
+    var getMouse = function(e,canvas) { //Gets mouse location relative to canvas, code stolen from https://github.com/simonsarris/Canvas-tutorials/blob/master/shapes.js 
+	    var element = canvas;
+	    var offsetX = 0;
+	    var offsetY = 0;
+	    var html = document.body.parentNode;
+	    var stylePaddingLeft, stylePaddingTop, styleBorderLeft, styleBorderTop;
+	    if (element.offsetParent !== undefined) {
+		    do {
+			    offsetX += element.offsetLeft;
+			    offsetY += element.offsetTop;
+		    } while ((element = element.offsetParent));
+	    }
+
+	    if (document.defaultView && document.defaultView.getComputedStyle) {
+		    stylePaddingLeft = parseInt(document.defaultView.getComputedStyle(canvas, null)['paddingLeft'], 10) || 0;
+		    stylePaddingTop  = parseInt(document.defaultView.getComputedStyle(canvas, null)['paddingTop'], 10) || 0;
+		    styleBorderLeft  = parseInt(document.defaultView.getComputedStyle(canvas, null)['borderLeftWidth'], 10) || 0;
+		    styleBorderTop   = parseInt(document.defaultView.getComputedStyle(canvas, null)['borderTopWidth'], 10) || 0;
+	    }
+	    htmlTop = html.offsetTop;
+	    htmlLeft = html.offsetLeft;
+	    offsetX += stylePaddingLeft + styleBorderLeft + htmlLeft;
+	    offsetY += stylePaddingTop + styleBorderTop + htmlTop;
+
+	    mx = e.pageX - offsetX;
+	    my = e.pageY - offsetY;
+	    return {x: mx, y: my};
+    };
 
     function next_room(current_location, action) {
         if (Math.random() < trial.action_noise) {
@@ -538,20 +579,21 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.fillText("Congratulations!", canvas.width/2, canvas.height/2);
     }
 
-    var keyboard_callback = function(info) {
-        if (!keyable) {
+    canvas.addEventListener('mousedown', function(e) {
+        if (!clickable) {
             return;
         }
+        var mouse = getMouse(e, canvas);
         var door_loc;
-        if (info.key === 37) {
+        if (door_contains(0, mouse.x, mouse.y)) {
             //go through left door
             door_loc = 0;
 
-        } else if (info.key === 39) {
+        } else if (door_contains(1, mouse.x, mouse.y)) {
             //go through right door
             door_loc = 1;
         } else {
-            //mis-type, ignore
+            //mis-click, ignore
             return;
         }
         // update everything 
@@ -563,7 +605,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         action_history.push(this_action); 
 
         // animate
-        keyable = false;
+        clickable = false;
         animate_door_opening(door_loc, function() {
             draw_current_room(current_location);
             location_history.push(current_location);
@@ -575,12 +617,12 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     setTimeout(end_function, 2000); 
                 }, 500);
             } else {
-                keyable = true;
+                clickable = true;
             }
         })
 
         return;
-    };
+    }, true);
 
     // putting it all together
 
@@ -612,6 +654,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw_door(0); draw_door(1);
         // Room eye candy
         if (room_color === "red") {
+//            draw_window(10, canvas.height/3);
             draw_table(canvas.width * 0.425, "SaddleBrown"); 
             draw_lamp("DarkRed");
             draw_painting("LightCoral", "FireBrick", "Crimson", "DarkRed");
@@ -671,14 +714,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     }
 
     draw_current_room(current_location);
-    var keyboard_listener = jsPsych.pluginAPI.getKeyboardResponse({
-        callback_function: keyboard_callback,
-        valid_responses: ['leftarrow', 'rightarrow'],
-        rt_method: 'date',
-        persist: true 
-    });
-    keyable = true;
-
+    clickable = true;
 
   };
 
