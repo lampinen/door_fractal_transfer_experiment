@@ -655,6 +655,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     
     function end_function() {
 
+      jsPsych.pluginAPI.cancelAllKeyboardResponses();
       display_element.html('');
 
       var trial_data = {
