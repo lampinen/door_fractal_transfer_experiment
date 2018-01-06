@@ -692,8 +692,6 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     
     function end_function() {
 
-      jsPsych.pluginAPI.cancelKeyboardResponse(keyboard_listener);
-
       display_element.html('');
 
       var trial_data = {
