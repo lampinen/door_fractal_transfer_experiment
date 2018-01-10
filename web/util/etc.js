@@ -18,3 +18,29 @@ function choice(a) {
     return a[Math.floor(Math.random() * a.length)];
 }
 
+//data/server communication
+function saveData(filename, filedata){
+   $.ajax({
+      type: 'post',
+      cache: false,
+      url: 'http://web.stanford.edu/~lampinen/cgi-bin/save_data.php', 
+      data: {filename: filename, filedata: filedata}
+   });
+}
+
+function load_data(filename){
+   $.ajax({
+      type: "post",
+      url: 'http://web.stanford.edu/~lampinen/cgi-bin/recover_auxiliary_data.php', 
+      cache: false,
+      data: {filename: filename},
+      dataType: 'json',
+      success: function(data) {
+	  alert(data["hi"]);
+      },
+      error: function(jqxhr, status, exception) {
+	  alert(exception);
+      }
+   });
+}
+
