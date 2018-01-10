@@ -10,14 +10,13 @@
 
     function load_data(filename){
        $.ajax({
-          action: 'POST',
+          type: "POST",
           url: 'http://web.stanford.edu/~lampinen/cgi-bin/recover_auxiliary_data.php', 
           cache: false,
           data: {filename: filename},
-          dataType: 'text',
+          dataType: 'json',
           success: function(data) {
-              alert(data);
-              alert(JSON.parse(data)["hi"]);
+              alert(data["hi"]);
           },
           error: function(jqxhr, status, exception) {
               alert(exception);
