@@ -28,16 +28,14 @@ function saveData(filename, filedata){
    });
 }
 
-function load_data(filename){
+function load_data(filename, callback){
    $.ajax({
       type: "post",
       url: 'http://web.stanford.edu/~lampinen/cgi-bin/recover_auxiliary_data.php', 
       cache: false,
       data: {filename: filename},
       dataType: 'json',
-      success: function(data) {
-	  alert(data["hi"]);
-      },
+      success: callback,
       error: function(jqxhr, status, exception) {
 	  alert(exception);
       }
