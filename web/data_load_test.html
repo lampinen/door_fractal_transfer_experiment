@@ -9,12 +9,14 @@
     <script>
 
     function load_data(filename){
+       alert("Loading...");
        $.ajax({
           url: 'http://web.stanford.edu/~lampinen/cgi-bin/recover_auxiliary_data.php', 
           cache: false,
           data: {filename: filename},
-          dataType: 'string',
+          dataType: 'json',
           success: function(data) {
+              alert("Loaded!");
               alert(data);
           }
        });
