@@ -9,15 +9,15 @@
     <script>
 
     function load_data(filename){
-       alert("Loading...");
        $.ajax({
+          action: 'POST',
           url: 'http://web.stanford.edu/~lampinen/cgi-bin/recover_auxiliary_data.php', 
           cache: false,
           data: {filename: filename},
-          dataType: 'json',
+          dataType: 'text',
           success: function(data) {
               alert(data);
-              alert(JSON.parse(data["hi"]));
+              alert(JSON.parse(data)["hi"]);
           },
           error: function(jqxhr, status, exception) {
               alert(exception);
