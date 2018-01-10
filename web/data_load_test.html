@@ -18,6 +18,9 @@
           success: function(data) {
               alert("Loaded!");
               alert(data);
+          },
+          error: function(jqxhr, status, exception) {
+              alert(exception);
           }
        });
     }
