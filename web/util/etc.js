@@ -19,12 +19,14 @@ function choice(a) {
 }
 
 //data/server communication
-function saveData(filename, filedata){
+function saveData(filename, filedata, callback, error_callback){
    $.ajax({
       type: 'post',
       cache: false,
       url: 'https://web.stanford.edu/~lampinen/cgi-bin/save_data.php', 
-      data: {filename: filename, filedata: filedata}
+      data: {filename: filename, filedata: filedata},
+      success: callback,
+      error: error_callback
    });
 }
 
