@@ -14,8 +14,18 @@
 </head>
 <body>
 </body>
-    <script>
+<script type="text/javascript">
+    (function(){
+        var ut_id = "il_ex0";
+        //var ut_id = "il_ex0_s01"; //TODO: this
+        if (true) {
+            repeat_turker = true;
+            document.getElementsByTagName('body')[0].innerHTML = "You have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
+        }
+    })();
+</script>
 
+<script>
     var turk_info = jsPsych.turk.turkInfo();
     var worker_id = turk_info.workerId;
 
@@ -24,7 +34,10 @@
     load_data("il/ex0/" + "blahtest" + ".json", function(result) { //TODO: revert to worker_id
         auxiliary_data = result;
         build_experiment();
-    });
+        },
+        function () {
+            document.getElementsByTagName('body')[0].innerHTML = "Sorry, this HIT is only available to participants who already completed the prior HIT. Please click 'Return HIT' to avoid any impact on your approval rating. (If you think you have received this message in error, please contact the HIT creator directly.)";
+        });
     
     var build_experiment = function() {
         var first_dihedral = auxiliary_data["first_dihedral"]; // will first task be dihedral group? (otherwise dicyclic)
@@ -55,18 +68,9 @@
 
 
         var block_timeline = [
-            {goal: 2, start: 0},
+            {goal: 0, start: 2},
             {goal: 6, start: 2},
             {goal: 9, start: 6}
-    //,
-    //        {goal: 1, start: 9},
-    //        {goal: 7, start: 1},
-    //        {goal: 11, start: 7},
-    //        {goal: 8, start: 11},
-    //        {goal: 5, start: 8},
-    //        {goal: 10, start: 5},
-    //        {goal: 4, start: 10},
-    //        {goal: 3, start: 4}
         ]
 
         var welcome_instructions = {
@@ -120,6 +124,9 @@
         }
 
         var start_experiment = function() {
+            if (repeat_turker) {
+                return;
+            }
             var turk_info = jsPsych.turk.turkInfo();
             var worker_id = turk_info.workerId;
 
@@ -133,5 +140,5 @@
         };
         jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
     };
-    </script>
+</script>
 </html>
