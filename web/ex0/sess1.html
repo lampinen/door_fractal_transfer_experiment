@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+    <title>Experiment 1</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="../util/group_theory.js"></script>
+    <script src="../util/etc.js"></script>
+    <script src="../jspsych/jspsych.js"></script>
+    <script src="../jspsych/plugins/jspsych-instructions.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
+    <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+</head>
+<body>
+</body>
+    <script>
+
+    var turk_info = jsPsych.turk.turkInfo();
+    var worker_id = turk_info.workerId;
+
+    var auxiliary_data; 
+
+    load_data("aux/il/ex0/" + "blahtest" + ".json", function(result) { //TODO: revert to worker_id
+        auxiliary_data = result;
+        build_experiment();
+    });
+    
+    var build_experiment = function() {
+        var first_dihedral = auxiliary_data["first_dihedral"]; // will first task be dihedral group? (otherwise dicyclic)
+        var isomorphic = auxiliary_data["isomorphic"]; // will two tasks be isomorphic?
+        var this_fractal_assignment = auxiliary_data["this_fractal_assignment"];
+        var this_mutagen_assignment = auxiliary_data["this_mutagen_assignment"];
+        var this_room_assignment = auxiliary_data["this_room_assignment"];
+        var this_door_generator_assignment = auxiliary_data["this_door_generator_assignment"];
+        var this_door_color_assignment = ["white", "black"];
+
+        console.log(this_room_assignment);
+
+        if (first_dihedral) {
+            var this_group_a = new dihedral_group(6);
+            if (isomorphic) {
+                var this_group_b = new dihedral_group(6);
+            } else {
+                var this_group_b = new dicyclic_group_12();
+            }
+        } else {
+            var this_group_a = new dicyclic_group_12;
+            if (isomorphic) {
+                var this_group_b = new dicyclic_group_12();
+            } else {
+                var this_group_b = new dihedral_group(6);
+            }
+        }
+
+
+        var block_timeline = [
+            {goal: 2, start: 0},
+            {goal: 6, start: 2},
+            {goal: 9, start: 6}
+    //,
+    //        {goal: 1, start: 9},
+    //        {goal: 7, start: 1},
+    //        {goal: 11, start: 7},
+    //        {goal: 8, start: 11},
+    //        {goal: 5, start: 8},
+    //        {goal: 10, start: 5},
+    //        {goal: 4, start: 10},
+    //        {goal: 3, start: 4}
+        ]
+
+        var welcome_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Hi, welcome to the second session of our HIT. Thank you for returning!.",
+                "As a reminder, we will post the next follow-up HIT tomorrow. Each HIT should take about 30 minutes. Because we need data from all three HITS, you will be awarded $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
+                "In order to reduce the number of participants we have to recruit, we have actually combined two learning-over-time experiments into this series of HITs. The first investigates spatial reasoning, the second involves learning relationships between visual patterns. As before, the second experiment will start immediately after you complete the first one. (They should each take approximately 15 minutes, for 30 minutes total per HIT.)"
+            ]
+        }
+
+        var fractal_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Welcome back to our experiment on learning of relationships between visual patterns.",
+                "Remember: In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. Your job is to help figure out the relationships between these different fractals, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g') to make a certain fractal."
+            ]
+        }
+
+        var fractal_trials = {
+            type: 'fractal-mutation',
+            group: this_group_a,
+            fractal_assignment: this_fractal_assignment,
+            mutagen_generator_assignment: this_mutagen_assignment,
+            timeline: block_timeline 
+        };
+
+        var room_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Welcome back to our spatial learning experiment.",
+                "In this experiment, you are exploring a haunted house. Your goal is to find your way between rooms by figuring out the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right, click on a door to go throuh it. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
+            ]
+        }
+
+        var room_trials = {
+            type: 'two-door-navigation',
+            group: this_group_b,
+            room_assignment: this_room_assignment,
+            door_color_assignment: this_door_color_assignment,
+            door_generator_assignment: this_door_generator_assignment,
+            timeline: block_timeline 
+        };
+
+        var debrief = {
+            type: 'survey-text',
+            questions: ["Do you have any comments on this experiment?"]
+        }
+
+        var start_experiment = function() {
+            var turk_info = jsPsych.turk.turkInfo();
+            var worker_id = turk_info.workerId;
+
+            jsPsych.init({
+                timeline: [room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
+                on_finish: function() {
+                    saveData("il/ex0/s1/" + worker_id + ".json", jsPsych.data.dataAsJSON());
+    //                jsPsych.data.displayData('json');
+                }
+            })
+        };
+        jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+    };
+    </script>
+</html>
