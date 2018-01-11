@@ -106,7 +106,7 @@
             show_clickable_nav: true,
             pages: [
                 "Welcome back to our spatial learning experiment.",
-                "In this experiment, you are exploring a haunted house. Your goal is to find your way between rooms by figuring out the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right, click on a door to go throuh it. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
+                "Remember: In this experiment, you are exploring a haunted house. Your goal is to find your way between rooms by figuring out the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right, click on a door to go throuh it. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
             ]
         }
 
@@ -133,11 +133,14 @@
 
             jsPsych.init({
                 timeline: [room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
-                on_finish: function() {
-                    saveData("il/ex0/s1/" + worker_id + ".json", jsPsych.data.dataAsJSON());
-    //                jsPsych.data.displayData('json');
-                }
-            })
+		on_finish: function() {
+		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
+		    var final_submit = function() {
+			jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
+		    };
+		    saveData("il/ex0/s0/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
+		}
+            });
         };
         jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
     };
