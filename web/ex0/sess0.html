@@ -172,7 +172,7 @@
             return;
 	}
         var turk_info = jsPsych.turk.turkInfo();
-        if (turk_info.preview_mode) {
+        if (turk_info.previewMode) {
 	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning over time. This HIT will take about 30 minutes, and you will be asked to return for similar HITs tomorrow and the following day. To encourage completion of all 3, you will be rewarded $4 for each of the first two, and $8 for the third, for a total of $16 if you complete all 3 HITs.";
             return;
         }
