@@ -18,8 +18,7 @@
 <script type="text/javascript">
     var repeat_turker;
     (function(){
-	var ut_id = "il_pilot1_0";
-	//var ut_id = "il_ex0_s0"; //TODO: this
+	var ut_id = "il_ex0_s0";
 
 	if (UTWorkerLimitReached(ut_id)) {
 	    repeat_turker = true;
@@ -112,6 +111,14 @@
 	]
     }
 
+    var inter_instructions = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+            "Thanks, you've now completed the experiment on spatial navigation for this session. Click next to proceed to the second experiment."
+	]
+    }
+
     var fractal_instructions = {
 	type: 'instructions',
         show_clickable_nav: true,
@@ -147,9 +154,17 @@
         timeline: block_timeline 
     };
 
+    var reminder_to_return = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+            "Thanks, you've now completed both experiments for this session! You're almost done, we just have a final question and need to save your data. Please remember to come back tomorrow for the next session!<br /><br />Click next to continue."
+	]
+    }
+
     var debrief = {
 	type: 'survey-text',
-	questions: ["Do you have any comments on this experiment?"]
+	questions: ["Do you have any comments on this HIT?"]
     }
 
     var start_experiment = function() {
@@ -157,6 +172,10 @@
             return;
 	}
         var turk_info = jsPsych.turk.turkInfo();
+        if (turk_info.preview_mode) {
+	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning over time. This HIT will take about 30 minutes, and you will be asked to return for HITs tomorrow and the following day. To encourage completion of all 3, you will be rewarded $4 for each of the first two, and $8 for the third, for a total of $16 if you complete all 3 HITs.";
+            return;
+        }
         var worker_id = turk_info.workerId;
 
         //data necessary to recreate the same experience for this participant in future sessions
@@ -173,7 +192,7 @@
 
 
         jsPsych.init({
-            timeline: [welcome_instructions, room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
+            timeline: [welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, reminder_to_return, debrief],
             on_finish: function() {
                 document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
                 var final_submit = function() {

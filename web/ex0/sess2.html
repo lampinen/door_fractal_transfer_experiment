@@ -8,6 +8,8 @@
     <script src="../jspsych/jspsych.js"></script>
     <script src="../jspsych/plugins/jspsych-instructions.js"></script>
     <script src="../jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-likert.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-multi-choice.js"></script>
     <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
     <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
     <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
@@ -18,7 +20,7 @@
 <script type="text/javascript">
     var repeat_turker;
     (function(){
-        var ut_id = "il_ex0_s1"; 
+        var ut_id = "il_ex0_s2";
         if (UTWorkerLimitReached(ut_id)) {
             repeat_turker = true;
             document.getElementsByTagName('body')[0].innerHTML = "You have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
@@ -69,50 +71,50 @@
 
 
         var block_timeline = [
-	    {start: 11, goal: 7},
-	    {start: 7, goal: 8},
-	    {start: 8, goal: 4},
-	    {start: 4, goal: 5},
-	    {start: 5, goal: 10},
-	    {start: 10, goal: 1},
-	    {start: 1, goal: 6},
-	    {start: 6, goal: 9},
-	    {start: 9, goal: 2},
-	    {start: 2, goal: 0},
-	    {start: 0, goal: 3},
-	    {start: 3, goal: 10},
-	    {start: 10, goal: 8},
-	    {start: 8, goal: 4},
-	    {start: 4, goal: 0},
-	    {start: 0, goal: 11},
-	    {start: 11, goal: 2},
-	    {start: 2, goal: 7},
-	    {start: 7, goal: 5},
-	    {start: 5, goal: 6},
-	    {start: 6, goal: 1},
-	    {start: 1, goal: 3},
-	    {start: 3, goal: 9},
-	    {start: 9, goal: 3},
-	    {start: 3, goal: 4},
-	    {start: 4, goal: 2},
-	    {start: 2, goal: 1},
-	    {start: 1, goal: 8},
-	    {start: 8, goal: 10},
-	    {start: 10, goal: 7},
-	    {start: 7, goal: 6},
-	    {start: 6, goal: 0},
-	    {start: 0, goal: 11},
-	    {start: 11, goal: 9},
-	    {start: 9, goal: 5}
+            {start: 3, goal: 7},
+            {start: 7, goal: 5},
+            {start: 5, goal: 0},
+            {start: 0, goal: 2},
+            {start: 2, goal: 10},
+            {start: 10, goal: 8},
+            {start: 8, goal: 11},
+            {start: 11, goal: 6},
+            {start: 6, goal: 4},
+            {start: 4, goal: 1},
+            {start: 1, goal: 9},
+            {start: 9, goal: 10},
+            {start: 10, goal: 2},
+            {start: 2, goal: 0},
+            {start: 0, goal: 9},
+            {start: 9, goal: 8},
+            {start: 8, goal: 6},
+            {start: 6, goal: 1},
+            {start: 1, goal: 4},
+            {start: 4, goal: 11},
+            {start: 11, goal: 3},
+            {start: 3, goal: 5},
+            {start: 5, goal: 7},
+            {start: 7, goal: 3},
+            {start: 3, goal: 4},
+            {start: 4, goal: 8},
+            {start: 8, goal: 6},
+            {start: 6, goal: 1},
+            {start: 1, goal: 5},
+            {start: 5, goal: 9},
+            {start: 9, goal: 10},
+            {start: 10, goal: 0},
+            {start: 0, goal: 7},
+            {start: 7, goal: 11},
+            {start: 11, goal: 2}
         ]
 
         var welcome_instructions = {
             type: 'instructions',
             show_clickable_nav: true,
             pages: [
-                "Hi, welcome to the second session of our HIT. Thank you for returning!.",
-                "As a reminder, we will post the next follow-up HIT tomorrow. Each HIT should take about 30 minutes. Because we need data from all three HITS, you will be awarded $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
-                "In order to reduce the number of participants we have to recruit, we have actually combined two learning-over-time experiments into this series of HITs. The first investigates spatial reasoning, the second involves learning relationships between visual patterns. As before, the second experiment will start immediately after you complete the first one. (They should each take approximately 15 minutes, for 30 minutes total per HIT.)"
+                "Hi, welcome to the final session of our HIT. Thank you for returning!.",
+                "As a reminder, each HIT should take about 30 minutes. Because we need data from all three HITS, you will be awarded $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
+                "As a further reminder, in order to reduce the number of participants we have to recruit, we have actually combined two learning-over-time experiments into this series of HITs. The first investigates spatial reasoning, the second involves learning relationships between visual patterns. As before, the second experiment will start immediately after you complete the first one. (They should each take approximately 15 minutes, for 30 minutes total per HIT.)"
             ]
         }
 
@@ -160,6 +162,34 @@
             timeline: block_timeline 
         };
 
+	var debrief_instructions = {
+	    type: 'instructions',
+	    show_clickable_nav: true,
+	    pages: [
+		"Thanks, you've now completed both experiments for this session! We just have some final questions to ask you, and then you'll be done."
+	    ]
+	}
+
+        var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
+        shuffle(correspondence_options);
+        var experiment_debrief = {
+            timeline:[
+                {type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"]},
+                {type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"]},
+                {type: "survey-likert", questions: [{prompt: "How similar did you think the spatial navigation and visual patterns experiments were?", labels: {"Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"}}]},
+                {type: "survey-text", questions: ["Did you see any relationship between the first and second experiments?"]},
+                {type: "survey-multi-choice", questions: [prompt: "The experiments were actually teaching you similar structures. One of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What do you think the correspondence was?", options: correspondence_options]},
+            ]
+        }
+
+        var demographics = {
+            type: 'survey-multi-choice',
+            questions: [{prompt: "What is your age?", options: ["<25", "25-35", "35-45", "45-55", "55-65", ">65"]},
+                        {prompt: "What is your level of education?", options: ["No high school degree", "High school degree or GED", "Some college", "Associates or other two-year degree", "Bachelor's degree", "Master's degree", "PhD, JD, MD or similar"]},
+                        {prompt: "What is your gender?", options: ["Male", "Female", "Other", "Decline to state"]},
+                        {prompt: "What is your race/ethnicity?", options: ["Asian","American Indian/Native American", "Black or African American", "Hispanic", "White", "Other", "Decline to state"]}]
+        }
+
         var debrief = {
             type: 'survey-text',
             questions: ["Do you have any comments on this HIT?"]
@@ -178,7 +208,7 @@
             var worker_id = turk_info.workerId;
 
             jsPsych.init({
-                timeline: [welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, reminder_to_return, debrief],
+                timeline: [welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, debrief_instructions, experiment_debrief, demographics, debrief],
 		on_finish: function() {
 		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
 		    var final_submit = function() {
