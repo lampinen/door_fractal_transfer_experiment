@@ -65,18 +65,41 @@
     console.log(this_room_assignment);
 
     var block_timeline = [
-        {goal: 1, start: 0},
-        {goal: 6, start: 1},
-        {goal: 9, start: 6}
-//,
-//        {goal: 1, start: 9},
-//        {goal: 7, start: 1},
-//        {goal: 11, start: 7},
-//        {goal: 8, start: 11},
-//        {goal: 5, start: 8},
-//        {goal: 10, start: 5},
-//        {goal: 4, start: 10},
-//        {goal: 3, start: 4}
+        {start: 0, goal: 4},
+        {start: 4, goal: 9},
+        {start: 9, goal: 10},
+        {start: 10, goal: 2},
+        {start: 2, goal: 5},
+        {start: 5, goal: 11},
+        {start: 11, goal: 6},
+        {start: 6, goal: 3},
+        {start: 3, goal: 8},
+        {start: 8, goal: 1},
+        {start: 1, goal: 7},
+        {start: 7, goal: 5},
+        {start: 5, goal: 8},
+        {start: 8, goal: 11},
+        {start: 11, goal: 6},
+        {start: 6, goal: 7},
+        {start: 7, goal: 10},
+        {start: 10, goal: 0},
+        {start: 0, goal: 9},
+        {start: 9, goal: 4},
+        {start: 4, goal: 2},
+        {start: 2, goal: 1},
+        {start: 1, goal: 3},
+        {start: 3, goal: 7},
+        {start: 7, goal: 6},
+        {start: 6, goal: 2},
+        {start: 2, goal: 8},
+        {start: 8, goal: 0},
+        {start: 0, goal: 3},
+        {start: 3, goal: 4},
+        {start: 4, goal: 10},
+        {start: 10, goal: 11},
+        {start: 11, goal: 1},
+        {start: 1, goal: 5},
+        {start: 5, goal: 9}
     ]
 
     var welcome_instructions = {
@@ -150,7 +173,7 @@
 
 
         jsPsych.init({
-            timeline: [room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
+            timeline: [welcome_instructions, room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
             on_finish: function() {
                 document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
                 var final_submit = function() {

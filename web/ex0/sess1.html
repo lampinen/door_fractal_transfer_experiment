@@ -70,9 +70,41 @@
 
 
         var block_timeline = [
-            {goal: 0, start: 2},
-            {goal: 6, start: 2},
-            {goal: 9, start: 6}
+	    {start: 11, goal: 7},
+	    {start: 7, goal: 8},
+	    {start: 8, goal: 4},
+	    {start: 4, goal: 5},
+	    {start: 5, goal: 10},
+	    {start: 10, goal: 1},
+	    {start: 1, goal: 6},
+	    {start: 6, goal: 9},
+	    {start: 9, goal: 2},
+	    {start: 2, goal: 0},
+	    {start: 0, goal: 3},
+	    {start: 3, goal: 10},
+	    {start: 10, goal: 8},
+	    {start: 8, goal: 4},
+	    {start: 4, goal: 0},
+	    {start: 0, goal: 11},
+	    {start: 11, goal: 2},
+	    {start: 2, goal: 7},
+	    {start: 7, goal: 5},
+	    {start: 5, goal: 6},
+	    {start: 6, goal: 1},
+	    {start: 1, goal: 3},
+	    {start: 3, goal: 9},
+	    {start: 9, goal: 3},
+	    {start: 3, goal: 4},
+	    {start: 4, goal: 2},
+	    {start: 2, goal: 1},
+	    {start: 1, goal: 8},
+	    {start: 8, goal: 10},
+	    {start: 10, goal: 7},
+	    {start: 7, goal: 6},
+	    {start: 6, goal: 0},
+	    {start: 0, goal: 11},
+	    {start: 11, goal: 9},
+	    {start: 9, goal: 5}
         ]
 
         var welcome_instructions = {
@@ -133,13 +165,13 @@
             var worker_id = turk_info.workerId;
 
             jsPsych.init({
-                timeline: [room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
+                timeline: [welcome_instructions, room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, debrief],
 		on_finish: function() {
 		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
 		    var final_submit = function() {
 			jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
 		    };
-		    saveData("il/ex0/s0/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
+		    saveData("il/ex0/s1/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
 		}
             });
         };
