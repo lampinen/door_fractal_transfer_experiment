@@ -676,7 +676,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
     var keyboard_listener;
     // start trial once images are loaded
-    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {
+    jsPsych.pluginAPI.preloadImages(trial.fractal_assignment, function() {
         draw_current_setup(current_location);
         keyboard_listener = jsPsych.pluginAPI.getKeyboardResponse({
             callback_function: keyboard_callback,
