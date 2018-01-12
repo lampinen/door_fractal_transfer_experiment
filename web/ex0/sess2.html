@@ -172,11 +172,12 @@
 
         var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
         shuffle(correspondence_options);
+
+        var similarity = {type: "survey-likert", questions: [{prompt: "How similar did you think the spatial navigation and visual patterns experiments were?", labels: ["Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"]}]};
         var experiment_debrief = {
             timeline:[
                 {type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"]},
                 {type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"]},
-                {type: "survey-likert", questions: [{prompt: "How similar did you think the spatial navigation and visual patterns experiments were?", labels: ["Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"]}]},
                 {type: "survey-text", questions: ["Did you see any relationship between the first and second experiments?"]},
                 {type: "survey-multi-choice", questions: [{prompt: "The experiments were actually teaching you similar structures. One of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What do you think the correspondence was?", options: correspondence_options}]},
             ]
