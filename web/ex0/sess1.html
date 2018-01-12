@@ -160,6 +160,14 @@
             timeline: block_timeline 
         };
 
+	var reminder_to_return = {
+	    type: 'instructions',
+	    show_clickable_nav: true,
+	    pages: [
+		"Thanks, you've now completed both experiments for this session! You're almost done, we just have a final question and need to save your data. Please remember to come back tomorrow for the next session!<br /><br />Click next to continue."
+	    ]
+	}
+
         var debrief = {
             type: 'survey-text',
             questions: ["Do you have any comments on this HIT?"]
