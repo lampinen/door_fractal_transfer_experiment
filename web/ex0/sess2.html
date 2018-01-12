@@ -209,7 +209,7 @@
             var worker_id = turk_info.workerId;
 
             jsPsych.init({
-                timeline: [experiment_debrief],//[welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, debrief_instructions, experiment_debrief, demographics, debrief],
+                timeline: [similarity, experiment_debrief],//[welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, debrief_instructions, experiment_debrief, demographics, debrief],
 		on_finish: function() {
 		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
 		    var final_submit = function() {
