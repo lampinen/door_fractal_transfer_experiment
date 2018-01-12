@@ -113,7 +113,7 @@
             show_clickable_nav: true,
             pages: [
                 "Hi, welcome to the final session of our HIT. Thank you for returning!.",
-                "As a reminder, each HIT should take about 30 minutes. Because we need data from all three HITS, you will be awarded $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
+                "As a reminder, each HIT should take about 30 minutes. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
                 "As a further reminder, in order to reduce the number of participants we have to recruit, we have actually combined two learning-over-time experiments into this series of HITs. The first investigates spatial reasoning, the second involves learning relationships between visual patterns. As before, the second experiment will start immediately after you complete the first one. (They should each take approximately 15 minutes, for 30 minutes total per HIT.)"
             ]
         }
@@ -201,7 +201,7 @@
             }
             var turk_info = jsPsych.turk.turkInfo();
 	    if (turk_info.previewMode) {
-		document.getElementsByTagName('body')[0].innerHTML = "This HIT is the third in a series of 3 HITS for some psychological experiments on learning over time. You must have completed the first HIT to be eligible for this one.";
+		document.getElementsByTagName('body')[0].innerHTML = "This HIT is the third in a series of 3 HITS for some psychological experiments on learning over time.<br /><br />You must have completed the first two HITs to be eligible for this one.";
 		return;
 	    }
 
