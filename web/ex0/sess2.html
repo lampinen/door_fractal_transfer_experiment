@@ -172,14 +172,13 @@
 
         var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
         shuffle(correspondence_options);
-
-        var similarity = {type: "survey-likert", questions: [{prompt: "How similar did you think the spatial navigation and visual patterns experiments were?", labels: ["Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"]}]};
         var experiment_debrief = {
             timeline:[
                 {type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"]},
                 {type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"]},
+                {type: "survey-likert", questions: ["How similar did you think the spatial navigation and visual patterns experiments were?"] labels: [["Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"]]},
                 {type: "survey-text", questions: ["Did you see any relationship between the first and second experiments?"]},
-                {type: "survey-multi-choice", questions: [{prompt: "The experiments were actually teaching you similar structures. One of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What do you think the correspondence was?", options: correspondence_options}]},
+                {type: "survey-multi-choice", questions: ["The experiments were actually teaching you similar structures. One of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What do you think the correspondence was?"], options: correspondence_options},
             ]
         }
 
@@ -209,7 +208,7 @@
             var worker_id = turk_info.workerId;
 
             jsPsych.init({
-                timeline: [similarity, experiment_debrief],//[welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, debrief_instructions, experiment_debrief, demographics, debrief],
+                timeline: [experiment_debrief],//[welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, debrief_instructions, experiment_debrief, demographics, debrief],
 		on_finish: function() {
 		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
 		    var final_submit = function() {
