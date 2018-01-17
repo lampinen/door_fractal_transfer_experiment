@@ -16,6 +16,7 @@ jsPsych.plugins['survey-text'] = (function() {
   plugin.trial = function(display_element, trial) {
 
     trial.preamble = typeof trial.preamble == 'undefined' ? "" : trial.preamble;
+    trial.required = typeof trial.required == 'undefined' ? false : trial.required;
     if (typeof trial.rows == 'undefined') {
       trial.rows = [];
       for (var i = 0; i < trial.questions.length; i++) {
@@ -77,7 +78,14 @@ jsPsych.plugins['survey-text'] = (function() {
         obje[id] = val;
         $.extend(question_data, obje);
       });
-
+      
+      // validate responses if required
+      if (trial.required) {
+          if (Object.values(question_data).includes("")) {
+              alert("Please answer all the questions!")
+              return;
+          }
+      }
       // save data
       var trialdata = {
         "rt": response_time,
