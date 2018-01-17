@@ -14,7 +14,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.door_generator_assignment = assignment of door positions to generators (should be [0, 1] or [1, 0])
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
-    trial.action_noise = trial.action_noise || 0.2; // how often an action "misses"
+    trial.action_noise = trial.action_noise || 0.15; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
 
