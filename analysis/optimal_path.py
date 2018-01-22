@@ -45,7 +45,7 @@ def dihedral_6_optimal_action(state, goal):
 
 
 
-def dihedral_12_optimal_action(state, goal):
+def dicyclic_12_optimal_action(state, goal):
     rs, ss = dc12.parse(state)
     rg, sg = dc12.parse(goal)
 
