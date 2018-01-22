@@ -41,7 +41,7 @@
         });
     
     var build_experiment = function() {
-        var first_dihedral = auxiliary_data["first_dihedral"]; // will first task be dihedral group? (otherwise dicyclic)
+        var fractal_dihedral = auxiliary_data["fractal_dihedral"]; // will first task be dihedral group? (otherwise dicyclic)
         var isomorphic = auxiliary_data["isomorphic"]; // will two tasks be isomorphic?
         var this_fractal_assignment = auxiliary_data["this_fractal_assignment"];
         var this_mutagen_assignment = auxiliary_data["this_mutagen_assignment"];
@@ -51,7 +51,7 @@
 
         //console.log(this_room_assignment);
 
-        if (first_dihedral) {
+        if (fractal_dihedral) {
             var this_group_a = new dihedral_group(6);
             if (isomorphic) {
                 var this_group_b = new dihedral_group(6);
