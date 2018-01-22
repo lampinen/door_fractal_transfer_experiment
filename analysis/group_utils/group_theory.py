@@ -8,11 +8,14 @@ class dihedral_group(object):
     def get_some_generators(self):
         return [1, self.nsides]
 
-    def operation(self, x, y):
+    def parse(self, x):
         rx = x % self.nsides
         sx = x // self.nsides
-        ry = y % self.nsides
-        sy = y // self.nsides
+        return rx, sx
+
+    def operation(self, x, y):
+        rx, sx = self.parse(x)
+        ry, sy = self.parse(y)
 
         if (sx == 0):
             rres = (rx + ry) % self.nsides
@@ -31,11 +34,14 @@ class dicyclic_group_12(object):
     def get_some_generators(self):
         return [1, 4]
 
-    def operation(self, x, y):
+    def parse(self, x):
         rx = x % 4
         sx = x // 4
-        ry = y % 4
-        sy = y // 4
+        return rx, sx
+
+    def operation(self, x, y):
+        rx, sx = self.parse(x)
+        ry, sy = self.parse(y)
 
         if (sx == 0):
             rres = (rx + ry) % 4

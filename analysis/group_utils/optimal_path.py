@@ -83,3 +83,13 @@ def dicyclic_12_optimal_action(state, goal):
         else: # dist == 3
             return None
 
+d6_table = np.full([12, 12], fill_value=None)
+dc12_table = np.full([12, 12], fill_value=None)
+
+for state in xrange(12):
+    for goal in xrange(12):
+        d6_table[state, goal] = dihedral_6_optimal_action(state, goal)
+        dc12_table[state, goal] = dicyclic_12_optimal_action(state, goal)
+
+numpy.savetxt("d6_table.csv", d6_table, delimiter=',')
+numpy.savetxt("dc12_table.csv", dc12_table, delimiter=',')
