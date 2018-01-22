@@ -30,10 +30,10 @@
 <script>
 
 
-    var first_dihedral = false; // will first task be dihedral group? (otherwise dicyclic)
+    var fractal_dihedral = false; // will first task be dihedral group? (otherwise dicyclic)
     var isomorphic = true; // will two tasks be isomorphic?
 
-    if (first_dihedral) {
+    if (fractal_dihedral) {
         var this_group_a = new dihedral_group(6);
         if (isomorphic) {
             var this_group_b = new dihedral_group(6);
@@ -181,8 +181,7 @@
 
         //data necessary to recreate the same experience for this participant in future sessions
         auxiliary_data = { 
-            "worker_id": worker_id,
-            "first_dihedral": first_dihedral,
+            "fractal_dihedral": fractal_dihedral,
             "isomorphic": isomorphic,
             "this_fractal_assignment": this_fractal_assignment,
             "this_mutagen_assignment": this_mutagen_assignment,
