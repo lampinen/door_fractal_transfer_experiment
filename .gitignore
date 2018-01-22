@@ -1,3 +1,5 @@
 mturk/
 data/
 anonymized_data/pilot/
+*.nb.html
+.Rhistory

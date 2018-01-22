@@ -39,16 +39,20 @@ for (i in 1:num_subjects) {
     main_d_frame = data.frame()
     question_d_frame = data.frame()
     for (trial_i in 1:length(main_d_list)) {
-      this_trial = main_d_list[trial_i][[1]]
+      this_trial = main_d_list[[trial_i]]
       
       if (this_trial$trial_type == "two-door-navigation" | this_trial$trial_type == "fractal-mutation") {
         # data trial
         this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed")])
         this_trial_d$session = s
-        this_trial_d$door_history = this_trial$door_history
-        this_trial_d$action_history = this_trial$action_history
-        this_trial_d$location_history = this_trial$location_history
-        this_trial_d$location_rts = this_trial$location_rts
+#        if (this_trial$trial_type == "two-door-navigation") {
+#          this_trial_d$object_history = list(fromJSON(this_trial$door_history))
+#        } else {
+#          this_trial_d$object_history = list(fromJSON(this_trial$mutagen_history))
+#        }
+        this_trial_d$action_history = list(fromJSON(this_trial$action_history))
+        this_trial_d$location_history = list(fromJSON(this_trial$location_history))
+        this_trial_d$location_rts = list(fromJSON(this_trial$location_rts))
         main_d_frame = bind_rows(main_d_frame, this_trial_d)
       } else if (grepl("survey",this_trial$trial_type)) {
         # debrief or demographics
