@@ -36,7 +36,7 @@ cyclic_group.prototype.operation = function(x, y) {
 
 
 // Dicyclic, where each element x is represented in a canonical form such that
-// int(x / 4) s-applications followed by (x % 4) r-applications, s & r being
+// (x % 4) r-applications followed by int(x / 4) s-applications, s & r being
 // group generators
 function dicyclic_group_12 () {
     this.order = 12;
@@ -83,7 +83,7 @@ dicyclic_group_12.prototype.operation = function(x, y) {
 
 
 // Dihedral, where each element x is represented in a canonical form such that
-// int(x / n) s-applications followed by (x % n) r-applications, s & r being
+// (x % n) r-applications followed by int(x / n) s-applications, s & r being
 // group generators (flip and rotation, respectively)
 function dihedral_group (num_sides) {
     this.num_sides = num_sides;
