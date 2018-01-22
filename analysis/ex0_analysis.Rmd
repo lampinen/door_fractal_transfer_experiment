@@ -1,0 +1,80 @@
+---
+title: "Implicit Learning Experiment 0 Analysis"
+output: html_notebook
+---
+
+```{r}
+library(rjson)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# Data loading
+```{r}
+num_subjects = 2
+data_dir = "../anonymized_data/pilot"
+```
+
+```{r}
+auxiliary_data = list()
+main_data = data.frame()
+question_data = data.frame()
+for (i in 1:num_subjects) {
+  if (!all(file.exists(c(
+    sprintf("%s/%s/%i.json", data_dir,"aux",i),
+    sprintf("%s/%s/%i.json", data_dir,"s0",i),
+    sprintf("%s/%s/%i.json", data_dir,"s1",i),
+    sprintf("%s/%s/%i.json", data_dir,"s2",i)
+  )))) {
+    print(sprintf("Skipping %i -- missing file", i))
+    next
+  }
+  aux_d_list = fromJSON(file=sprintf("%s/%s/%i.json", data_dir,"aux",i))
+  aux_d_list$subject_id = i
+  auxiliary_data = rbind(auxiliary_data, aux_d_list)
+  
+  for (s in 0:2) {
+    main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
+    main_d_frame = data.frame()
+    question_d_frame = data.frame()
+    for (trial_i in 1:length(main_d_list)) {
+      this_trial = main_d_list[trial_i][[1]]
+      
+      if (this_trial$trial_type == "two-door-navigation" | this_trial$trial_type == "fractal-mutation") {
+        # data trial
+        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed")])
+        this_trial_d$session = s
+        this_trial_d$door_history = this_trial$door_history
+        this_trial_d$action_history = this_trial$action_history
+        this_trial_d$location_history = this_trial$location_history
+        this_trial_d$location_rts = this_trial$location_rts
+        main_d_frame = bind_rows(main_d_frame, this_trial_d)
+      } else if (grepl("survey",this_trial$trial_type)) {
+        # debrief or demographics
+        parsed_responses = fromJSON(this_trial$responses)
+        for (name in names(parsed_responses)) {
+          this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+          this_Q_d$session = s
+          this_Q_d$name = name
+          this_Q_d$response = parsed_responses[[name]]
+          question_d_frame = bind_rows(question_d_frame, this_Q_d)
+        }
+      } else {
+        # instructions or other
+        next
+      }
+    }
+    main_d_frame$subject_id = i
+    main_data = bind_rows(main_data, main_d_frame)
+    if (nrow(question_d_frame) > 0) {
+      question_d_frame$subject_id = i
+      question_data = bind_rows(question_data, question_d_frame)
+    }
+  }
+}
+
+auxiliary_data = data.frame(auxiliary_data)
+main_data = data.frame(main_data)
+question_data = data.frame(question_data)
+```
