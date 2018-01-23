@@ -14,7 +14,7 @@ def dihedral_6_optimal_action(state, goal):
             if dist < 4:
                 return 0
             elif dist == 4:
-                return None
+                return -1
             else:
                 return 1
         else: 
@@ -22,7 +22,7 @@ def dihedral_6_optimal_action(state, goal):
             if dist < 4:
                 return 0
             elif dist == 4:
-                return None
+                return -1
             else:
                 return 1
     else: # different rings
@@ -31,7 +31,7 @@ def dihedral_6_optimal_action(state, goal):
             if 0 < dist < 3:
                 return 0
             elif dist == 3: 
-                return None
+                return -1
             else:
                 return 1
         else: 
@@ -39,7 +39,7 @@ def dihedral_6_optimal_action(state, goal):
             if 0 < dist < 3:
                 return 0
             elif dist == 3:
-                return None
+                return -1
             else:
                 return 1
 
@@ -55,7 +55,7 @@ def dicyclic_12_optimal_action(state, goal):
     elif (rs + rg) % 2 == 0: # commutes
         if ss == sg: # same cycle
             return 0
-        return None
+        return -1
     else: 
         if rg % 2 == 0:
             ls = ss
@@ -81,15 +81,15 @@ def dicyclic_12_optimal_action(state, goal):
                 else:
                     return 1
         else: # dist == 3
-            return None
+            return -1
 
-d6_table = np.full([12, 12], fill_value=None)
-dc12_table = np.full([12, 12], fill_value=None)
+d6_table = np.full([12, 12], fill_value=-1)
+dc12_table = np.full([12, 12], fill_value=-1)
 
 for state in xrange(12):
     for goal in xrange(12):
         d6_table[state, goal] = dihedral_6_optimal_action(state, goal)
         dc12_table[state, goal] = dicyclic_12_optimal_action(state, goal)
 
-numpy.savetxt("d6_table.csv", d6_table, delimiter=',')
-numpy.savetxt("dc12_table.csv", dc12_table, delimiter=',')
+np.savetxt("d6_table.csv", d6_table, fmt='%i', delimiter=',')
+np.savetxt("dc12_table.csv", dc12_table, fmt='%i', delimiter=',')
