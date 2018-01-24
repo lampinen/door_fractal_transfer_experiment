@@ -192,7 +192,10 @@
 		    var final_submit = function() {
 			jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
 		    };
-		    saveData("il/ex0/s1/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
+		    var aux_submit = function() {
+			saveData("aux/il/ex0/s1/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
+		    };
+		    saveData("il/ex0/s1/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
 		}
             });
         };
