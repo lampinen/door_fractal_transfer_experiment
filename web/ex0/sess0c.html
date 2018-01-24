@@ -105,9 +105,11 @@
 	type: 'instructions',
         show_clickable_nav: true,
 	pages: [
-            "Hi, welcome to our HIT. Please read the following instructions carefully, failure to follow them may result in your work being rejected.",
-            "We are researchers from the Stanford Department of Psychology who are interested in learning over time. In order to investigate this, we will post a follow-up HIT tomorrow, and another the day after. Each HIT should take about 30 minutes. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
-            "In order to reduce the number of participants we have to recruit, we have actually combined two learning-over-time experiments into this series of HITs. The first investigates spatial reasoning, the second involves learning relationships between visual patterns. The second experiment will start immediately after you complete the first one. (They should each take approximately 15 minutes, for 30 minutes total per HIT.)"
+	    "Hi, welcome to our HIT. Please read the following instructions carefully, failure to follow them may result in your work being rejected.<br /><br />Note that if you are colorblind, this task will probably not be possible for you, and you should click 'Return HIT.'",
+	    "We are researchers from the Stanford Department of Psychology who are interested in learning in environments that have some noise or randomness. We are investigating this in several domainss, so we have combined two experiments in this HIT: one on spatial learning, and another on learning of relationships between visual patterns. (In today's HIT, they each should take approximately 15 minutes, for 30 minutes total.)",
+	    "Because learning with noise is slow, we are looking at learning over time. We will post a follow-up HIT tomorrow, and another the following day. Each HIT will include the same experiments as this HIT, and should take about 30 minutes. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", 
+	    "Note: because we are interested in intuitive learning under noise, we ask that you do your best without relying on notes or other external aids during any of these HITs."
+
 	]
     }
 
@@ -123,8 +125,8 @@
 	type: 'instructions',
         show_clickable_nav: true,
 	pages: [
-            "Welcome to our experiment. This experiment investigates learning of relationships between visual patterns.",
-            "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. Your job is to help figure out the relationships between these different fractals, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g') to make a certain fractal."
+	    "You are now beginning the second experiment, which investigates learning of relationships between visual patterns.",
+	    "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. However, the results are not always predictable. Your job is to learn to make a particular fractal, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g')."
 	]
     }
 
@@ -140,9 +142,10 @@
 	type: 'instructions',
         show_clickable_nav: true,
 	pages: [
-            "Welcome to our experiment. This experiment investigates spatial learning.",
-            "In this experiment, you are exploring a haunted house. Your goal is to find your way between rooms by figuring out the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right, click on a door to go throuh it. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place...<br /><br />Note: because we are interested in spatial learning, we ask that you please do not draw a map or otherwise make notes during this task."
+	    "You are now beginning the first experiment, which investigates spatial learninhg.",
+	    "In this experiment, you are exploring a haunted house. The house nas many rooms, each of a different color.  Your task will be to learn to find your way to any room from any other room.  Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and over the experiment you will get a chance to learn where you can get to from each room. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
 	]
+
     }
 
     var room_trials = {
@@ -158,7 +161,7 @@
 	type: 'instructions',
         show_clickable_nav: true,
 	pages: [
-            "Thanks, you've now completed both experiments for this session! You're almost done, we just have a final question and need to save your data. Please remember to come back tomorrow for the next session! (It will be called Learning over time experiment 2.)<br /><br />Click next to continue."
+            "Thanks, you've now completed both experiments for this session! You're almost done, we just have a final question and need to save your data. Please remember to come back tomorrow for the next session! (It will be called Learning over time experiment 2.) Remember you will be paid $4 for completing the second HIT, and $8 for completing the third, so try to do all three!<br /><br />Click next to continue."
 	]
     }
 
@@ -174,7 +177,7 @@
 	}
         var turk_info = jsPsych.turk.turkInfo();
         if (turk_info.previewMode) {
-	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning over time.<br /><br />This HIT will take about 30 minutes, and you will be asked to return for similar HITs tomorrow and the following day. <br /><br />To encourage completion of all 3, you will be paid $4 for each of the first two, and $8 for the third, for a total of $16 if you complete all 3 HITs.";
+	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning under noise.<br /><br />This HIT will take about 30 minutes, and you will be asked to return for similar HITs tomorrow and the following day. <br /><br />To encourage completion of all 3, you will be paid $4 for each of the first two, and $8 for the third, for a total of $16 if you complete all 3 HITs.";
             return;
         }
         var worker_id = turk_info.workerId;

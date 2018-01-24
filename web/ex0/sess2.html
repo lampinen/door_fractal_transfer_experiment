@@ -113,8 +113,7 @@
             show_clickable_nav: true,
             pages: [
                 "Hi, welcome to the final session of our HIT. Thank you for returning!.",
-                "As a reminder, each HIT should take about 30 minutes. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", // TODO: insert dates and payments
-                "As a further reminder, in order to reduce the number of participants we have to recruit, we have actually combined two learning-over-time experiments into this series of HITs. The first investigates spatial reasoning, the second involves learning relationships between visual patterns. As before, the second experiment will start immediately after you complete the first one. (They should each take approximately 15 minutes, for 30 minutes total per HIT.)"
+                "As a reminder, this HIT contains two experiments, and should take about 30 minutes total. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for this one, for a total of $16 if you complete all three.", // TODO: insert dates and payments
             ]
         }
 
@@ -122,8 +121,8 @@
             type: 'instructions',
             show_clickable_nav: true,
             pages: [
-                "Welcome back to our experiment on learning of relationships between visual patterns.",
-                "Remember: In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. Your job is to help figure out the relationships between these different fractals, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g') to make a certain fractal."
+                "You are now returning to the second experiment, which investigates learning of relationships between visual patterns.",
+                "As a reminder, in this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. However, the results are not always predictable. Your job is to learn to make a particular fractal, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g')."
             ]
         }
 
@@ -148,8 +147,8 @@
             type: 'instructions',
             show_clickable_nav: true,
             pages: [
-                "Welcome back to our spatial learning experiment.",
-                "Remember: In this experiment, you are exploring a haunted house. Your goal is to find your way between rooms by figuring out the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right, click on a door to go throuh it. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
+               "You are now returning to the first experiment, which investigates spatial learninhg.",
+               "As a reminder, in this experiment, you are exploring a haunted house. The house nas many rooms, each of a different color.  Your task will be to learn to find your way to any room from any other room.  Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and you will get a chance to learn when you can get to from each room. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
             ]
         }
 
@@ -178,11 +177,11 @@
                 {type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"], rows: [5], required: true},
                 {type: "survey-likert", questions: ["How similar did you think the spatial navigation and visual patterns experiments were?"], labels: [["Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"]]},
                 {type: "survey-text", questions: ["Describe any similarities you noticed between the spatial navigation and visual patterns experiments."], rows: [5], required: true},
-                {type: "survey-multi-choice", questions: ["Did you suspect there was a correspondence between the relationships learned in the spatial learning experiment and the relationships learned in the visual patterns experiment?", "If yes, did you feel like you found one?"], options: [["Yes", "No"], ["Yes", "No"]]},
-                {type: "survey-multi-choice", questions: ["If you did notice a relationship between the two experiments, when did you become aware of it?"], options: [["During session 1", "Between sessions 1 and 2", "During session 2", "Between sessions 2 and 3", "During this session", "During these questions/I wasn't aware until you pointed it out"]]},
+                {type: "survey-multi-choice", questions: ["Did you suspect there was a correspondence between the relationships learned in the spatial learning experiment and the relationships learned in the visual patterns experiment?"], options: [["Yes", "No"]]},
+                {type: "survey-multi-choice", questions: ["If you did notice a relationship between the two experiments, when did you become aware of it?"], options: [["Did not notice", "During session 1", "Between sessions 1 and 2", "During session 2", "Between sessions 2 and 3", "During this session", "During these questions/I wasn't aware until you pointed it out"]]},
                 {type: "survey-text", questions: ["If you felt like you found a correspondence, please describe it. (If not, no response is required.)"], rows: [5]},
                 {type: "survey-likert", questions: ["Did you feel like the relationships you learned in one task were helpful for learning the other task?"], labels: [["Not at all helpful", "Only a little helpful", "Moderately helpful", "Quite helpful", "Extremely helpful"]]},
-                {type: "survey-multi-choice", questions: ["In our experiment, for some participants the spatial learning experiment and the visual patterns experiment had the same underlying structure, for some participants they had different structures. Which do you think it was for you?"], options: [["Same structure", "Different structure"]]},
+                {type: "survey-multi-choice", questions: ["In our experiment, for some participants the spatial learning experiment and the visual patterns experiment had the same underlying structure, and for other participants they had different structures. Which do you think it was for you?"], options: [["Same structure", "Different structure"]]},
                 {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What is your best guess about what the correspondence was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]},
             ]
         }
