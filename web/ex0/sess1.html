@@ -19,7 +19,7 @@
     var repeat_turker;
     (function(){
         var ut_id = "il_ex0_s1"; 
-        if (false) {
+        if (UTWorkerLimitReached(ut_id)) {
             repeat_turker = true;
             document.getElementsByTagName('body')[0].innerHTML = "You have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
         }
@@ -70,40 +70,40 @@
 
         var block_timeline = [
 	    {start: 11, goal: 7},
-//	    {start: 7, goal: 8},
-//	    {start: 8, goal: 4},
-//	    {start: 4, goal: 5},
-//	    {start: 5, goal: 10},
-//	    {start: 10, goal: 1},
-//	    {start: 1, goal: 6},
-//	    {start: 6, goal: 9},
-//	    {start: 9, goal: 2},
-//	    {start: 2, goal: 0},
-//	    {start: 0, goal: 3},
-//	    {start: 3, goal: 10},
-//	    {start: 10, goal: 8},
-//	    {start: 8, goal: 4},
-//	    {start: 4, goal: 0},
-//	    {start: 0, goal: 11},
-//	    {start: 11, goal: 2},
-//	    {start: 2, goal: 7},
-//	    {start: 7, goal: 5},
-//	    {start: 5, goal: 6},
-//	    {start: 6, goal: 3},
-//	    {start: 3, goal: 1},
-//	    {start: 1, goal: 9},
-//	    {start: 9, goal: 3},
-//	    {start: 3, goal: 4},
-//	    {start: 4, goal: 2},
-//	    {start: 2, goal: 1},
-//	    {start: 1, goal: 8},
-//	    {start: 8, goal: 10},
-//	    {start: 10, goal: 7},
-//	    {start: 7, goal: 6},
-//	    {start: 6, goal: 0},
-//	    {start: 0, goal: 11},
-//	    {start: 11, goal: 9},
-//	    {start: 9, goal: 5}
+	    {start: 7, goal: 8},
+	    {start: 8, goal: 4},
+	    {start: 4, goal: 5},
+	    {start: 5, goal: 10},
+	    {start: 10, goal: 1},
+	    {start: 1, goal: 6},
+	    {start: 6, goal: 9},
+	    {start: 9, goal: 2},
+	    {start: 2, goal: 0},
+	    {start: 0, goal: 3},
+	    {start: 3, goal: 10},
+	    {start: 10, goal: 8},
+	    {start: 8, goal: 4},
+	    {start: 4, goal: 0},
+	    {start: 0, goal: 11},
+	    {start: 11, goal: 2},
+	    {start: 2, goal: 7},
+	    {start: 7, goal: 5},
+	    {start: 5, goal: 6},
+	    {start: 6, goal: 3},
+	    {start: 3, goal: 1},
+	    {start: 1, goal: 9},
+	    {start: 9, goal: 3},
+	    {start: 3, goal: 4},
+	    {start: 4, goal: 2},
+	    {start: 2, goal: 1},
+	    {start: 1, goal: 8},
+	    {start: 8, goal: 10},
+	    {start: 10, goal: 7},
+	    {start: 7, goal: 6},
+	    {start: 6, goal: 0},
+	    {start: 0, goal: 11},
+	    {start: 11, goal: 9},
+	    {start: 9, goal: 5}
         ]
 
         var welcome_instructions = {
