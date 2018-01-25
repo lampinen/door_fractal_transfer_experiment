@@ -31,8 +31,14 @@ for (i in 1:num_subjects) {
     next
   }
   aux_d_list = fromJSON(file=sprintf("%s/%s/%i.json", data_dir,"aux",i))
-  aux_d_list$subject_id = i
-  auxiliary_data = rbind(auxiliary_data, aux_d_list)
+  aux_d_frame = data.frame(aux_d_list[c("fractal_dihedral", "isomorphic")])
+  aux_d_frame$subject_id = i
+  aux_d_frame$this_fractal_assignment = list(aux_d_list$this_fractal_assignment)
+  aux_d_frame$this_room_assignment = list(aux_d_list$this_room_assignment)
+  aux_d_frame$this_mutagen_assignment = list(aux_d_list$this_mutagen_assignment)
+  aux_d_frame$this_door_color_assignment = list(aux_d_list$this_door_color_assignment)
+  aux_d_frame$this_door_generator_assignment = list(aux_d_list$this_door_generator_assignment)
+  auxiliary_data = rbind(auxiliary_data, aux_d_frame)
   
   for (s in 0:2) {
     main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
@@ -43,16 +49,17 @@ for (i in 1:num_subjects) {
       
       if (this_trial$trial_type == "two-door-navigation" | this_trial$trial_type == "fractal-mutation") {
         # data trial
-        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed")])
+        this_trial$location_rts = fromJSON(this_trial$location_rts)
+        this_trial$action_history = fromJSON(this_trial$action_history)
+        this_trial$location_history = fromJSON(this_trial$location_history)[1:length(this_trial$action_history)] # chop off known last location
+        
+        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed", "location_history", "action_history", "location_rts")])
         this_trial_d$session = s
 #        if (this_trial$trial_type == "two-door-navigation") {
 #          this_trial_d$object_history = list(fromJSON(this_trial$door_history))
 #        } else {
 #          this_trial_d$object_history = list(fromJSON(this_trial$mutagen_history))
 #        }
-        this_trial_d$action_history = list(fromJSON(this_trial$action_history))
-        this_trial_d$location_history = list(fromJSON(this_trial$location_history))
-        this_trial_d$location_rts = list(fromJSON(this_trial$location_rts))
         main_d_frame = bind_rows(main_d_frame, this_trial_d)
       } else if (grepl("survey",this_trial$trial_type)) {
         # debrief or demographics
@@ -82,3 +89,64 @@ auxiliary_data = data.frame(auxiliary_data)
 main_data = data.frame(main_data)
 question_data = data.frame(question_data)
 ```
+# fake data (for development purposes only)
+```{r}
+auxiliary_data = bind_rows(auxiliary_data, auxiliary_data, auxiliary_data, auxiliary_data)
+auxiliary_data$subject_id = c(2, 3, 4, 5)
+auxiliary_data$fractal_dihedral = c(F, T, F, T)
+auxiliary_data$isomorphic = c(F, F, T, T)
+
+mdlen = nrow(main_data)
+main_data = bind_rows(main_data, main_data, main_data, main_data)
+main_data$subject_id = rep(c(2, 3, 4, 5), each=mdlen)
+
+
+qdlen = nrow(question_data)
+question_data = bind_rows(question_data, question_data, question_data, question_data)
+question_data$subject_id = rep(c(2, 3, 4, 5), each=qdlen)
+```
+
+
+# data manipulation
+Easy get of condition variables
+```{r}
+main_data = inner_join(main_data, 
+                       auxiliary_data %>%
+                         select(fractal_dihedral, isomorphic, subject_id))
+```
+
+Some renaming for convenience/clarity
+```{r}
+main_data = main_data %>%
+  rename(location=location_history, action=action_history) %>%
+  mutate(group = ifelse(grepl("dihedral", group), "dihedral", "dicyclic"),
+         trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"))
+```
+
+Load correct action info
+```{r}
+d6_opt_tab = read.csv('group_utils/d6_table.csv', header=F)
+d6_opt_tab[d6_opt_tab == -1] = NA
+dc12_opt_tab = read.csv('group_utils/dc12_table.csv', header=F)
+dc12_opt_tab[dc12_opt_tab == -1] = NA
+
+d6_optimal_action = function(state, goal) {
+  return(d6_opt_tab[state+1, goal+1])
+}
+d6_optimal_action = Vectorize(d6_optimal_action)
+
+dc12_optimal_action = function(state, goal) {
+  return(dc12_opt_tab[state+1, goal+1])
+}
+dc12_optimal_action = Vectorize(dc12_optimal_action)
+```
+
+Label actions as correct or incorrect
+```{r}
+main_data = main_data %>%
+  mutate(correct_action = ifelse(group=="dihedral",
+                                 d6_optimal_action(location, goal),
+                                 dc12_optimal_action(location, goal)),
+         action_correct = action == correct_action)
+```
+
