@@ -8,6 +8,8 @@ library(rjson)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(lme4)
+library(lmerTest)
 ```
 
 # Data loading
@@ -148,5 +150,33 @@ main_data = main_data %>%
                                  d6_optimal_action(location, goal),
                                  dc12_optimal_action(location, goal)),
          action_correct = action == correct_action)
+```
+
+Factors as appropriate
+```{r}
+main_data = main_data %>%
+  mutate(trial_type = factor(trial_type),
+         group = factor(group),
+         subject_id = factor(subject_id),
+         session = scale(session, center=T, scale=F)) # center session variable
+```
+
+# Most basic analyses
+
+Just looking at condition and extremely important controls and random effects
+```{r}
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + (1 | subject_id), family=binomial, data=main_data)
+summary(basic_non_time_dependent_model)
+```
+
+Time dependent:
+```{r}
+basic_time_dependent_model = glmer(action_correct ~ isomorphic + session + group + trial_type + (1 + session | subject_id), family=binomial, data=main_data)
+summary(basic_time_dependent_model)
+```
+
+```{r}
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * session + group + trial_type + (1 + session | subject_id), family=binomial, data=main_data)
+summary(basic_time_dependent_model)
 ```
 
