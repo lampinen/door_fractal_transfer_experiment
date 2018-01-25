@@ -152,31 +152,42 @@ main_data = main_data %>%
          action_correct = action == correct_action)
 ```
 
-Factors as appropriate
+
+Factors and centering as appropriate
 ```{r}
 main_data = main_data %>%
   mutate(trial_type = factor(trial_type),
          group = factor(group),
          subject_id = factor(subject_id),
-         session = scale(session, center=T, scale=F)) # center session variable
+         session_c = scale(session, center=T, scale=F), # center session variable
+         trial_index_by_type = ifelse(trial_type == "fractal", trial_index - 37, trial_index), # align indices for door and fractal trials
+         trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T))
 ```
 
 # Most basic analyses
 
 Just looking at condition and extremely important controls and random effects
 ```{r}
-basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + (1 | subject_id), family=binomial, data=main_data)
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + trial_index_by_type_z + I(trial_index_by_type_z^2)  | subject_id), family=binomial, data=main_data)
 summary(basic_non_time_dependent_model)
 ```
 
 Time dependent:
 ```{r}
-basic_time_dependent_model = glmer(action_correct ~ isomorphic + session + group + trial_type + (1 + session | subject_id), family=binomial, data=main_data)
+basic_time_dependent_model = glmer(action_correct ~ isomorphic + session + I(session^2) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session + I(session^2)  + trial_index_by_type_z + I(trial_index_by_type_z^2) | subject_id), family=binomial, data=main_data)
 summary(basic_time_dependent_model)
 ```
 
 ```{r}
-time_dependent_interaction_model = glmer(action_correct ~ isomorphic * session + group + trial_type + (1 + session | subject_id), family=binomial, data=main_data)
-summary(basic_time_dependent_model)
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session + I(session^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session + I(session^2)  + trial_index_by_type_z + I(trial_index_by_type_z^2) | subject_id), family=binomial, data=main_data)
+summary(time_dependent_interaction_model)
+```
+
+# Collapsed data for question analyses
+
+```{r}
+collapsed_main_data = main_data %>%
+  group_by(subject_id, isomorphic, fractal_dihedral, group, trial_type, session) %>%
+  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)))
 ```
 
