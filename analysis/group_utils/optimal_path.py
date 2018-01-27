@@ -81,15 +81,24 @@ def dicyclic_12_optimal_action(state, goal):
                 else:
                     return 1
         else: # dist == 3
-            return -1
+            if lev_dist == 1:
+                if rg % 2 == 0:
+                    return -1
+                else:
+                    return 0
+            else: # lev_dist == 2
+                if rg % 2 == 0:
+                    return 0
+                else:
+                    return -1
+if __name__ == "__main__":
+    d6_table = np.full([12, 12], fill_value=-1)
+    dc12_table = np.full([12, 12], fill_value=-1)
 
-d6_table = np.full([12, 12], fill_value=-1)
-dc12_table = np.full([12, 12], fill_value=-1)
+    for state in xrange(12):
+        for goal in xrange(12):
+            d6_table[state, goal] = dihedral_6_optimal_action(state, goal)
+            dc12_table[state, goal] = dicyclic_12_optimal_action(state, goal)
 
-for state in xrange(12):
-    for goal in xrange(12):
-        d6_table[state, goal] = dihedral_6_optimal_action(state, goal)
-        dc12_table[state, goal] = dicyclic_12_optimal_action(state, goal)
-
-np.savetxt("d6_table.csv", d6_table, fmt='%i', delimiter=',')
-np.savetxt("dc12_table.csv", dc12_table, fmt='%i', delimiter=',')
+    np.savetxt("d6_table.csv", d6_table, fmt='%i', delimiter=',')
+    np.savetxt("dc12_table.csv", dc12_table, fmt='%i', delimiter=',')
