@@ -52,19 +52,30 @@ def dicyclic_12_optimal_action(state, goal):
 
     if rs == rg: # same 3-cycle
         return 1
-    elif (rs + rg) % 2 == 0: # commutes
+
+    if rg % 2 == 0:
+        ls = ss
+        lg = (-sg) % 3
+    else:
+        ls = (-ss) % 3
+        lg = sg
+    lev_dist = (lg - ls) % 3
+
+    if (rs + rg) % 2 == 0: # commutes
         if ss == sg: # same cycle
             return 0
+        if lev_dist == 1:
+            if rg % 2 == 0:
+                return -1
+            else:
+                return 0
+        else: # lev_dist == 2
+            if rg % 2 == 0:
+                return 0
+            else:
+                return -1
         return -1
     else: 
-        if rg % 2 == 0:
-            ls = ss
-            lg = (-sg) % 3
-        else:
-            ls = (-ss) % 3
-            lg = sg
-        lev_dist = (lg - ls) % 3
-
         if lev_dist == 0:
             return 0
 
@@ -91,6 +102,7 @@ def dicyclic_12_optimal_action(state, goal):
                     return 0
                 else:
                     return -1
+
 if __name__ == "__main__":
     d6_table = np.full([12, 12], fill_value=-1)
     dc12_table = np.full([12, 12], fill_value=-1)
