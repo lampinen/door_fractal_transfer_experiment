@@ -413,20 +413,24 @@ dihedral_data = main_data %>%
 
 
 ```{r}
-dihedral_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c | subject_id), family=binomial, data=dihedral_data)
+dihedral_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c | subject_id), family=binomial, data=dihedral_data)
 summary(dihedral_basic_non_time_dependent_model)
 ```
 
 Time dependent:
 ```{r}
-dihedral_basic_time_dependent_model = glmer(action_correct ~ isomorphic + session_c + I(session_c^2) + correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dihedral_data)
+dihedral_basic_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + session_c + I(session_c^2) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dihedral_data)
 summary(dihedral_basic_time_dependent_model)
 ```
 
 
 ```{r}
-dihedral_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2))  +  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c | subject_id), family=binomial, data=dihedral_data)
+dihedral_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c | subject_id), family=binomial, data=dihedral_data)
 summary(dihedral_time_dependent_interaction_model)
+```
+```{r}
+dihedral_action_model = glmer(action ~ isomorphic * (correct_action + session_c + I(session_c^2)) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_action_model)
 ```
 
 ```{r}
@@ -466,6 +470,37 @@ dihedral_time_dependent_education_interaction_model =  glmer(action_correct ~ is
 summary(dihedral_time_dependent_education_interaction_model)
 ```
 
+```{r}
+dihedral_time_dependent_correct_int_education_model = glmer(action_correct ~ isomorphic * (education_high * correct_action + session_c + I(session_c^2))+   trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c  | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_time_dependent_correct_int_education_model)
+```
+# Other subset
+
+```{r}
+dicyclic_data = main_data %>%
+  select(-session_c, -trial_index_by_type_z) %>%
+  filter(group == "dicyclic") %>%
+  mutate(session_c = scale(session, center=T, scale=F), # this is dumb
+         trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T))
+```
+
+
+```{r}
+dicyclic_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c | subject_id), family=binomial, data=dicyclic_data)
+summary(dicyclic_basic_non_time_dependent_model)
+```
+
+Time dependent:
+```{r}
+dicyclic_basic_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + session_c + I(session_c^2) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dicyclic_data)
+summary(dicyclic_basic_time_dependent_model)
+```
+
+
+```{r}
+dicyclic_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c | subject_id), family=binomial, data=dicyclic_data)
+summary(dicyclic_time_dependent_interaction_model)
+```
 # What's the pattern in these huge action biases?
 ```{r}
 xtabs(~ correct_action + action + group, data=main_data, na.action=na.pass, exclude=NULL)
@@ -489,4 +524,5 @@ xtabs( ~ isomorphic + fractal_dihedral + education_high, data=q2q_data)
 summary(glm(correspondence_suspected ~ education_high, family=binomial, data=q2q_data))
 
 ```
+
 
