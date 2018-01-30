@@ -14,11 +14,11 @@ library(lmerTest)
 
 # Data loading
 ```{r}
-num_subjects = 2
-data_dir = "../anonymized_data/pilot"
+num_subjects = 42
+data_dir = "../anonymized_data/ex0"
 ```
 
-```{r}
+```{r, message=F, warning=F}
 auxiliary_data = list()
 main_data = data.frame()
 question_data = data.frame()
@@ -93,19 +93,19 @@ question_data = data.frame(question_data)
 ```
 # fake data (for development purposes only)
 ```{r}
-auxiliary_data = bind_rows(auxiliary_data, auxiliary_data, auxiliary_data, auxiliary_data)
-auxiliary_data$subject_id = c(2, 3, 4, 5)
-auxiliary_data$fractal_dihedral = c(F, T, F, T)
-auxiliary_data$isomorphic = c(F, F, T, T)
-
-mdlen = nrow(main_data)
-main_data = bind_rows(main_data, main_data, main_data, main_data)
-main_data$subject_id = rep(c(2, 3, 4, 5), each=mdlen)
-
-
-qdlen = nrow(question_data)
-question_data = bind_rows(question_data, question_data, question_data, question_data)
-question_data$subject_id = rep(c(2, 3, 4, 5), each=qdlen)
+# auxiliary_data = bind_rows(auxiliary_data, auxiliary_data, auxiliary_data, auxiliary_data)
+# auxiliary_data$subject_id = c(2, 3, 4, 5)
+# auxiliary_data$fractal_dihedral = c(F, T, F, T)
+# auxiliary_data$isomorphic = c(F, F, T, T)
+# 
+# mdlen = nrow(main_data)
+# main_data = bind_rows(main_data, main_data, main_data, main_data)
+# main_data$subject_id = rep(c(2, 3, 4, 5), each=mdlen)
+# 
+# 
+# qdlen = nrow(question_data)
+# question_data = bind_rows(question_data, question_data, question_data, question_data)
+# question_data$subject_id = rep(c(2, 3, 4, 5), each=qdlen)
 ```
 
 
@@ -152,42 +152,341 @@ main_data = main_data %>%
          action_correct = action == correct_action)
 ```
 
+# question data manipulation
 
-Factors and centering as appropriate
 ```{r}
-main_data = main_data %>%
+question_data = question_data %>%
+  mutate(question = ifelse(session < 2 | trial_index == 86,
+                           "comments",
+                    ifelse(trial_index == 75,
+                           "door_hyp_guess",
+                    ifelse(trial_index == 76,
+                           "fractal_hyp_guess",
+                    ifelse(trial_index == 77,
+                           "similarity_likert",
+                    ifelse(trial_index == 78,
+                           "similarity_descr",
+                    ifelse(trial_index == 79,
+                           "correspondence_suspect",
+                    ifelse(trial_index == 80,
+                           "when_noticed",
+                    ifelse(trial_index == 81,
+                           "correspondence_descr",
+                    ifelse(trial_index == 82,
+                           "one_task_helpful_for_other",
+                    ifelse(trial_index == 83,
+                           "which_condition",
+                    ifelse(trial_index == 84 & name == "Q0",
+                           "correspondence_identify",
+                    ifelse(trial_index == 84 & name == "Q1",
+                           "correspondence_identify_confidence",
+                    ifelse(trial_index == 85 & name == "Q0",
+                           "age",
+                    ifelse(trial_index == 85 & name == "Q1",
+                           "education",
+                    ifelse(trial_index == 85 & name == "Q2",
+                           "gender",
+                    ifelse(trial_index == 85 & name == "Q3",
+                           "race",
+                           NA)))))))))))))))))
+
+any(is.na(question_data$question))
+```
+
+hacky way of doing exactly the comparison I want to do (vector-wise comparison of vectors whose elements are lists).
+```{r}
+compare_lists_of_lists = function(l1, l2) {
+  res = c()
+  for (i in 1:length(l1)) {
+    if (identical(l1[[i]], l2[[i]])) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+
+compare_lol_to_list = function(lol, l) {
+  res = c()
+  for (i in 1:length(lol)) {
+    if (identical(lol[[i]], l)) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+```
+
+```{r}
+question_data = inner_join(question_data,
+                           auxiliary_data %>%
+                             select(fractal_dihedral,
+                                    isomorphic,
+                                    this_door_color_assignment,
+                                    this_door_generator_assignment,
+                                    this_mutagen_assignment,
+                                    subject_id)) %>%
+  mutate(correct_correspondence = ifelse(!isomorphic, NA, ifelse((compare_lol_to_list(this_door_color_assignment, list(c("white", "black"))) & compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)) | (compare_lol_to_list(this_door_color_assignment, list(c("black", "white"))) & !compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)), "white door = acid, black door = ray", "black door = acid, white door = ray")),
+         correspondence_correct = ifelse(question != "correspondence_identify", NA, response == correct_correspondence))
+```
+
+```{r}
+question_data = question_data %>%
+  mutate(subject_id = factor(subject_id))
+```
+
+# demographics
+
+```{r}
+demographic_data = question_data %>%
+  filter(question %in% c("race", "gender", "age", "education")) %>%
+  select(subject_id, question, response) %>%
+  spread(question, response)  %>%
+  mutate(education_high = grepl("PhD|Master|Bachelor", education))
+  
+```
+
+factoring
+```{r}
+main_data = main_data %>% 
   mutate(trial_type = factor(trial_type),
          group = factor(group),
-         subject_id = factor(subject_id),
-         session_c = scale(session, center=T, scale=F), # center session variable
+         subject_id = factor(subject_id))
+```
+
+```{r}
+main_data = inner_join(main_data, demographic_data) 
+```
+
+
+# More main data + collapsed data
+
+Centering as appropriate
+```{r}
+main_data = main_data %>%
+  mutate(session_c = session-1, #scale(session, center=T, scale=F), # center session variable
          trial_index_by_type = ifelse(trial_type == "fractal", trial_index - 37, trial_index), # align indices for door and fractal trials
          trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T))
 ```
 
-# Most basic analyses
 
-Just looking at condition and extremely important controls and random effects
-```{r}
-basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + trial_index_by_type_z + I(trial_index_by_type_z^2)  | subject_id), family=binomial, data=main_data)
-summary(basic_non_time_dependent_model)
-```
-
-Time dependent:
-```{r}
-basic_time_dependent_model = glmer(action_correct ~ isomorphic + session + I(session^2) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session + I(session^2)  + trial_index_by_type_z + I(trial_index_by_type_z^2) | subject_id), family=binomial, data=main_data)
-summary(basic_time_dependent_model)
-```
-
-```{r}
-time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session + I(session^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session + I(session^2)  + trial_index_by_type_z + I(trial_index_by_type_z^2) | subject_id), family=binomial, data=main_data)
-summary(time_dependent_interaction_model)
-```
-
-# Collapsed data for question analyses
 
 ```{r}
 collapsed_main_data = main_data %>%
   group_by(subject_id, isomorphic, fractal_dihedral, group, trial_type, session) %>%
   summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)))
+```
+
+```{r}
+fully_summarized_data = collapsed_main_data %>%
+  group_by(isomorphic, group, session) %>%
+  summarize(mean_pct_correct = mean(pct_correct), sd_pct_correct = sd(pct_correct)) %>%
+  mutate(c95_lower = mean_pct_correct - 1.96*sd_pct_correct/sqrt(n()),
+         c95_upper = mean_pct_correct + 1.96*sd_pct_correct/sqrt(n()))
+```
+
+# Most basic analyses
+```{r}
+theme_set(theme_bw() +
+            theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()))
+```
+
+
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=isomorphic, y=pct_correct, fill=group)) +
+  geom_violin()
+```
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, color=isomorphic, group=interaction(subject_id, isomorphic, group, trial_type))) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+#  ylim(0,1) +
+  facet_wrap(~ group)
+```
+
+```{r}
+ggsave("figures/ex0/curve_plot.png", width=7,height=5)
+```
+
+
+```{r}
+ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fill=isomorphic)) +
+  geom_bar(stat="identity",position="dodge") +
+  geom_errorbar(aes(ymin=c95_lower, ymax = c95_upper), position=position_dodge(width=1), width=0.5) +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+  ylim(0,1) +
+  facet_wrap(~ group)
+```
+
+```{r}
+ggsave("figures/ex0/basic_plot.png", width=7,height=5)
+```
+
+Appears to be absolutely no learning in the dicyclic condition (although increasing errorbars in the isomorphic condition reflect the fact that at least one subject may have learned...)
+
+Just looking at condition and extremely important controls and random effects
+```{r}
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1  | subject_id), family=binomial, data=main_data)
+summary(basic_non_time_dependent_model)
+```
+
+Time dependent:
+```{r}
+basic_time_dependent_model = glmer(action_correct ~ isomorphic + session_c + I(session_c^2) + group * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +session_c | subject_id), family=binomial, data=main_data)
+summary(basic_time_dependent_model)
+```
+
+
+```{r}
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2))  + group *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c  | subject_id), family=binomial, data=main_data)
+summary(time_dependent_interaction_model)
+```
+
+
+
+```{r}
+rt_time_dependent_interaction_model = lmer(location_rts/1000~ isomorphic * (session_c + I(session_c^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 | subject_id), data=main_data)
+summary(rt_time_dependent_interaction_model)
+```
+
+```{r}
+num_steps_per_trial_data = main_data %>%
+  group_by(subject_id, isomorphic, session_c, group, trial_type, trial_index_by_type_z) %>%
+  summarize(num_steps_needed=n())
+```
+
+```{r}
+ns_time_dependent_interaction_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 | subject_id), data=num_steps_per_trial_data)
+summary(ns_time_dependent_interaction_model)
+```
+
+
+
+# Joining data
+```{r}
+s2_joined_question_data = inner_join(question_data,
+                                     collapsed_main_data %>%
+                                       group_by(subject_id, session) %>%
+                                       summarize(pct_correct = mean(pct_correct)) %>%
+                                       ungroup() %>%
+                                       filter(session==2))
+```
+
+# performance -> question relationship
+
+```{r}
+cc_model = glm(correspondence_correct ~ pct_correct, family="binomial", data=s2_joined_question_data %>% filter(! is.na(correspondence_correct)))
+summary(cc_model)
+```
+
+# does education matter?
+```{r}
+
+time_dependent_education_model = glmer(action_correct ~ isomorphic * (education_high + session_c + I(session_c^2))  + group *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), family=binomial, data=main_data)
+summary(time_dependent_education_model)
+```
+
+```{r}
+time_dependent_education_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) * education_high  + group *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), family=binomial, data=main_data)
+summary(time_dependent_education_interaction_model)
+```
+
+# What if we consider the subset of the data where there appeared to be any learning at all?
+
+```{r}
+dihedral_data = main_data %>%
+  select(-session_c, -trial_index_by_type_z) %>%
+  filter(group == "dihedral") %>%
+  mutate(session_c = scale(session, center=T, scale=F), # this is dumb
+         trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T))
+```
+
+
+```{r}
+dihedral_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_basic_non_time_dependent_model)
+```
+
+Time dependent:
+```{r}
+dihedral_basic_time_dependent_model = glmer(action_correct ~ isomorphic + session_c + I(session_c^2) + correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_basic_time_dependent_model)
+```
+
+
+```{r}
+dihedral_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2))  +  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_time_dependent_interaction_model)
+```
+
+```{r}
+dihedral_rt_time_dependent_model = lmer(location_rts/1000~ isomorphic  + (session_c + I(session_c^2)) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=dihedral_data)
+summary(dihedral_rt_time_dependent_model)
+```
+
+
+```{r}
+dihedral_rt_time_dependent_interaction_model = lmer(location_rts/1000~ isomorphic * (session_c + I(session_c^2)) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c  | subject_id), data=dihedral_data)
+summary(dihedral_rt_time_dependent_interaction_model)
+```
+
+```{r}
+num_steps_per_trial_data = dihedral_data %>%
+  group_by(subject_id, isomorphic, session_c, trial_type, trial_index_by_type_z) %>%
+  summarize(num_steps_needed=n())
+```
+
+```{r}
+dihedral_ns_time_dependent_model = lmer(num_steps_needed~ isomorphic + (session_c + I(session_c^2))  + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data)
+summary(dihedral_ns_time_dependent_model)
+```
+
+```{r}
+dihedral_ns_time_dependent_interaction_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2))  + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data)
+summary(dihedral_ns_time_dependent_interaction_model)
+```
+
+```{r}
+dihedral_time_dependent_education_model = glmer(action_correct ~ isomorphic * (education_high + session_c + I(session_c^2))+  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c  | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_time_dependent_education_model)
+```
+
+```{r}
+dihedral_time_dependent_education_interaction_model =  glmer(action_correct ~ isomorphic * education_high * ( session_c + I(session_c^2)) + correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 | subject_id), family=binomial, data=dihedral_data)
+summary(dihedral_time_dependent_education_interaction_model)
+```
+
+# What's the pattern in these huge action biases?
+```{r}
+xtabs(~ correct_action + action + group, data=main_data, na.action=na.pass, exclude=NULL)
+```
+
+# question by question prediction
+
+```{r}
+q2q_data = question_data %>% 
+  filter(session == 2) %>%
+  select(subject_id, fractal_dihedral, isomorphic, question, response) %>%
+  spread(question, response) %>%
+  mutate(education_high = grepl("PhD|Master|Bachelor", education),
+         correspondence_suspected = correspondence_suspect == "Yes")
+```
+
+```{r}
+xtabs( ~ isomorphic + fractal_dihedral + education_high, data=q2q_data)
+```
+```{r}
+summary(glm(correspondence_suspected ~ education_high, family=binomial, data=q2q_data))
+
 ```
 
