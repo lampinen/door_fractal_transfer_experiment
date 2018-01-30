@@ -376,10 +376,10 @@ summary(ns_time_dependent_interaction_model)
 ```{r}
 s2_joined_question_data = inner_join(question_data,
                                      collapsed_main_data %>%
-                                       group_by(subject_id, session) %>%
+                                       group_by(subject_id, session, isomorphic, group) %>%
                                        summarize(pct_correct = mean(pct_correct)) %>%
                                        ungroup() %>%
-                                       filter(session==2))
+                                       filter(session==2, isomorphic, group=="dihedral"))
 ```
 
 # performance -> question relationship
