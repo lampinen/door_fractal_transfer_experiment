@@ -526,3 +526,26 @@ summary(glm(correspondence_suspected ~ education_high, family=binomial, data=q2q
 ```
 
 
+# tabulating stuff
+
+```{r}
+main_data %>%
+  select(-trial_index_by_type_z, session_c) %>%
+  filter(group == "dihedral" & !is.na(correct_action)) %>%
+  group_by(isomorphic, trial_type, subject_id, correct_action) %>%
+  summarize(pct_correct = mean(action_correct)) %>%
+  ungroup() %>%
+  group_by(isomorphic, trial_type, correct_action) %>%
+  summarize(mean_pct_correct = mean(pct_correct))
+```
+
+```{r}
+main_data %>%
+  select(-trial_index_by_type_z, session_c) %>%
+  filter(group == "dihedral" & !is.na(correct_action)) %>%
+  group_by(isomorphic, trial_type, subject_id) %>%
+  summarize(pct_flip = mean(action)) %>%
+  ungroup() %>%
+  group_by(isomorphic, trial_type) %>%
+  summarize(mean_pct_flip = mean(pct_flip), sd_pct_flip = sd(pct_flip))
+```
