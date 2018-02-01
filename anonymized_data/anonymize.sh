@@ -9,8 +9,9 @@ i=1
 for f in ${origin}/${subdir}/aux/*.json
 do
     filename=$(basename ${f})
-    cp ${origin}/${subdir}/aux/${filename} ${target}/${subdir}/aux/ 
-    cp ${origin}/${subdir}/s0/${filename} ${target}/${subdir}/s0/ 
-    cp ${origin}/${subdir}/s1/${filename} ${target}/${subdir}/s1/ 
-    cp ${origin}/${subdir}/s2/${filename} ${target}/${subdir}/s2/ 
+    cp ${origin}/${subdir}/aux/${filename} ${target}/${subdir}/aux/${i}.json 
+    cp ${origin}/${subdir}/s0/${filename} ${target}/${subdir}/s0/${i}.json
+    cp ${origin}/${subdir}/s1/${filename} ${target}/${subdir}/s1/${i}.json
+    cp ${origin}/${subdir}/s2/${filename} ${target}/${subdir}/s2/${i}.json
+    i=$((i+1))
 done
