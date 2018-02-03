@@ -413,19 +413,19 @@ dihedral_data = main_data %>%
 
 
 ```{r}
-dihedral_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c | subject_id), family=binomial, data=dihedral_data)
+dihedral_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c + correct_action | subject_id), family=binomial, data=dihedral_data)
 summary(dihedral_basic_non_time_dependent_model)
 ```
 
 Time dependent:
 ```{r}
-dihedral_basic_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + session_c + I(session_c^2) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dihedral_data)
+dihedral_basic_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + session_c + I(session_c^2) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  correct_action | subject_id), family=binomial, data=dihedral_data)
 summary(dihedral_basic_time_dependent_model)
 ```
 
 
 ```{r}
-dihedral_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c | subject_id), family=binomial, data=dihedral_data)
+dihedral_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + correct_action | subject_id), family=binomial, data=dihedral_data)
 summary(dihedral_time_dependent_interaction_model)
 ```
 ```{r}
@@ -486,19 +486,19 @@ dicyclic_data = main_data %>%
 
 
 ```{r}
-dicyclic_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c | subject_id), family=binomial, data=dicyclic_data)
+dicyclic_basic_non_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 + session_c + correct_action | subject_id), family=binomial, data=dicyclic_data)
 summary(dicyclic_basic_non_time_dependent_model)
 ```
 
 Time dependent:
 ```{r}
-dicyclic_basic_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + session_c + I(session_c^2) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c | subject_id), family=binomial, data=dicyclic_data)
+dicyclic_basic_time_dependent_model = glmer(action_correct ~ isomorphic * correct_action + session_c + I(session_c^2) + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 +  session_c + correct_action | subject_id), family=binomial, data=dicyclic_data)
 summary(dicyclic_basic_time_dependent_model)
 ```
 
 
 ```{r}
-dicyclic_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c | subject_id), family=binomial, data=dicyclic_data)
+dicyclic_time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2)) *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1  + session_c + correct_action | subject_id), family=binomial, data=dicyclic_data)
 summary(dicyclic_time_dependent_interaction_model)
 ```
 # What's the pattern in these huge action biases?
