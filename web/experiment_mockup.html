@@ -16,14 +16,14 @@
         return a[Math.floor(Math.random() * a.length)];
     }
 
-    let this_group =  new dihedral_group(6);
+    let this_group =  new square_cycles();
     var elements = this_group.get_elements();
 
-    var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/grn_blu.png', 'images/grn_prp.png', 'images/grn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/red_prp.png', 'images/wht_red.png', 'images/ylw_pnk.png', 'images/ylw_slt.png'];
+    var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/grn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/ylw_pnk.png', 'images/ylw_slt.png'];
     jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
         
     var this_mutagen_assignment = [1, 0];
-    var this_room_assignment = ["red", "green", "blue", "grey", "ivory", "orange", "pink", "brown", "yellow", "purple", "cyan", "olive"];
+    var this_room_assignment = ["red", "green", "blue", "grey", "orange", "pink", "yellow", "purple"];
     var this_door_generator_assignment = [1, 0];
     var this_door_color_assignment = ["white", "black"];
 
@@ -32,7 +32,8 @@
         group: this_group,
         fractal_assignment: this_fractal_assignment,
         mutagen_generator_assignment: this_mutagen_assignment,
-        goal: 10,
+        action_noise: 0,
+        goal: 4,
         start: 0
     };
 
@@ -41,6 +42,7 @@
         group: this_group,
         fractal_assignment: this_fractal_assignment,
         mutagen_generator_assignment: this_mutagen_assignment,
+        action_noise: 0,
         goal: 1,
         start: 3
     };
@@ -51,7 +53,8 @@
         room_assignment: this_room_assignment,
         door_color_assignment: this_door_color_assignment,
         door_generator_assignment: this_door_generator_assignment,
-        goal: 10,
+        action_noise: 0,
+        goal: 4,
         start: 0
     };
     var test_room_2 = {
@@ -60,6 +63,7 @@
         room_assignment: this_room_assignment,
         door_color_assignment: this_door_color_assignment,
         door_generator_assignment: this_door_generator_assignment,
+        action_noise: 0,
         goal: 1,
         start: 3
     };

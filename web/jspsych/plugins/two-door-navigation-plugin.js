@@ -671,6 +671,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         } else if (room_color === "ivory") {
             draw_table(canvas.width * 0.425, "SaddleBrown"); 
         } else if (room_color === "orange") {
+            draw_window("#CC6600");
             draw_chair("SaddleBrown"); 
         } else if (room_color === "pink") {
             draw_window("PaleVioletRed");
@@ -679,7 +680,8 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         } else if (room_color === "brown") {
             draw_window("#553322");
         } else if (room_color === "yellow") {
-            draw_rug("LemonChiffon", "Gold");
+            draw_table(canvas.width * 0.425, "LemonChiffon"); 
+            draw_lamp("GoldenRod");
         } else if (room_color === "purple") {
             draw_rug("Indigo", "MediumOrchid");
         } else if (room_color === "olive") {
