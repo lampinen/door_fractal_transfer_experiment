@@ -125,3 +125,53 @@ dihedral_group.prototype.operation = function(x, y) {
     }
     return rres + this.num_sides * sres;
 }
+
+
+///////////////////// Non groups, but using the same general framing for simplicity of coding
+
+// square_attractors
+function square_attractors() {
+    this.order = 8;
+    this.elements = range(8);
+}
+
+square_attractors.prototype.get_order = function() {
+    return this.order;
+}
+
+square_attractors.prototype.get_elements = function() {
+    return this.elements;
+}
+
+square_attractors.prototype.get_name = function() {
+    return "square attractors (cube, non-group)"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+square_attractors.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+square_attractors.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Square attractor operation error!");
+        return y;
+    }
+
+    if (x < 4) { // lower cycle
+        if (y == 0) {
+            res = (x + 1) % 4;
+        } else {
+            res = x + 4;
+        }
+    } else { //upper cycle
+        if (y == 1) {
+            res = 4 + ((x - 1) % 4);
+        } else {
+            res = x - 4;
+        }
+    }
+    
+    return res
+}
