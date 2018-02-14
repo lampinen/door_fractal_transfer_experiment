@@ -175,3 +175,58 @@ square_attractors.prototype.operation = function(x, y) {
     
     return res
 }
+
+// square_cycles
+function square_cycles() {
+    this.order = 8;
+    this.elements = range(8);
+}
+
+square_cycles.prototype.get_order = function() {
+    return this.order;
+}
+
+square_cycles.prototype.get_elements = function() {
+    return this.elements;
+}
+
+square_cycles.prototype.get_name = function() {
+    return "square cycles (cube, non-group)"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+square_cycles.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+square_cycles.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Square cycle operation error!");
+        return y;
+    }
+
+    if (x < 4) { // lower cycle
+        if (y == 0) {
+            res = (x + 1) % 4;
+        } else {
+            if ((x % 2) == 1) {
+                res = x - 1;
+            } else {
+                res = x + 4;
+            }
+        }
+    } else { //upper cycle
+        if (y == 0) {
+            res = 4 + ((x - 1) % 4);
+        } else {
+            if ((x % 2) == 0) {
+                res = x + 1;
+            } else {
+                res = x - 4;
+            }
+        }
+    }
+    
+    return res
+}
