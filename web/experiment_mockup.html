@@ -81,17 +81,18 @@
             {"x": 280, "y": 225}, {"x": 520, "y": 225},
             {"x": 160, "y": 100}, {"x": 400, "y": 100},
             {"x": 160, "y": 310}, {"x": 400, "y": 310}],
-	location_labels: [0, 1] 
+	location_labels: [0, 1],
+        instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = acid, blue arrows = gamma ray). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
     }
 
     var diagram_selection = {
 	type: 'survey-multi-choice',
 	questions: [ "The fractal relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
-	 options: [["<img src='images/blu_wht.png'>", "<img src='images/blu_wht.png'>"]],
+	 options: [["<img src='images/diagrams/square_cycles.png'>", "<img src='images/diagrams/tri_cycles.png'>"]],
     }
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [drag_test, diagram_selection, test_room, test_room_2, test_fractal, test_fractal_2],
+            timeline: [diagram_selection, drag_test, test_room, test_room_2, test_fractal, test_fractal_2],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
