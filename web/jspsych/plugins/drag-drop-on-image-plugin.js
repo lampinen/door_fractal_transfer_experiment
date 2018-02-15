@@ -54,6 +54,8 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     var draw = canvas.getContext("2d");
 
     display_element.append('<div id="instruction-div">The fractal relationships in your experiment obeyed the structure above (black squares = fractals, colored arrows = gamma ray and acid). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started).</div>');
+    display_element.append("<br /><br /><button id='drag-drop-submit-btn' class='jspsych-btn'>Submit answers</button></div>");
+
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -91,7 +93,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
         this.contains = function(mouse) {
             var x = mouse.x;
             var y = mouse.y;
-            return (x >= this.x) && (x <= this.x + this.width) && (y >= this.y) && (y <= this.y + this.width)
+            return (x >= this.x) && (x <= this.x + this.width) && (y >= this.y) && (y <= this.y + this.width);
         }
 
         this.free = function() {
@@ -111,6 +113,15 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     initial_locations = initial_locations.map(function(x) {var loc = new snap_location(x); return loc;});
     var target_locations = trial.target_locations.map(function(x) {var loc = new snap_location(x); return loc;});
     var all_locations = initial_locations.concat(target_locations);
+
+    function any_targets_unoccupied() { // checks for completion
+        for (var i = 0; i < target_locations.length; i++) {
+            if (!target_locations[i].occupied) {
+                return true;
+            }
+        }
+        return false; 
+    }
 
     // "constructor" for draggable image object
     function Draggable(image, initial_location, width, height) {
@@ -255,18 +266,22 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     ////// Ending/starting /////////////////////////////////////////////////////////
     
     function end_function() {
+        if (any_targets_unoccupied()) {
+            // slacking off, typical Marissa
+            alert("Please place every fractal on one of the locations on the image!");
+            return;
+        }
+        display_element.html('');
 
-      jsPsych.pluginAPI.cancelAllKeyboardResponses();
-      display_element.html('');
+        var trial_data = {
+        };
 
-      var trial_data = {
-      };
-
-      jsPsych.finishTrial(trial_data);
+        jsPsych.finishTrial(trial_data);
     }
 
     // start trial once images are loaded
     jsPsych.pluginAPI.preloadImages(trial.dragging_images.concat([trial.background_image]), function() {
+	$('#drag-drop-submit-btn').on('click', end_function);
         setInterval(redraw, frame_freq);
     });
   };
