@@ -159,6 +159,7 @@ square_attractors.prototype.operation = function(x, y) {
         return y;
     }
 
+    var res;
     if (x < 4) { // lower cycle
         if (y == 0) {
             res = (x + 1) % 4;
@@ -205,6 +206,7 @@ square_cycles.prototype.operation = function(x, y) {
         alert("Square cycle operation error!");
         return y;
     }
+    var res;
 
     if (x < 4) { // lower cycle
         if (y == 0) {
@@ -225,6 +227,68 @@ square_cycles.prototype.operation = function(x, y) {
             } else {
                 res = x - 4;
             }
+        }
+    }
+    
+    return res
+}
+
+// tri_cycles (in cube), or surrealism as I like to call it
+function tri_cycles() {
+    this.order = 8;
+    this.elements = range(8);
+}
+
+tri_cycles.prototype.get_order = function() {
+    return this.order;
+}
+
+tri_cycles.prototype.get_elements = function() {
+    return this.elements;
+}
+
+tri_cycles.prototype.get_name = function() {
+    return "tri cycles (cube, non-group)"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+tri_cycles.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+tri_cycles.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Tri cycles operation error!");
+        return y;
+    }
+
+    var res;
+    if (y == 1) {
+        if (x == 0) {
+            res = 3;
+        } else if (x == 3) {
+            res = 4; 
+        } else if (x == 6) {
+            res = 5;
+        } else if (x == 5) {
+            res = 2;
+        } else {
+            res = (x + 4) % 8;
+        }
+    } else { // y == 0
+        if (x == 0) {
+            res = 2;
+        } else if (x == 6) {
+            res = 4; 
+        } else if (x == 1 || x == 2) {
+            res = x - 1;
+        } else if (x == 4) {
+            res = 7;
+        } else if (x == 7) {
+            res = 6;
+        } else {
+            res = (x + 4) % 8;
         }
     }
     
