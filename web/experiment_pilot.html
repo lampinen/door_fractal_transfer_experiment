@@ -51,13 +51,29 @@
 
     var block_timeline = [
         {goal: 2, start: 0},
-        {goal: 6, start: 2}
-//        {goal: 5, start: 6},
-//        {goal: 1, start: 5},
-//        {goal: 7, start: 1},
-//        {goal: 3, start: 7},
-//        {goal: 0, start: 3},
-//        {goal: 4, start: 0}
+        {goal: 6, start: 2},
+        {goal: 4, start: 6},
+        {goal: 5, start: 4},
+        {goal: 1, start: 5},
+        {goal: 7, start: 1},
+        {goal: 3, start: 7},
+        {goal: 0, start: 3},
+        {goal: 4, start: 0},
+        {goal: 3, start: 4},
+        {goal: 6, start: 3},
+        {goal: 2, start: 6},
+        {goal: 1, start: 2},
+        {goal: 5, start: 1},
+        {goal: 7, start: 5},
+        {goal: 0, start: 7},
+        {goal: 6, start: 0},
+        {goal: 1, start: 6},
+        {goal: 3, start: 1},
+        {goal: 2, start: 3},
+	{goal: 0, start: 2},
+        {goal: 4, start: 0},
+        {goal: 7, start: 4},
+        {goal: 5, start: 7}
     ]
 
     var welcome_instructions = {
@@ -150,7 +166,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [welcome_instructions, room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, describe_structures, diagram_selection, drag_summary, debrief],
+            timeline: [welcome_instructions, room_instructions, room_trials, fractal_instructions, fractal_trials, describe_structures, diagram_selection, drag_summary, debrief],
             on_finish: function() {
 		var d = new Date();
 		saveData("il_pilot/pilot" + d.getTime() + ".json", jsPsych.data.dataAsJSON());
