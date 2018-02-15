@@ -26,6 +26,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     trial.bg_image_width = trial.bg_image_width || 400;
     trial.dragging_image_height = trial.dragging_image_height || 80;
     trial.dragging_image_width = trial.dragging_image_width || 80;
+    trial.instruction_text = trial.instruction_text || ""; 
 
     var frame_freq = 50; // ms between frames
 
@@ -53,7 +54,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     var canvas = $('#dragging-canvas')[0];
     var draw = canvas.getContext("2d");
 
-    display_element.append('<div id="instruction-div">The fractal relationships in your experiment obeyed the structure above (black squares = fractals, colored arrows = gamma ray and acid). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started).</div>');
+    display_element.append('<div id="instruction-div">' + trial.instruction_text + '</div>');
     display_element.append("<br /><br /><button id='drag-drop-submit-btn' class='jspsych-btn'>Submit answers</button></div>");
 
 
