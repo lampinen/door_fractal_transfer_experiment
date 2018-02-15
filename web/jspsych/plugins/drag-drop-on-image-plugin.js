@@ -64,8 +64,6 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
 
     var action_history = [];
 
-    var action_rts = [];
-
     var start_time = (new Date()).getTime();
 
     if (trial.dragging_images.length > 10) {
@@ -121,6 +119,17 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
             }
         }
         return false; 
+    }
+
+    function get_current_assignments() { // checks for completion
+        var curr_assignments = [];
+        for (var i = 0; i < target_locations.length; i++) {
+            if (!target_locations[i].occupied) {
+                curr_assignments.push(null);
+            }
+            curr_assignments.push(target_locations[i].draggable.image.src);
+        }
+        return curr_assignments;
     }
 
     // "constructor" for draggable image object
@@ -186,10 +195,12 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     }
 
     var draggables_array = []; 
-    for (var i = 0; i < trial.dragging_images.length; i++) {
+    for (var i = 0; i < trial.dragging_images.length - 1; i++) {
         var this_draggable = new Draggable(dragging_image_objects[i], initial_locations[i]);
         draggables_array.push(this_draggable);
     }
+    var this_draggable = new Draggable(dragging_image_objects[i], target_locations[0]); // first one placed to make it easier for old fogeys like Yochai
+    draggables_array.push(this_draggable);
 
     function redraw() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
@@ -274,7 +285,10 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
         display_element.html('');
 
         var trial_data = {
+            "rt": (new Date()).getTime() - start_time,
+            "assignments": get_current_assignments() 
         };
+//        alert(JSON.stringify(trial_data))
 
         jsPsych.finishTrial(trial_data);
     }
