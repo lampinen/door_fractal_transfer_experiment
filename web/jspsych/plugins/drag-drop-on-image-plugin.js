@@ -53,7 +53,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     var canvas = $('#dragging-canvas')[0];
     var draw = canvas.getContext("2d");
 
-    display_element.append('The fractal relationships in your experiment obeyed the structure above, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started).');
+    display_element.append('<div id="instruction-div">The fractal relationships in your experiment obeyed the structure above (black squares = fractals, colored arrows = gamma ray and acid). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started).</div>');
 
     // if any trial variables are functions
     // this evaluates the function and replaces
