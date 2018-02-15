@@ -4,6 +4,7 @@
     <title>Experiment</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="util/group_theory.js"></script>
+    <script src="util/etc.js"></script>
     <script src="jspsych/jspsych.js"></script>
     <script src="jspsych/plugins/fractal-mutation-plugin.js"></script>
     <script src="jspsych/plugins/two-door-navigation-plugin.js"></script>
@@ -70,11 +71,16 @@
         start: 3
     };
 
+    var dragging_images = this_fractal_assignment.slice(); 
+    shuffle(dragging_images);
     var drag_test = {
 	type: 'drag-drop-on-image',
 	background_image: "images/diagrams/square_cycles.png",
-	dragging_images: ["images/blu_wht.png", "images/cyn_red.png"],
-	locations: [{"x": 100, "y": 100}, {"x": 200, "y": 200}], 
+	dragging_images: dragging_images,
+	target_locations: [{"x": 280, "y": 10}, {"x": 520, "y": 10},
+            {"x": 280, "y": 225}, {"x": 520, "y": 225},
+            {"x": 160, "y": 100}, {"x": 400, "y": 100},
+            {"x": 160, "y": 310}, {"x": 400, "y": 310}],
 	location_labels: [0, 1] 
     }
 
