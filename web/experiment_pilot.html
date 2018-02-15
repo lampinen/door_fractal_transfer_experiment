@@ -130,6 +130,9 @@
     var diagram_selection = {
         type: 'survey-multi-choice',
         questions: [ "The fractal relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to the acid, and the blue arrows correspond to the gamma ray. Select the structure that you think you had."],
+         options: [["<img src='images/diagrams/square_cycles.png'>", "<img src='images/diagrams/tri_cycles.png'>"]],
+    }
+
         
     var debrief = {
 	type: 'survey-text',
@@ -147,7 +150,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [welcome_instructions, room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, describe_structures, diagram_selection, dragging_images, debrief],
+            timeline: [welcome_instructions, room_instructions, room_trials, debrief, fractal_instructions, fractal_trials, describe_structures, diagram_selection, drag_summary, debrief],
             on_finish: function() {
 		var d = new Date();
 		saveData("il_pilot/pilot" + d.getTime() + ".json", jsPsych.data.dataAsJSON());
