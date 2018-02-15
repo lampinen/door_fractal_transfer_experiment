@@ -80,6 +80,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     /////// the annoying part ////////////////////////////////////////////////////
 
     // "constructor" for the places the objects snap to 
+    var snap_padding = 10; //pixels
     function snap_location(this_location) {
         this.x = this_location.x;
         this.y = this_location.y;
@@ -91,7 +92,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
         this.contains = function(mouse) {
             var x = mouse.x;
             var y = mouse.y;
-            return (x >= this.x) && (x <= this.x + this.width) && (y >= this.y) && (y <= this.y + this.width);
+            return (x >= this.x - snap_padding) && (x <= this.x + this.width + snap_padding) && (y >= this.y - snap_padding) && (y <= this.y + this.width + snap_padding);
         }
 
         this.free = function() {
@@ -127,19 +128,20 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
             if (!target_locations[i].occupied) {
                 curr_assignments.push(null);
             }
-            curr_assignments.push(target_locations[i].draggable.image.src);
+            curr_assignments.push(target_locations[i].draggable.label);
         }
         return curr_assignments;
     }
 
     // "constructor" for draggable image object
-    function Draggable(image, initial_location, width, height) {
+    function Draggable(image, initial_location, label, width, height) {
         this.drawer = draw; // it would be so nice if I named things intelligently
         this.curr_location = initial_location;
         this.position_x = initial_location.x; //not strictly necessary given below
         this.position_y = initial_location.y;
         this.curr_location.assign_draggable(this);
 
+        this.label = label || image.src;
         this.image = image;
         this.width = width || trial.dragging_image_width;
         this.height = height || trial.dragging_image_height;
@@ -196,10 +198,10 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
 
     var draggables_array = []; 
     for (var i = 0; i < trial.dragging_images.length - 1; i++) {
-        var this_draggable = new Draggable(dragging_image_objects[i], initial_locations[i]);
+        var this_draggable = new Draggable(dragging_image_objects[i], initial_locations[i], trial.dragging_images[i]);
         draggables_array.push(this_draggable);
     }
-    var this_draggable = new Draggable(dragging_image_objects[i], target_locations[0]); // first one placed to make it easier for old fogeys like Yochai
+    var this_draggable = new Draggable(dragging_image_objects[i], target_locations[0], trial.dragging_images[i]); // first one placed to make it easier for old fogeys like Yochai
     draggables_array.push(this_draggable);
 
     function redraw() {
@@ -288,7 +290,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
             "rt": (new Date()).getTime() - start_time,
             "assignments": get_current_assignments() 
         };
-//        alert(JSON.stringify(trial_data))
+        //alert(JSON.stringify(trial_data))
 
         jsPsych.finishTrial(trial_data);
     }
