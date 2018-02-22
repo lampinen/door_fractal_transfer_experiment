@@ -204,6 +204,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
         var this_draggable = new Draggable(dragging_image_objects[i], initial_locations[i], trial.dragging_images[i]);
         draggables_array.push(this_draggable);
         if ((trial.preplaced_image !== "" && this_draggable.label == trial.preplaced_image) || (trial.preplaced_image === "" && i == trial.dragging_images.length-1)) { // first one placed to make it easier for old fogeys like Yochai
+            this_draggable.curr_location.free();
             target_locations[trial.preplaced_image_location].assign_draggable(this_draggable); 
         }
     }
@@ -217,8 +218,16 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
                        trial.bg_image_width,
                        trial.bg_image_height);
 
+        var currently_dragging = -1;
         for (var i = 0; i < draggables_array.length; i++) {
-            draggables_array[i].draw();
+            if (draggables_array[i].dragging) {
+                currently_dragging = i;
+            } else { 
+                draggables_array[i].draw();
+            }
+        }
+        if (currently_dragging !== -1) {
+            draggables_array[currently_dragging].draw();
         }
     }
     ////// event stuff /////////////////////////////
