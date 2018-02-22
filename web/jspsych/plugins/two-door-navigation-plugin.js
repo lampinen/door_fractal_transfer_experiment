@@ -679,6 +679,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
             draw_lamp("PaleVioletRed");
         } else if (room_color === "brown") {
             draw_window("#553322");
+            draw_chair("#802205"); 
         } else if (room_color === "yellow") {
             draw_table(canvas.width * 0.425, "LemonChiffon"); 
             draw_lamp("GoldenRod");
