@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<head>
+    <title>Experiment 1</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="../util/group_theory.js"></script>
+    <script src="../util/etc.js"></script>
+    <script src="../jspsych/jspsych.js"></script>
+    <script src="../jspsych/plugins/jspsych-instructions.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
+    <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+</head>
+<body>
+</body>
+<script src="//uniqueturker.myleott.com/lib.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var repeat_turker;
+    (function(){
+	var ut_id = "il_ex1_s0";
+
+	if (UTWorkerLimitReached(ut_id)) {
+	    repeat_turker = true;
+	    document.getElementsByTagName('body')[0].innerHTML = "You may have already participated in a previous experiment and be ineligible for this one, or you have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
+	}
+    })();
+</script>
+
+<script>
+
+
+    var fractal_square_cycles = true; // will fractal task be square_cycles (otherwise tri_cycles) 
+    var isomorphic = true; // will two tasks be isomorphic?
+
+    if (fractal_square_cycles) {
+        var this_group_a = new square_cycles();
+        if (isomorphic) {
+            var this_group_b = new square_cycles();
+        } else {
+            var this_group_b = new tri_cycles();
+        }
+    } else {
+        var this_group_a = new tri_cycles;
+        if (isomorphic) {
+            var this_group_b = new tri_cycles();
+        } else {
+            var this_group_b = new square_cycles();
+        }
+    }
+
+    var this_fractal_assignment = ['../images/blu_wht.png', '../images/cyn_red.png', '../images/grn_red.png', '../images/gry_blk.png', '../images/org_blu.png', '../images/pnk_blu.png', '../images/ylw_pnk.png', '../images/ylw_slt.png'];
+    shuffle(this_fractal_assignment);
+        
+    var this_mutagen_assignment = [1, 0];
+    shuffle(this_mutagen_assignment);
+    var this_room_assignment = ["red", "green", "blue", "grey", "pink", "brown", "yellow", "purple"];
+    shuffle(this_room_assignment);
+    var this_door_generator_assignment = [1, 0];
+    shuffle(this_door_generator_assignment);
+    var this_door_color_assignment = ["white", "black"];
+    shuffle(this_door_color_assignment);
+
+    console.log(this_room_assignment);
+
+    var block_timeline = [
+        {start: 0, goal: 4},
+        {start: 4, goal: 9},
+        {start: 9, goal: 10},
+        {start: 10, goal: 2},
+        {start: 2, goal: 5},
+        {start: 5, goal: 11},
+        {start: 11, goal: 6},
+        {start: 6, goal: 3},
+        {start: 3, goal: 8},
+        {start: 8, goal: 1},
+        {start: 1, goal: 7},
+        {start: 7, goal: 5},
+        {start: 5, goal: 8},
+        {start: 8, goal: 11},
+        {start: 11, goal: 6},
+        {start: 6, goal: 7},
+        {start: 7, goal: 10},
+        {start: 10, goal: 0},
+        {start: 0, goal: 9},
+        {start: 9, goal: 4},
+        {start: 4, goal: 2},
+        {start: 2, goal: 1},
+        {start: 1, goal: 3},
+        {start: 3, goal: 7},
+        {start: 7, goal: 6},
+        {start: 6, goal: 2},
+        {start: 2, goal: 8},
+        {start: 8, goal: 0},
+        {start: 0, goal: 3},
+        {start: 3, goal: 4},
+        {start: 4, goal: 10},
+        {start: 10, goal: 11},
+        {start: 11, goal: 1},
+        {start: 1, goal: 5},
+        {start: 5, goal: 9}
+    ]
+
+    var welcome_instructions = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+	    "Hi, welcome to our HIT. Please read the following instructions carefully, failure to follow them may result in your work being rejected.<br /><br />Note that if you are colorblind, this task will probably not be possible for you, and you should click 'Return HIT.'",
+	    "We are researchers from the Stanford Department of Psychology who are interested in learning in environments that have some noise or randomness. We are investigating this in several domains, so we have combined two experiments in this HIT: one on spatial learning, and another on learning of relationships between visual patterns. (In today's HIT, they each should take approximately 15 minutes, for 30 minutes total.)",
+	    "Because learning with noise is slow, we are looking at learning over time. We will post a follow-up HIT tomorrow, and another the following day. Each HIT will include the same experiments as this HIT, and should take about 30 minutes. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", 
+	    "Note: because we are interested in intuitive learning under noise, we ask that you do your best without relying on notes or other external aids during any of these HITs."
+
+	]
+    }
+
+    var inter_instructions = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+            "Thanks, you've now completed the experiment on spatial navigation for this session. Click next to proceed to the second experiment."
+	]
+    }
+
+    var fractal_instructions = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+	    "You are now beginning the second experiment, which investigates learning of relationships between visual patterns.",
+	    "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. However, the results are not always predictable. Your job is to learn to make a particular fractal, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g')."
+	]
+    }
+
+    var fractal_trials = {
+        type: 'fractal-mutation',
+        group: this_group_a,
+        fractal_assignment: this_fractal_assignment,
+        mutagen_generator_assignment: this_mutagen_assignment,
+        timeline: block_timeline 
+    };
+
+    var room_instructions = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+	    "You are now beginning the first experiment, which investigates spatial learninhg.",
+	    "In this experiment, you are exploring a haunted house. The house nas many rooms, each of a different color.  Your task will be to learn to find your way to any room from any other room.  Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and over the experiment you will get a chance to learn where you can get to from each room. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
+	]
+
+    }
+
+    var room_trials = {
+        type: 'two-door-navigation',
+        group: this_group_b,
+        room_assignment: this_room_assignment,
+        door_color_assignment: this_door_color_assignment,
+        door_generator_assignment: this_door_generator_assignment,
+        timeline: block_timeline 
+    };
+
+    var reminder_to_return = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+            "Thanks, you've now completed both experiments for this session! You're almost done, we just have a final question and need to save your data. Please remember to come back tomorrow for the next session! (It will be called Learning over time experiment 2.) Remember you will be paid $4 for completing the second HIT, and $8 for completing the third, so try to do all three!<br /><br />Click next to continue."
+	]
+    }
+
+    var debrief = {
+	type: 'survey-text',
+	questions: ["Do you have any comments on this HIT?"],
+        rows: [5]
+    }
+
+    var start_experiment = function() {
+	if (repeat_turker) {
+            return;
+	}
+        var turk_info = jsPsych.turk.turkInfo();
+        if (turk_info.previewMode) {
+	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning under noise.<br /><br />This HIT will take about 30 minutes, and you will be asked to return for similar HITs tomorrow and the following day. <br /><br />To encourage completion of all 3, you will be paid $4 for each of the first two, and $8 for the third, for a total of $16 if you complete all 3 HITs.<br /><br />NOTE: if you participated in one of our previous HITs, you are ineligible to participate in this one, sorry!";
+            return;
+        }
+        var worker_id = turk_info.workerId;
+
+        //data necessary to recreate the same experience for this participant in future sessions
+        auxiliary_data = { 
+            "fractal_square_cycles": fractal_square_cycles,
+            "isomorphic": isomorphic,
+            "this_fractal_assignment": this_fractal_assignment,
+            "this_mutagen_assignment": this_mutagen_assignment,
+            "this_room_assignment": this_room_assignment,
+            "this_door_generator_assignment": this_door_generator_assignment,
+            "this_door_color_assignment": this_door_color_assignment
+        }
+
+
+        jsPsych.init({
+            timeline: [welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, reminder_to_return, debrief],
+            on_finish: function() {
+                document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
+                var final_submit = function() {
+                    jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
+                };
+                var aux_submit = function() {
+                    saveData("aux/il/ex1/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
+                };
+		saveData("il/ex1/s0/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
+            }
+        });
+    };
+    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+</script>
+</html>

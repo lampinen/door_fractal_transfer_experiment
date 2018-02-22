@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+    <title>Experiment 1</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="../util/group_theory.js"></script>
+    <script src="../util/etc.js"></script>
+    <script src="../jspsych/jspsych.js"></script>
+    <script src="../jspsych/plugins/jspsych-instructions.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-likert.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-multi-choice.js"></script>
+    <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
+    <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+</head>
+<body>
+</body>
+<script src="//uniqueturker.myleott.com/lib.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var repeat_turker;
+    (function(){
+        var ut_id = "il_ex1_s2";
+        if (UTWorkerLimitReached(ut_id)) {
+            repeat_turker = true;
+            document.getElementsByTagName('body')[0].innerHTML = "You have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
+        }
+    })();
+</script>
+
+<script>
+    var turk_info = jsPsych.turk.turkInfo();
+    var worker_id = turk_info.workerId;
+
+    var auxiliary_data; 
+
+    load_data("il/ex1/s1/" + worker_id + ".json", function(results) { 
+        auxiliary_data = results;
+        build_experiment();
+        },
+        function () {
+            document.getElementsByTagName('body')[0].innerHTML = "Sorry, this HIT is only available to participants who already completed the prior HIT. Please click 'Return HIT' to avoid any impact on your approval rating. (If you think you have received this message in error, please contact the HIT creator directly.)";
+        });
+    
+    var build_experiment = function() {
+        var fractal_square_cycles = auxiliary_data["fractal_square_cycles"]; // will first task be dihedral group? (otherwise dicyclic)
+        var isomorphic = auxiliary_data["isomorphic"]; // will two tasks be isomorphic?
+        var this_fractal_assignment = auxiliary_data["this_fractal_assignment"];
+        var this_mutagen_assignment = auxiliary_data["this_mutagen_assignment"];
+        var this_room_assignment = auxiliary_data["this_room_assignment"];
+        var this_door_generator_assignment = auxiliary_data["this_door_generator_assignment"];
+        var this_door_color_assignment = ["white", "black"];
+
+        //console.log(this_room_assignment);
+
+        if (fractal_square_cycles) {
+            var this_group_a = new square_cycles();
+            if (isomorphic) {
+                var this_group_b = new square_cycles();
+            } else {
+                var this_group_b = new tri_cycles();
+            }
+        } else {
+            var this_group_a = new tri_cycles;
+            if (isomorphic) {
+                var this_group_b = new tri_cycles();
+            } else {
+                var this_group_b = new square_cycles();
+            }
+        }
+
+
+        var block_timeline = [
+            {start: 3, goal: 7},
+            {start: 7, goal: 5},
+            {start: 5, goal: 0},
+            {start: 0, goal: 2},
+            {start: 2, goal: 10},
+            {start: 10, goal: 8},
+            {start: 8, goal: 11},
+            {start: 11, goal: 6},
+            {start: 6, goal: 4},
+            {start: 4, goal: 1},
+            {start: 1, goal: 9},
+            {start: 9, goal: 10},
+            {start: 10, goal: 2},
+            {start: 2, goal: 0},
+            {start: 0, goal: 9},
+            {start: 9, goal: 8},
+            {start: 8, goal: 6},
+            {start: 6, goal: 1},
+            {start: 1, goal: 4},
+            {start: 4, goal: 11},
+            {start: 11, goal: 3},
+            {start: 3, goal: 5},
+            {start: 5, goal: 7},
+            {start: 7, goal: 3},
+            {start: 3, goal: 4},
+            {start: 4, goal: 8},
+            {start: 8, goal: 6},
+            {start: 6, goal: 1},
+            {start: 1, goal: 5},
+            {start: 5, goal: 9},
+            {start: 9, goal: 10},
+            {start: 10, goal: 0},
+            {start: 0, goal: 7},
+            {start: 7, goal: 11},
+            {start: 11, goal: 2}
+        ]
+
+        var welcome_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Hi, welcome to the final session of our HIT. Thank you for returning!.",
+                "As a reminder, this HIT contains two experiments, and should take about 30 minutes total. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for this one, for a total of $16 if you complete all three.", // TODO: insert dates and payments
+            ]
+        }
+
+        var fractal_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "You are now returning to the second experiment, which investigates learning of relationships between visual patterns.",
+                "As a reminder, in this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. However, the results are not always predictable. Your job is to learn to make a particular fractal, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g')."
+            ]
+        }
+
+	var inter_instructions = {
+	    type: 'instructions',
+	    show_clickable_nav: true,
+	    pages: [
+		"Thanks, you've now completed the experiment on spatial navigation for this session. Click next to proceed to the second experiment."
+	    ]
+	}
+
+
+        var fractal_trials = {
+            type: 'fractal-mutation',
+            group: this_group_a,
+            fractal_assignment: this_fractal_assignment,
+            mutagen_generator_assignment: this_mutagen_assignment,
+            timeline: block_timeline 
+        };
+
+        var room_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+               "You are now returning to the first experiment, which investigates spatial learninhg.",
+               "As a reminder, in this experiment, you are exploring a haunted house. The house nas many rooms, each of a different color.  Your task will be to learn to find your way to any room from any other room.  Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and you will get a chance to learn when you can get to from each room. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
+            ]
+        }
+
+        var room_trials = {
+            type: 'two-door-navigation',
+            group: this_group_b,
+            room_assignment: this_room_assignment,
+            door_color_assignment: this_door_color_assignment,
+            door_generator_assignment: this_door_generator_assignment,
+            timeline: block_timeline 
+        };
+
+	var debrief_instructions = {
+	    type: 'instructions',
+	    show_clickable_nav: true,
+	    pages: [
+		"Thanks, you've now completed both experiments for this session! We just have some final questions to ask you, and then you'll be done."
+	    ]
+	}
+
+	var dragging_images = this_fractal_assignment.slice(); 
+	shuffle(dragging_images);
+	var diagram_dragging = {
+	    type: 'drag-drop-on-image',
+	    background_image: (fractal_square_cycles) ? "images/diagrams/square_cycles.png" : "images/diagrams/tri_cycles.png",
+	    dragging_images: dragging_images,
+	    target_locations: [{"x": 280, "y": 10}, {"x": 520, "y": 10},
+		{"x": 280, "y": 225}, {"x": 520, "y": 225},
+		{"x": 160, "y": 100}, {"x": 400, "y": 100},
+		{"x": 160, "y": 310}, {"x": 400, "y": 310}],
+	    location_labels: [0, 1],
+	    preplaced_image: this_fractal_assignment[0],
+	    preplaced_image_location: 6, // This is the ``0'' location in the group_theory.js representation 
+	    instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = acid, blue arrows = gamma ray). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
+	}
+
+	var diagram_selection = {
+	    type: 'survey-multi-choice',
+	    questions: [ "The fractal (visual pattern) relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
+	     options: [["<img src='images/diagrams/square_cycles.png'>", "<img src='images/diagrams/tri_cycles.png'>"]],
+	}
+
+        var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
+        shuffle(correspondence_options);
+        var experiment_debrief = {
+            timeline:[
+                {type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"], rows: [5], required: true},
+                {type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"], rows: [5], required: true},
+		diagram_selection,
+                diagram_dragging,
+                {type: "survey-likert", questions: ["How similar did you think the spatial navigation and visual patterns experiments were?"], labels: [["Not at all similar", "Only a little similar", "Moderately similar", "Quite similar", "Extremely similar"]]},
+                {type: "survey-text", questions: ["Describe any similarities you noticed between the spatial navigation and visual patterns experiments."], rows: [5], required: true},
+                {type: "survey-multi-choice", questions: ["Did you suspect there was a correspondence between the relationships learned in the spatial learning experiment and the relationships learned in the visual patterns experiment?"], options: [["Yes", "No"]]},
+                {type: "survey-multi-choice", questions: ["If you noticed a relationship between the two experiments, when did you become aware of it?"], options: [["Did not notice", "During session 1", "Between sessions 1 and 2", "During session 2", "Between sessions 2 and 3", "During this session", "During these questions/I wasn't aware until you pointed it out"]]},
+                {type: "survey-text", questions: ["If you felt like you found a correspondence, please describe it. (If not, no response is required.)"], rows: [5]},
+                {type: "survey-likert", questions: ["Did you feel like the relationships you learned in one task were helpful for learning the other task?"], labels: [["Not at all helpful", "Only a little helpful", "Moderately helpful", "Quite helpful", "Extremely helpful"]]},
+                {type: "survey-multi-choice", questions: ["In our experiment, for some participants the spatial learning experiment and the visual patterns experiment had the same underlying structure, and for other participants they had different structures. Which do you think it was for you?"], options: [["Same structure", "Different structure"]]},
+                {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What is your best guess about what the correspondence was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]},
+            ]
+        }
+
+
+        var demographics = {
+            type: 'survey-multi-choice',
+            questions: [ "What is your age?",
+                         "What is your level of education?",
+                         "What is your gender?",
+                         "What is your race/ethnicity?"],
+             options: [["<25", "25-35", "35-45", "45-55", "55-65", ">65"],
+                       ["No high school degree", "High school degree or GED", "Some college", "Associates or other two-year degree", "Bachelor's degree", "Master's degree", "PhD, JD, MD or similar"],
+                       ["Male", "Female", "Other", "Decline to state"],
+                       ["Asian","American Indian/Native American", "Black or African American", "Hispanic", "White", "Other", "Decline to state"]]
+        }
+
+        var debrief = {
+            type: 'survey-text',
+            questions: ["Do you have any comments on this HIT?"],
+            rows: [5]
+        }
+
+        var start_experiment = function() {
+            if (repeat_turker) {
+                return;
+            }
+            var turk_info = jsPsych.turk.turkInfo();
+	    if (turk_info.previewMode) {
+		document.getElementsByTagName('body')[0].innerHTML = "This HIT is the third in a series of 3 HITS for some psychological experiments on learning over time.<br /><br />You must have completed the first two HITs to be eligible for this one.";
+		return;
+	    }
+
+            var worker_id = turk_info.workerId;
+
+            jsPsych.init({
+                timeline: [welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, debrief_instructions, experiment_debrief, demographics, debrief],
+		on_finish: function() {
+		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
+		    var final_submit = function() {
+			jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
+		    };
+		    saveData("il/ex1/s2/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
+		}
+            });
+        };
+        jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+    };
+</script>
+</html>
