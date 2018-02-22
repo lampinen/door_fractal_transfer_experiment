@@ -19,6 +19,8 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     //trial.background_image = background image
     //trial.dragging_images = assignment of fractals to elements
     //trial.target_locations = locations of drop zones (rel. to background image) as {x: x, y: y, width: width, height: height} objects
+    trial.preplaced_image = (typeof trial.preplaced_image === 'undefined') ? "" : trial.preplaced_image; //Which image to pre-place, if any 
+    trial.preplaced_image_location = (typeof trial.preplaced_image_location === 'undefined') ? 0 : trial.preplaced_image_location; //Where to pre-place it (index in location list) 
     trial.location_labels = (typeof trial.location_labels === 'undefined') ? range(trial.locations.length()) : trial.location_labels; 
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
@@ -198,12 +200,14 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     }
 
     var draggables_array = []; 
-    for (var i = 0; i < trial.dragging_images.length - 1; i++) {
+    for (var i = 0; i < trial.dragging_images.length; i++) {
         var this_draggable = new Draggable(dragging_image_objects[i], initial_locations[i], trial.dragging_images[i]);
         draggables_array.push(this_draggable);
+        if ((trial.preplaced_image !== "" && this_draggable.label == trial.preplaced_image) || (trial.preplaced_image === "" && i == trial.dragging_images.length-1)) { // first one placed to make it easier for old fogeys like Yochai
+            target_locations[trial.preplaced_image_location].assign_draggable(this_draggable); 
+        }
     }
-    var this_draggable = new Draggable(dragging_image_objects[i], target_locations[0], trial.dragging_images[i]); // first one placed to make it easier for old fogeys like Yochai
-    draggables_array.push(this_draggable);
+    
 
     function redraw() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
