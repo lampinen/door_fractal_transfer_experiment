@@ -11,6 +11,7 @@
     <script src="jspsych/plugins/drag-drop-on-image-plugin.js"></script>
     <script src="jspsych/plugins/jspsych-survey-multi-choice.js"></script>
     <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <link href="css/other.css" rel="stylesheet" type="text/css"></link>
 </head>
 <body>
 </body>
@@ -92,9 +93,16 @@
 	questions: [ "The fractal relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
 	 options: [["<img src='images/diagrams/square_cycles.png'>", "<img src='images/diagrams/tri_cycles.png'>"]],
     }
+
+    var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
+    shuffle(correspondence_options);
+    var room_fractal_correspondence_examples = "<table class='correspondence-table'><tr><td>" + this_room_assignment[0] + " room: </td><td>" + this_room_assignment[1] + " room: </td><td>" + this_room_assignment[2] + " room: </td><td>" + this_room_assignment[3] + " room: </tr><tr><td><img src='"+ this_fractal_assignment[0] + "' /></td><td><img src='" + this_fractal_assignment[1] + "' /></td><td><img src='" + this_fractal_assignment[2] + "' /></td><td><img src='" + this_fractal_assignment[3] + "' /></td></tr></table>";
+
+    var correspondence_identification = {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a particular fractal in the visual pattern experiment, and one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. Below is a table showing you which fractals a few rooms corresponded to:<br />" + room_fractal_correspondence_examples + "<br />What is your best guess about what the correspondence between the doors and the gamma ray and acid was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]} 
+
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [diagram_selection, drag_test, test_room, test_room_2, test_fractal, test_fractal_2],
+            timeline: [correspondence_identification, diagram_selection, drag_test, test_room, test_room_2, test_fractal, test_fractal_2],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }

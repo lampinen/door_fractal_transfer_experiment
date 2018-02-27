@@ -13,6 +13,7 @@
     <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
     <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
     <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <link href="../css/other.css" rel="stylesheet" type="text/css"></link>
 </head>
 <body>
 </body>
@@ -208,6 +209,7 @@
 
         var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
         shuffle(correspondence_options);
+        var room_fractal_correspondence_examples = "<table class='correspondence-table'><tr><td>" + this_room_assignment[0] + " room: </td><td>" + this_room_assignment[1] + " room: </td><td>" + this_room_assignment[2] + " room: </td><td>" + this_room_assignment[3] + " room: </tr><tr><td><img src='"+ this_fractal_assignment[0] + "' /></td><td><img src='" + this_fractal_assignment[1] + "' /></td><td><img src='" + this_fractal_assignment[2] + "' /></td><td><img src='" + this_fractal_assignment[3] + "' /></td></tr></table>";
         var experiment_debrief = {
             timeline:[
                 {type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"], rows: [5], required: true},
@@ -221,7 +223,7 @@
                 {type: "survey-text", questions: ["If you felt like you found a correspondence, please describe it. (If not, no response is required.)"], rows: [5]},
                 {type: "survey-likert", questions: ["Did you feel like the relationships you learned in one task were helpful for learning the other task?"], labels: [["Not at all helpful", "Only a little helpful", "Moderately helpful", "Quite helpful", "Extremely helpful"]]},
                 {type: "survey-multi-choice", questions: ["In our experiment, for some participants the spatial learning experiment and the visual patterns experiment had the same underlying structure, and for other participants they had different structures. Which do you think it was for you?"], options: [["Same structure", "Different structure"]]},
-                //{type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What is your best guess about what the correspondence was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]},
+                {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a particular fractal in the visual pattern experiment, and one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. Below is a table showing you which fractals a few rooms corresponded to:<br />" + room_fractal_correspondence_examples + "<br />What is your best guess about what the correspondence between the doors and the gamma ray and acid was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]}
             ]
         }
 
