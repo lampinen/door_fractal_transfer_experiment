@@ -207,7 +207,7 @@
 	     options: [["<img src='images/diagrams/square_cycles.png'>", "<img src='images/diagrams/tri_cycles.png'>"]],
 	}
 
-        var correspondence_options = ["left (" + door_color_assignment[0] + ") door = acid, (" + door_color_assignment[1] + ") door = ray", "left (" + door_color_assignment[0] + ") door = ray, (" + door_color_assignment[1] + ") door = acid"];
+        var correspondence_options = ["left (" + this_door_color_assignment[0] + ") door = acid, (" + this_door_color_assignment[1] + ") door = ray", "left (" + this_door_color_assignment[0] + ") door = ray, (" + this_door_color_assignment[1] + ") door = acid"];
         shuffle(correspondence_options);
         var room_fractal_correspondence_examples = "<table class='correspondence-table'><tr><td><img src='images/room_snapshots/"+ this_room_assignment[0] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td><td><img src='images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td><td><img src='images/room_snapshots/"+ this_room_assignment[2] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td><td><img src='images/room_snapshots/"+ this_room_assignment[3] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td></tr><tr><td><img src='"+ this_fractal_assignment[0] + "' /></td><td><img src='" + this_fractal_assignment[1] + "' /></td><td><img src='" + this_fractal_assignment[2] + "' /></td><td><img src='" + this_fractal_assignment[3] + "' /></td></tr></table>";
         var experiment_debrief = {
