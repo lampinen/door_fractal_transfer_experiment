@@ -1,0 +1,354 @@
+---
+title: "Implicit Learning Experiment 0 Analysis"
+output: html_notebook
+---
+
+```{r}
+library(rjson)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+library(lmerTest)
+```
+
+# Data loading
+```{r}
+num_subjects = 1
+data_dir = "../data/pilot1"
+
+```
+
+```{r, message=F, warning=F}
+auxiliary_data = list()
+main_data = data.frame()
+question_data = data.frame()
+for (i in 1:num_subjects) {
+
+  aux_d_list = fromJSON(file=sprintf("%s/%s/%i.json", data_dir,"aux",i))
+  aux_d_frame = data.frame(aux_d_list[c("fractal_square_cycles", "isomorphic")])
+  aux_d_frame$subject_id = i
+  aux_d_frame$this_fractal_assignment = list(aux_d_list$this_fractal_assignment)
+  aux_d_frame$this_room_assignment = list(aux_d_list$this_room_assignment)
+  aux_d_frame$this_mutagen_assignment = list(aux_d_list$this_mutagen_assignment)
+  aux_d_frame$this_door_color_assignment = list(aux_d_list$this_door_color_assignment)
+  aux_d_frame$this_door_generator_assignment = list(aux_d_list$this_door_generator_assignment)
+  auxiliary_data = rbind(auxiliary_data, aux_d_frame)
+  
+  for (s in c(0:2)) {
+    main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
+    main_d_frame = data.frame()
+    question_d_frame = data.frame()
+    for (trial_i in 1:length(main_d_list)) {
+      this_trial = main_d_list[[trial_i]]
+      
+      if (this_trial$trial_type == "two-door-navigation" | this_trial$trial_type == "fractal-mutation") {
+        # data trial
+        this_trial$location_rts = fromJSON(this_trial$location_rts)
+        this_trial$action_history = fromJSON(this_trial$action_history)
+        this_trial$location_history = fromJSON(this_trial$location_history)[1:length(this_trial$action_history)] # chop off known last location
+        
+        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed", "location_history", "action_history", "location_rts")])
+        this_trial_d$session = s
+#        if (this_trial$trial_type == "two-door-navigation") {
+#          this_trial_d$object_history = list(fromJSON(this_trial$door_history))
+#        } else {
+#          this_trial_d$object_history = list(fromJSON(this_trial$mutagen_history))
+#        }
+        main_d_frame = bind_rows(main_d_frame, this_trial_d)
+      } else if (grepl("survey",this_trial$trial_type)) {
+        next
+        # debrief or demographics
+        parsed_responses = fromJSON(this_trial$responses)
+        for (name in names(parsed_responses)) {
+          this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+          this_Q_d$session = s
+          this_Q_d$name = name
+          this_Q_d$response = parsed_responses[[name]]
+          question_d_frame = bind_rows(question_d_frame, this_Q_d)
+        }
+      } else {
+        # instructions or other
+        next
+      }
+    }
+    main_d_frame$subject_id = i
+    main_data = bind_rows(main_data, main_d_frame)
+    if (nrow(question_d_frame) > 0) {
+      question_d_frame$subject_id = i
+      question_data = bind_rows(question_data, question_d_frame)
+    }
+  }
+}
+
+auxiliary_data = data.frame(auxiliary_data)
+main_data = data.frame(main_data)
+question_data = data.frame(question_data)
+```
+# fake data (for development purposes only)
+```{r}
+# auxiliary_data = bind_rows(auxiliary_data, auxiliary_data, auxiliary_data, auxiliary_data)
+# auxiliary_data$subject_id = c(2, 3, 4, 5)
+# auxiliary_data$fractal_square_cycles = c(F, T, F, T)
+# auxiliary_data$isomorphic = c(F, F, T, T)
+# 
+# mdlen = nrow(main_data)
+# main_data = bind_rows(main_data, main_data, main_data, main_data)
+# main_data$subject_id = rep(c(2, 3, 4, 5), each=mdlen)
+# 
+# 
+# qdlen = nrow(question_data)
+# question_data = bind_rows(question_data, question_data, question_data, question_data)
+# question_data$subject_id = rep(c(2, 3, 4, 5), each=qdlen)
+```
+
+
+# data manipulation
+Easy get of condition variables
+```{r}
+main_data = inner_join(main_data, 
+                       auxiliary_data %>%
+                         select(fractal_square_cycles, isomorphic, subject_id))
+```
+
+Some renaming for convenience/clarity
+```{r}
+main_data = main_data %>%
+  rename(location=location_history, action=action_history) %>%
+  mutate(group = ifelse(grepl("square_cycles", group), "square_cycles", "dicyclic"),
+         trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"))
+```
+
+Load correct action info
+```{r}
+sq_opt_tab = read.csv('group_utils/sq_table.csv', header=F)
+sq_opt_tab[sq_opt_tab == -1] = NA
+tr_opt_tab = read.csv('group_utils/tr_table.csv', header=F)
+tr_opt_tab[tr_opt_tab == -1] = NA
+
+sq_optimal_action = function(state, goal) {
+  return(sq_opt_tab[state+1, goal+1])
+}
+sq_optimal_action = Vectorize(sq_optimal_action)
+
+tr_optimal_action = function(state, goal) {
+  return(tr_opt_tab[state+1, goal+1])
+}
+tr_optimal_action = Vectorize(tr_optimal_action)
+```
+
+Label actions as correct or incorrect
+```{r}
+main_data = main_data %>%
+  mutate(correct_action = ifelse(group=="square_cycles",
+                                 sq_optimal_action(location, goal),
+                                 tr_optimal_action(location, goal)),
+         action_correct = action == correct_action)
+```
+
+# question data manipulation
+
+```{r}
+question_data = question_data %>%
+  mutate(question = ifelse(session < 2 | trial_index == 119,
+                           "comments",
+                    ifelse(trial_index == 106,
+                           "door_hyp_guess",
+                    ifelse(trial_index == 107,
+                           "fractal_hyp_guess",
+                    ifelse(trial_index == 108,
+                           "diagram_selection",
+                    ifelse(trial_index == 109,
+                           "drag_drop_on_diagram",
+                    ifelse(trial_index == 110,
+                           "similarity_likert",
+                    ifelse(trial_index == 111,
+                           "similarity_descr",
+                    ifelse(trial_index == 112,
+                           "correspondence_suspect",
+                    ifelse(trial_index == 113,
+                           "when_noticed",
+                    ifelse(trial_index == 114,
+                           "correspondence_descr",
+                    ifelse(trial_index == 115,
+                           "one_task_helpful_for_other",
+                    ifelse(trial_index == 116,
+                           "which_condition",
+                    ifelse(trial_index == 117 & name == "Q0",
+                           "correspondence_identify",
+                    ifelse(trial_index == 117 & name == "Q1",
+                           "correspondence_identify_confidence",
+                    ifelse(trial_index == 118 & name == "Q0",
+                           "age",
+                    ifelse(trial_index == 118 & name == "Q1",
+                           "education",
+                    ifelse(trial_index == 118 & name == "Q2",
+                           "gender",
+                    ifelse(trial_index == 118 & name == "Q3",
+                           "race",
+                           NA)))))))))))))))))))
+
+any(is.na(question_data$question))
+```
+
+hacky way of doing exactly the comparison I want to do (vector-wise comparison of vectors whose elements are lists).
+```{r}
+compare_lists_of_lists = function(l1, l2) {
+  res = c()
+  for (i in 1:length(l1)) {
+    if (identical(l1[[i]], l2[[i]])) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+
+compare_lol_to_list = function(lol, l) {
+  res = c()
+  for (i in 1:length(lol)) {
+    if (identical(lol[[i]], l)) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+```
+
+```{r}
+question_data = inner_join(question_data,
+                           auxiliary_data %>%
+                             select(fractal_square_cycles,
+                                    isomorphic,
+                                    this_door_color_assignment,
+                                    this_door_generator_assignment,
+                                    this_mutagen_assignment,
+                                    subject_id)) %>%
+  mutate(correct_correspondence = "???", # ifelse(!isomorphic, NA, ifelse((compare_lol_to_list(this_door_color_assignment, list(c("white", "black"))) & compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)) | (compare_lol_to_list(this_door_color_assignment, list(c("black", "white"))) & !compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)), "white door = acid, black door = ray", "black door = acid, white door = ray")), # TODO: update
+         correspondence_correct = ifelse(question != "correspondence_identify", NA, response == correct_correspondence))
+```
+
+```{r}
+question_data = question_data %>%
+  mutate(subject_id = factor(subject_id))
+```
+
+# demographics
+
+```{r}
+demographic_data = question_data %>%
+  filter(question %in% c("race", "gender", "age", "education")) %>%
+  select(subject_id, question, response) %>%
+  spread(question, response)  %>%
+  mutate(education_high = grepl("PhD|Master|Bachelor", education))
+  
+```
+
+factoring
+```{r}
+main_data = main_data %>% 
+  mutate(trial_type = factor(trial_type),
+         group = factor(group),
+         subject_id = factor(subject_id))
+```
+
+```{r}
+main_data = inner_join(main_data, demographic_data) 
+```
+
+
+# More main data + collapsed data
+
+Centering as appropriate
+```{r}
+main_data = main_data %>%
+  mutate(session_c = session-1, #scale(session, center=T, scale=F), # center session variable
+         trial_index_by_type = ifelse(trial_type == "fractal", trial_index - 52, trial_index), # align indices for door and fractal trials
+         trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T)) %>%
+  group_by(subject_id) %>% 
+  mutate(rt_z_by_subj = scale(location_rts, center=T, scale=T)) %>%
+  ungroup()
+```
+
+
+
+```{r}
+collapsed_main_data = main_data %>%
+  group_by(subject_id, isomorphic, fractal_square_cycles, group, trial_type, session) %>%
+  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)))
+```
+
+```{r}
+fully_summarized_data = collapsed_main_data %>%
+  group_by(isomorphic, group, session) %>%
+  summarize(mean_pct_correct = mean(pct_correct), sd_pct_correct = sd(pct_correct)) %>%
+  mutate(c95_lower = mean_pct_correct - 1.96*sd_pct_correct/sqrt(n()),
+         c95_upper = mean_pct_correct + 1.96*sd_pct_correct/sqrt(n()))
+```
+
+# Most basic analyses
+```{r}
+theme_set(theme_bw() +
+            theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()))
+```
+
+
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=isomorphic, y=pct_correct, fill=group)) +
+  geom_violin()
+```
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, color=isomorphic, group=interaction(subject_id, isomorphic, group, trial_type))) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+#  ylim(0,1) +
+  facet_wrap(~ group)
+```
+
+```{r}
+ggsave("figures/ex1/curve_plot.png", width=7,height=5)
+```
+
+
+```{r}
+ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fill=isomorphic)) +
+  geom_bar(stat="identity",position="dodge") +
+  geom_errorbar(aes(ymin=c95_lower, ymax = c95_upper), position=position_dodge(width=1), width=0.5) +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+  ylim(0,1) +
+  facet_wrap(~ group)
+```
+
+```{r}
+ggsave("figures/ex1/basic_plot.png", width=7,height=5)
+```
+
+Appears to be absolutely no learning in the dicyclic condition (although increasing errorbars in the isomorphic condition reflect the fact that at least one subject may have learned...)
+
+Just looking at condition and extremely important controls and random effects
+```{r}
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +rt_z_by_subj + (1  | subject_id), family=binomial, data=main_data)
+summary(basic_non_time_dependent_model)
+```
+
+Time dependent:
+```{r}
+basic_time_dependent_model = glmer(action_correct ~ isomorphic + session_c + I(session_c^2) + group * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + rt_z_by_subj + (1 +session_c | subject_id), family=binomial, data=main_data)
+summary(basic_time_dependent_model)
+```
+
+
+```{r}
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2))  + group *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  +rt_z_by_subj *session_c + (1 + session_c  | subject_id), family=binomial, data=main_data)
+summary(time_dependent_interaction_model)
+```
