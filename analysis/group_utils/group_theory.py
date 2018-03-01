@@ -89,7 +89,7 @@ class square_cycles(object):
 	return res 
 	
 
-class tr_cycles(object):
+class tri_cycles(object):
     def __init__(self):
         self.order = 8 
 
@@ -98,16 +98,16 @@ class tr_cycles(object):
 
     def operation(self, x, y):
         if (y not in [0, 1]):
-            raise ValueError("Square cycle operation error!")
+            raise ValueError("Tri cycle operation error!")
 
         if (y == 1):
             if (x == 0):
                 res = 3;
-            else if (x == 3):
+            elif (x == 3):
                 res = 4;
-            else if (x == 6):
+            elif (x == 6):
                 res = 5;
-            else if (x == 5):
+            elif (x == 5):
                 res = 2;
             else:
                 res = (x + 4) % 8;
@@ -115,13 +115,13 @@ class tr_cycles(object):
         else: # y == 0
             if (x == 0):
                 res = 2;
-            else if (x == 6):
+            elif (x == 6):
                 res = 4;
-            else if (x == 1 || x == 2):
+            elif (x in [1, 2]):
                 res = x - 1;
-            else if (x == 4):
+            elif (x == 4):
                 res = 7;
-            else if (x == 7):
+            elif (x == 7):
                 res = 6;
             else:
                 res = (x + 4) % 8;
