@@ -16,7 +16,7 @@ library(lmerTest)
 ```{r}
 num_subjects = 1
 data_dir = "../data/pilot1"
-
+drag_drop_target_locations_order = c(7, 8, 4, 3, 5, 6, 2, 1) # order in which the group elements were used as drag and drop locations, because I didn't plan ahead well
 ```
 
 ```{r, message=F, warning=F}
@@ -35,7 +35,7 @@ for (i in 1:num_subjects) {
   aux_d_frame$this_door_generator_assignment = list(aux_d_list$this_door_generator_assignment)
   auxiliary_data = rbind(auxiliary_data, aux_d_frame)
   
-  for (s in c(0:2)) {
+  for (s in c(0,2)) {
     main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
     main_d_frame = data.frame()
     question_d_frame = data.frame()
@@ -57,16 +57,21 @@ for (i in 1:num_subjects) {
 #        }
         main_d_frame = bind_rows(main_d_frame, this_trial_d)
       } else if (grepl("survey",this_trial$trial_type)) {
-        next
         # debrief or demographics
         parsed_responses = fromJSON(this_trial$responses)
         for (name in names(parsed_responses)) {
           this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
           this_Q_d$session = s
           this_Q_d$name = name
-          this_Q_d$response = parsed_responses[[name]]
+          this_Q_d$response = as.character(parsed_responses[[name]])
           question_d_frame = bind_rows(question_d_frame, this_Q_d)
         }
+      } else if (grepl("drag-drop-on-image",this_trial$trial_type)) {
+        this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+        this_Q_d$session = s
+        this_Q_d$assignments = list(this_trial$assignments)
+        this_Q_d$num_assignments_correct = sum(this_trial$assignments[drag_drop_target_locations_order] == aux_d_frame$this_fractal_assignment[[1]])
+        question_d_frame = bind_rows(question_d_frame, this_Q_d)      
       } else {
         # instructions or other
         next
