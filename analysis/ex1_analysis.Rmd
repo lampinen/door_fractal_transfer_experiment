@@ -14,8 +14,8 @@ library(lmerTest)
 
 # Data loading
 ```{r}
-num_subjects = 1
-data_dir = "../data/pilot1"
+num_subjects = 40
+data_dir = "../anonymized_data/ex1"
 drag_drop_target_locations_order = c(7, 8, 4, 3, 5, 6, 2, 1) # order in which the group elements were used as drag and drop locations, because I didn't plan ahead well
 ```
 
@@ -24,7 +24,15 @@ auxiliary_data = list()
 main_data = data.frame()
 question_data = data.frame()
 for (i in 1:num_subjects) {
-
+  if (!all(file.exists(c(
+    sprintf("%s/%s/%i.json", data_dir,"aux",i),
+    sprintf("%s/%s/%i.json", data_dir,"s0",i),
+    sprintf("%s/%s/%i.json", data_dir,"s1",i),
+    sprintf("%s/%s/%i.json", data_dir,"s2",i)
+  )))) {
+    print(sprintf("Skipping %i -- missing file", i))
+    next
+  }
   aux_d_list = fromJSON(file=sprintf("%s/%s/%i.json", data_dir,"aux",i))
   aux_d_frame = data.frame(aux_d_list[c("fractal_square_cycles", "isomorphic")])
   aux_d_frame$subject_id = i
@@ -35,7 +43,7 @@ for (i in 1:num_subjects) {
   aux_d_frame$this_door_generator_assignment = list(aux_d_list$this_door_generator_assignment)
   auxiliary_data = rbind(auxiliary_data, aux_d_frame)
   
-  for (s in c(0,2)) {
+  for (s in 0:2) {
     main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
     main_d_frame = data.frame()
     question_d_frame = data.frame()
@@ -70,7 +78,7 @@ for (i in 1:num_subjects) {
         this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
         this_Q_d$session = s
         this_Q_d$assignments = list(this_trial$assignments)
-        this_Q_d$num_assignments_correct = sum(this_trial$assignments[drag_drop_target_locations_order] == aux_d_frame$this_fractal_assignment[[1]])
+        this_Q_d$num_assignments_correct = sum(this_trial$assignments[drag_drop_target_locations_order] == aux_d_frame$this_fractal_assignment[[1]]) #TODO: fix
         question_d_frame = bind_rows(question_d_frame, this_Q_d)      
       } else {
         # instructions or other
@@ -90,24 +98,6 @@ auxiliary_data = data.frame(auxiliary_data)
 main_data = data.frame(main_data)
 question_data = data.frame(question_data)
 ```
-# fake data (for development purposes only)
-```{r}
-# auxiliary_data = bind_rows(auxiliary_data, auxiliary_data, auxiliary_data, auxiliary_data)
-# auxiliary_data$subject_id = c(2, 3, 4, 5)
-# auxiliary_data$fractal_square_cycles = c(F, T, F, T)
-# auxiliary_data$isomorphic = c(F, F, T, T)
-# 
-# mdlen = nrow(main_data)
-# main_data = bind_rows(main_data, main_data, main_data, main_data)
-# main_data$subject_id = rep(c(2, 3, 4, 5), each=mdlen)
-# 
-# 
-# qdlen = nrow(question_data)
-# question_data = bind_rows(question_data, question_data, question_data, question_data)
-# question_data$subject_id = rep(c(2, 3, 4, 5), each=qdlen)
-```
-
-
 # data manipulation
 Easy get of condition variables
 ```{r}
@@ -120,7 +110,7 @@ Some renaming for convenience/clarity
 ```{r}
 main_data = main_data %>%
   rename(location=location_history, action=action_history) %>%
-  mutate(group = ifelse(grepl("square_cycles", group), "square_cycles", "dicyclic"),
+  mutate(group = ifelse(grepl("square cycles", group), "square_cycles", "tri_cycles"),
          trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"))
 ```
 
@@ -155,41 +145,41 @@ main_data = main_data %>%
 
 ```{r}
 question_data = question_data %>%
-  mutate(question = ifelse(session < 2 | trial_index == 119,
+  mutate(question = ifelse(session < 2 | trial_index == 118,
                            "comments",
-                    ifelse(trial_index == 106,
+                    ifelse(trial_index == 105,
                            "door_hyp_guess",
-                    ifelse(trial_index == 107,
+                    ifelse(trial_index == 106,
                            "fractal_hyp_guess",
-                    ifelse(trial_index == 108,
+                    ifelse(trial_index == 107,
                            "diagram_selection",
-                    ifelse(trial_index == 109,
+                    ifelse(trial_index == 108,
                            "drag_drop_on_diagram",
-                    ifelse(trial_index == 110,
+                    ifelse(trial_index == 109,
                            "similarity_likert",
-                    ifelse(trial_index == 111,
+                    ifelse(trial_index == 110,
                            "similarity_descr",
-                    ifelse(trial_index == 112,
+                    ifelse(trial_index == 111,
                            "correspondence_suspect",
-                    ifelse(trial_index == 113,
+                    ifelse(trial_index == 112,
                            "when_noticed",
-                    ifelse(trial_index == 114,
+                    ifelse(trial_index == 113,
                            "correspondence_descr",
-                    ifelse(trial_index == 115,
+                    ifelse(trial_index == 114,
                            "one_task_helpful_for_other",
-                    ifelse(trial_index == 116,
+                    ifelse(trial_index == 115,
                            "which_condition",
-                    ifelse(trial_index == 117 & name == "Q0",
+                    ifelse(trial_index == 116 & name == "Q0",
                            "correspondence_identify",
-                    ifelse(trial_index == 117 & name == "Q1",
+                    ifelse(trial_index == 116 & name == "Q1",
                            "correspondence_identify_confidence",
-                    ifelse(trial_index == 118 & name == "Q0",
+                    ifelse(trial_index == 117 & name == "Q0",
                            "age",
-                    ifelse(trial_index == 118 & name == "Q1",
+                    ifelse(trial_index == 117 & name == "Q1",
                            "education",
-                    ifelse(trial_index == 118 & name == "Q2",
+                    ifelse(trial_index == 117 & name == "Q2",
                            "gender",
-                    ifelse(trial_index == 118 & name == "Q3",
+                    ifelse(trial_index == 117 & name == "Q3",
                            "race",
                            NA)))))))))))))))))))
 
@@ -282,6 +272,10 @@ main_data = main_data %>%
   ungroup()
 ```
 
+```{r}
+# quick test
+#main_data = main_data %>% filter(trial_type=="fractal")
+```
 
 
 ```{r}
@@ -338,22 +332,98 @@ ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fi
 ggsave("figures/ex1/basic_plot.png", width=7,height=5)
 ```
 
-Appears to be absolutely no learning in the dicyclic condition (although increasing errorbars in the isomorphic condition reflect the fact that at least one subject may have learned...)
 
 Just looking at condition and extremely important controls and random effects
 ```{r}
-basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +rt_z_by_subj + (1  | subject_id), family=binomial, data=main_data)
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +rt_z_by_subj + (1  + correct_action | subject_id), family=binomial, data=main_data)
 summary(basic_non_time_dependent_model)
 ```
 
 Time dependent:
 ```{r}
-basic_time_dependent_model = glmer(action_correct ~ isomorphic + session_c + I(session_c^2) + group * correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + rt_z_by_subj + (1 +session_c | subject_id), family=binomial, data=main_data)
+basic_time_dependent_model = glmer(action_correct ~ isomorphic + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + rt_z_by_subj + (1 + correct_action | subject_id), family=binomial, data=main_data)
 summary(basic_time_dependent_model)
 ```
 
 
 ```{r}
-time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2))  + group *  correct_action + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  +rt_z_by_subj *session_c + (1 + session_c  | subject_id), family=binomial, data=main_data)
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * (session_c + I(session_c^2))  + group  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c + correct_action | subject_id), family=binomial, data=main_data)
 summary(time_dependent_interaction_model)
 ```
+
+
+```{r}
+action_model = glmer(action ~ (isomorphic + session_c + I(session_c^2)) * correct_action * group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 | subject_id), family=binomial, data=main_data)
+summary(action_model)
+```
+
+# num steps
+```{r}
+num_steps_per_trial_data = main_data %>%
+  group_by(subject_id, isomorphic, group, session_c, trial_type, trial_index_by_type_z) %>%
+  summarize(num_steps_needed=n())
+```
+
+```{r}
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * group * (session_c + I(session_c^2))  + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data)
+summary(ns_time_dependent_model)
+```
+
+# explicit from implicit
+```{r}
+s2_joined_question_data = inner_join(question_data,
+                                     collapsed_main_data %>%
+                                       group_by(subject_id, session, trial_type, isomorphic, fractal_square_cycles) %>%
+                                       summarize(pct_correct = mean(pct_correct)) %>%
+                                       ungroup() %>%
+                                       filter(session==2) %>%
+                                       spread(trial_type, pct_correct) %>%
+                                       rename(fractal_pct_correct = fractal, door_pct_correct=door))
+```
+
+## drag + drop
+```{r}
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic + fractal_square_cycles + fractal_pct_correct, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_model)
+```
+
+## diagram selection
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("square_cycles", response), fractal_square_cycles, !fractal_square_cycles)))
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)),
+       aes(x=fractal_pct_correct, y = ds_correct, color=ds_correct)) +
+  geom_point() +
+  facet_wrap(~ isomorphic)
+```
+
+```{r}
+ds_correct_model = glm(ds_correct ~ fractal_square_cycles + isomorphic + fractal_pct_correct, data=s2_joined_question_data)
+summary(ds_correct_model)
+```
+
+# similarity likert
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(total_pct_correct = door_pct_correct + fractal_pct_correct)
+```
+
+
+```{r}
+sl_model = lm(response ~  isomorphic + total_pct_correct, data=s2_joined_question_data %>%
+                filter(question == "similarity_likert"))
+summary(sl_model)
+```
+
+# one task helpful for other? 
+
+```{r}
+oth_model = lm(response ~  isomorphic * total_pct_correct + fractal_square_cycles, data=s2_joined_question_data %>%
+                filter(question == "one_task_helpful_for_other"))
+summary(oth_model)
+```
+
