@@ -19,7 +19,7 @@ data_dir = "../anonymized_data/ex1"
 drag_drop_target_locations_order = c(7, 8, 4, 3, 5, 6, 2, 1) # order in which the group elements were used as drag and drop locations, because I didn't plan ahead well
 ```
 
-```{r, message=F, warning=F}
+```{r message=FALSE, warning=FALSE}
 auxiliary_data = list()
 main_data = data.frame()
 question_data = data.frame()
@@ -226,8 +226,9 @@ question_data = inner_join(question_data,
                                     this_door_generator_assignment,
                                     this_mutagen_assignment,
                                     subject_id)) %>%
-  mutate(correct_correspondence = "???", # ifelse(!isomorphic, NA, ifelse((compare_lol_to_list(this_door_color_assignment, list(c("white", "black"))) & compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)) | (compare_lol_to_list(this_door_color_assignment, list(c("black", "white"))) & !compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)), "white door = acid, black door = ray", "black door = acid, white door = ray")), # TODO: update
-         correspondence_correct = ifelse(question != "correspondence_identify", NA, response == correct_correspondence))
+  mutate(correspondence_correct = ifelse(question != "correspondence_identify" | !isomorphic,
+                                         NA,
+                                         (substring(response, 41) == " ray" & compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)) | (substring(response, 41) == "acid" & !compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment))))
 ```
 
 ```{r}
@@ -409,12 +410,13 @@ summary(ds_correct_model)
 # similarity likert
 ```{r}
 s2_joined_question_data = s2_joined_question_data %>%
-  mutate(total_pct_correct = door_pct_correct + fractal_pct_correct)
+  mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
+         total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)))
 ```
 
 
 ```{r}
-sl_model = lm(response ~  isomorphic + total_pct_correct, data=s2_joined_question_data %>%
+sl_model = lm(response ~  isomorphic * total_pct_correct_z, data=s2_joined_question_data %>%
                 filter(question == "similarity_likert"))
 summary(sl_model)
 ```
@@ -422,8 +424,13 @@ summary(sl_model)
 # one task helpful for other? 
 
 ```{r}
-oth_model = lm(response ~  isomorphic * total_pct_correct + fractal_square_cycles, data=s2_joined_question_data %>%
+oth_model = lm(response ~  isomorphic * total_pct_correct_z + fractal_square_cycles, data=s2_joined_question_data %>%
                 filter(question == "one_task_helpful_for_other"))
 summary(oth_model)
 ```
 
+# correspondence correct
+```{r}
+correspondence_correct_model = glm(correspondence_correct ~ fractal_square_cycles +  total_pct_correct_z, data=s2_joined_question_data)
+summary(correspondence_correct_model)
+```
