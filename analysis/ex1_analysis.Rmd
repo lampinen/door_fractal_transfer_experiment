@@ -283,7 +283,8 @@ main_data = main_data %>%
 ```{r}
 collapsed_main_data = main_data %>%
   group_by(subject_id, isomorphic, fractal_square_cycles, group, trial_type, session) %>%
-  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)))
+  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct))) %>%
+  ungroup()
 ```
 
 ```{r}
@@ -315,11 +316,23 @@ ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, color=isomorphic,
 #  ylim(0,1) +
   facet_wrap(~ group)
 ```
-
 ```{r}
 ggsave("figures/ex1/curve_plot.png", width=7,height=5)
 ```
 
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, linetype=trial_type, color=isomorphic)) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+#  ylim(0,1) +
+  facet_wrap(~ subject_id)
+```
+
+```{r}
+ggsave("figures/ex1/individual_curve_plot.png", width=10,height=10)
+```
 
 ```{r}
 ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fill=isomorphic)) +
@@ -334,7 +347,55 @@ ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fi
 ggsave("figures/ex1/basic_plot.png", width=7,height=5)
 ```
 
+# basic models
+## pct correct correlation
+```{r}
+pcc_data = collapsed_main_data %>%
+  mutate(pct_correct = pct_correct-0.5) %>% #center at chance
+  select(-c(group)) %>%
+  spread(trial_type, pct_correct) %>%
+  rename(fractal_pct_correct = fractal,
+         door_pct_correct = door) 
+```
 
+```{r}
+pcc_data %>%
+  group_by(isomorphic) %>%
+  summarize(pct_correct_dot = mean(fractal_pct_correct * door_pct_correct))
+```
+
+```{r}
+ggplot(data=pcc_data, aes(x=door_pct_correct, y=fractal_pct_correct, color=isomorphic)) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1, linetype=2, alpha=0.5) +
+  xlim(-0.5,0.5) +
+  ylim(-0.5,0.5) +
+  facet_wrap(~ isomorphic)
+```
+```{r}
+pcc2_data = pcc_data %>%
+  group_by(subject_id, isomorphic) %>%
+  summarize(pct_correct_dot = mean(fractal_pct_correct * door_pct_correct))
+```
+
+```{r}
+ggplot(data=pcc2_data, aes(x=isomorphic, y= pct_correct_dot, color=isomorphic)) +
+  geom_point(position="jitter")
+```
+
+
+```{r}
+pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + (1|subject_id), data=pcc_data)
+summary(pc_model)
+```
+
+```{r}
+pc2_model=lm(pct_correct_dot ~ isomorphic, data=pcc2_data)
+summary(pc2_model)
+```
+
+
+## action correct
 Just looking at condition and extremely important controls and random effects
 ```{r}
 basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +rt_z_by_subj + (1  + correct_action | subject_id), family=binomial, data=main_data)
@@ -367,7 +428,7 @@ num_steps_per_trial_data = main_data %>%
 ```
 
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * group * (session_c + I(session_c^2))  + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data)
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data)
 summary(ns_time_dependent_model)
 ```
 
@@ -380,7 +441,8 @@ s2_joined_question_data = inner_join(question_data,
                                        ungroup() %>%
                                        filter(session==2) %>%
                                        spread(trial_type, pct_correct) %>%
-                                       rename(fractal_pct_correct = fractal, door_pct_correct=door))
+                                       rename(fractal_pct_correct = fractal, door_pct_correct=door) %>%
+                                       mutate(abs_fpc_d = abs(fractal_pct_correct - 0.5), abs_dpc_d = abs(door_pct_correct - 0.5)))
 ```
 
 ## drag + drop
@@ -412,7 +474,8 @@ summary(ds_correct_model)
 ```{r}
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
-         total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)))
+         total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
+         abs_tpc_d = abs(total_pct_correct-0.5))
 ```
 
 
@@ -430,12 +493,27 @@ oth_model = lm(response ~  isomorphic * total_pct_correct_z + fractal_square_cyc
 summary(oth_model)
 ```
 
-# correspondence correct
+What if we look at deviations from chance rather than just pct correct?
 ```{r}
-correspondence_correct_model = glm(correspondence_correct ~ fractal_square_cycles +  total_pct_correct_z, data=s2_joined_question_data)
-summary(correspondence_correct_model)
+oth_d_model = lm(response ~  isomorphic * abs_tpc_d + fractal_square_cycles, data=s2_joined_question_data %>%
+                filter(question == "one_task_helpful_for_other"))
+summary(oth_d_model)
 ```
 
+# correspondence correct
+```{r}
+correspondence_correct_model = glm(correspondence_correct ~ fractal_square_cycles + total_pct_correct_z, data=s2_joined_question_data)
+summary(correspondence_correct_model)
+```
+```{r}
+cc_data = inner_join(s2_joined_question_data,
+                                         pcc2_data %>%
+                                           rename(subject_pct_correct_correlation=pct_correct_dot))
+```
+```{r}
+correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_square_cycles + total_pct_correct_z + subject_pct_correct_correlation, data=cc_data)
+summary(correspondence_correct_model_2)
+```
 # when noticed
 ```{r}
 code_when_noticed = function(response) {
