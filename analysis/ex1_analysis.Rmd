@@ -283,8 +283,12 @@ main_data = main_data %>%
 ```{r}
 collapsed_main_data = main_data %>%
   group_by(subject_id, isomorphic, fractal_square_cycles, group, trial_type, session) %>%
-  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct))) %>%
-  ungroup()
+  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)),
+            pct_correct_se=sqrt(pct_correct * (1-pct_correct))/sqrt(n()),
+            pct_correct_95ci_lower=pct_correct-1.96*pct_correct_se,
+            pct_correct_95ci_upper=pct_correct+1.96*pct_correct_se) %>%
+  ungroup() %>%
+  mutate(session = factor(session))
 ```
 
 ```{r}
@@ -322,10 +326,11 @@ ggsave("figures/ex1/curve_plot.png", width=7,height=5)
 
 
 ```{r}
-ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, linetype=trial_type, color=isomorphic)) +
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, linetype=trial_type, color=isomorphic, group=trial_type)) +
   geom_line() +
   geom_point() +
   geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+  geom_errorbar(aes(ymin=pct_correct_95ci_lower, ymax=pct_correct_95ci_upper), width=0.5) +
 #  ylim(0,1) +
   facet_wrap(~ subject_id)
 ```
@@ -385,7 +390,7 @@ ggplot(data=pcc2_data, aes(x=isomorphic, y= pct_correct_dot, color=isomorphic)) 
 
 
 ```{r}
-pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + (1|subject_id), data=pcc_data)
+pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + fractal_square_cycles + (1|subject_id), data=pcc_data)
 summary(pc_model)
 ```
 
@@ -428,7 +433,7 @@ num_steps_per_trial_data = main_data %>%
 ```
 
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data)
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2)  + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 summary(ns_time_dependent_model)
 ```
 
