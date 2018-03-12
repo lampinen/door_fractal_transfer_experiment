@@ -577,7 +577,7 @@ distributional_data = main_data %>%
   ungroup()
 ```
 
-All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions.
+All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that sq_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.)
 ```{r}
 sq_p2_locs = c(2, 1, 5, 6, 3, 4, 8, 7)
 sq_p2_acts = c(1, 0)
@@ -591,7 +591,7 @@ sq_p6_locs = c(6, 5, 8, 7, 2, 1, 4, 3)
 sq_p6_acts = c(0, 1)
 sq_p7_locs = c(7, 8, 4, 3, 6, 5, 1, 2)
 sq_p7_acts = c(1, 0)
-sq_p8_locs = c(8, 7, 6, 5, 4, 3, 2, 1)?
+sq_p8_locs = c(8, 7, 6, 5, 4, 3, 2, 1)
 sq_p8_acts = c(0, 1)
 
 
@@ -617,7 +617,24 @@ Computing the L1 distance between the subjects door and fractal distribtuions av
 
 ```{r}
 distributional_similarity_data = distributional_data %>%
-  filter(session==2) %>%
+  filter(session==2) %>% # TODO: remove and analyze by session?
+  mutate(location = location + 1, # so they can be used as 1-indices
+         action = action + 1, # so they can be used as 1-indices
+         location_2 = ifelse(grepl("square", group), sq_p2_locs[location], tr_p2_locs[location]),
+         action_2 = ifelse(grepl("square", group), sq_p2_acts[action], tr_p2_acts[action]),
+         location_3 = ifelse(grepl("square", group), sq_p3_locs[location], tr_p3_locs[location]),
+         action_3 = ifelse(grepl("square", group), sq_p3_acts[action], tr_p3_acts[action]),
+         location_4 = ifelse(grepl("square", group), sq_p4_locs[location], tr_p4_locs[location]),
+         action_4 = ifelse(grepl("square", group), sq_p4_acts[action], tr_p4_acts[action]),
+         location_5 = ifelse(grepl("square", group), sq_p5_locs[location], tr_p5_locs[location]),
+         action_5 = ifelse(grepl("square", group), sq_p5_acts[action], tr_p5_acts[action]),
+         location_6 = ifelse(grepl("square", group), sq_p6_locs[location], tr_p6_locs[location]),
+         action_6 = ifelse(grepl("square", group), sq_p6_acts[action], tr_p6_acts[action]),
+         location_7 = ifelse(grepl("square", group), sq_p7_locs[location], tr_p7_locs[location]),
+         action_7 = ifelse(grepl("square", group), sq_p7_acts[action], tr_p7_acts[action]),
+         location_8 = ifelse(grepl("square", group), sq_p8_locs[location], tr_p8_locs[location]),
+         action_8 = ifelse(grepl("square", group), sq_p8_acts[action], tr_p8_acts[action])) %>%
   select(-action_count, -group) %>%
   spread(trial_type, action_probability)
+  
 ```
