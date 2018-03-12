@@ -698,6 +698,7 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
 Analyze the overlap -- may need to rethink cases where a state is not visited
 ```{r}
 distributional_similarity_data = distributional_similarity_data %>%
+#  filter(!(subject_id %in% c(5, 7, 15, 26))) %>% # exclude subjects who showed obvious learning -- is there still an effect
   group_by(isomorphic, fractal_square_cycles, subject_id, perm) %>% 
   summarize(L1 = sum(abs(door-fractal), na.rm=T)) %>%
   ungroup() %>%
