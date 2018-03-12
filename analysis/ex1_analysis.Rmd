@@ -566,20 +566,58 @@ summary(sl_model)
 getting a distribution for each subject
 ```{r}
 distributional_data = main_data %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, trial_type, location, goal, action) %>% 
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal, action) %>% 
   summarize(action_count = n()) %>%
   ungroup() %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, trial_type, location, goal) %>% 
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal) %>% 
   mutate(action_probability = action_count/sum(action_count)) %>%
   ungroup() %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, trial_type) %>% 
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type) %>% 
   complete(location, goal, action, fill=list(action_count=0, action_probability=0.)) %>%
   ungroup()
 ```
 
+All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions.
+```{r}
+sq_p2_locs = c(2, 1, 5, 6, 3, 4, 8, 7)
+sq_p2_acts = c(1, 0)
+sq_p3_locs = c(3, 4, 1, 2, 7, 8, 5, 6)
+sq_p3_acts = c(0, 1)
+sq_p4_locs = c(4, 3, 7, 8, 1, 2, 6, 5)
+sq_p4_acts = c(1, 0)
+sq_p5_locs = c(5, 6, 2, 1, 8, 7, 3, 4)
+sq_p5_acts = c(1, 0)
+sq_p6_locs = c(6, 5, 8, 7, 2, 1, 4, 3)
+sq_p6_acts = c(0, 1)
+sq_p7_locs = c(7, 8, 4, 3, 6, 5, 1, 2)
+sq_p7_acts = c(1, 0)
+sq_p8_locs = c(8, 7, 6, 5, 4, 3, 2, 1)?
+sq_p8_acts = c(0, 1)
+
+
+tr_p2_locs = c(7, 8, 5, 6, 1, 4, 3, 2)
+tr_p2_acts = c(0, 1)
+# tri-cycles only has 1 non-trivial isomorphism, but it's easiest to code by making another 6 dummies
+tr_p3_locs = c(1, 2, 3, 4, 5, 6, 7, 8)
+tr_p3_acts = c(0, 1)
+tr_p4_locs = tr_p2_locs
+tr_p4_acts = tr_p2_acts
+tr_p5_locs = tr_p3_locs 
+tr_p5_acts = tr_p3_acts 
+tr_p6_locs = tr_p2_locs
+tr_p6_acts = tr_p2_acts
+tr_p7_locs = tr_p3_locs 
+tr_p7_acts = tr_p3_acts 
+tr_p8_locs = tr_p2_locs
+tr_p8_acts = tr_p2_acts
+```
 
 Computing the L1 distance between the subjects door and fractal distribtuions averaged across all possible isomorphisms between the structures. Note that this is correlational -- can't tell if transfer or just due to the similar structures leading to similar behavior. Also since there is no canonical way to map between non-isomorphic groups, there could be some weird effects... Have to think carefully about it.
 
-```{r}
 
+```{r}
+distributional_similarity_data = distributional_data %>%
+  filter(session==2) %>%
+  select(-action_count, -group) %>%
+  spread(trial_type, action_probability)
 ```
