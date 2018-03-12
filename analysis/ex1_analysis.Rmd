@@ -573,33 +573,39 @@ distributional_data = main_data %>%
   mutate(action_probability = action_count/sum(action_count)) %>%
   ungroup() %>%
   group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type) %>% 
-  complete(location, goal, action, fill=list(action_count=0, action_probability=0.)) %>%
-  ungroup()
+  complete(location, goal, action, fill=list(action_count=NA, action_probability=NA)) %>%
+  ungroup() #%>%
+  # group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal) %>% 
+  # mutate(never_visited = all(is.na(action_count)),
+  #        action_probability=ifelse(never_visited, NA, 
+  #                                  ifelse(is.na(action_probability), 0., action_probability))) %>%
+  # ungroup() 
+  
 ```
 
 All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that sq_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.)
 ```{r}
 sq_p2_locs = c(2, 1, 5, 6, 3, 4, 8, 7)
-sq_p2_acts = c(1, 0)
+sq_p2_acts = c(2, 1)
 sq_p3_locs = c(3, 4, 1, 2, 7, 8, 5, 6)
-sq_p3_acts = c(0, 1)
+sq_p3_acts = c(1, 2)
 sq_p4_locs = c(4, 3, 7, 8, 1, 2, 6, 5)
-sq_p4_acts = c(1, 0)
+sq_p4_acts = c(2, 1)
 sq_p5_locs = c(5, 6, 2, 1, 8, 7, 3, 4)
-sq_p5_acts = c(1, 0)
+sq_p5_acts = c(2, 1)
 sq_p6_locs = c(6, 5, 8, 7, 2, 1, 4, 3)
-sq_p6_acts = c(0, 1)
+sq_p6_acts = c(1, 2)
 sq_p7_locs = c(7, 8, 4, 3, 6, 5, 1, 2)
-sq_p7_acts = c(1, 0)
+sq_p7_acts = c(2, 1)
 sq_p8_locs = c(8, 7, 6, 5, 4, 3, 2, 1)
-sq_p8_acts = c(0, 1)
+sq_p8_acts = c(1, 2)
 
 
 tr_p2_locs = c(7, 8, 5, 6, 1, 4, 3, 2)
-tr_p2_acts = c(0, 1)
+tr_p2_acts = c(1, 2)
 # tri-cycles only has 1 non-trivial isomorphism, but it's easiest to code by making another 6 dummies
 tr_p3_locs = c(1, 2, 3, 4, 5, 6, 7, 8)
-tr_p3_acts = c(0, 1)
+tr_p3_acts = c(1, 2)
 tr_p4_locs = tr_p2_locs
 tr_p4_acts = tr_p2_acts
 tr_p5_locs = tr_p3_locs 
@@ -619,22 +625,89 @@ Computing the L1 distance between the subjects door and fractal distribtuions av
 distributional_similarity_data = distributional_data %>%
   filter(session==2) %>% # TODO: remove and analyze by session?
   mutate(location = location + 1, # so they can be used as 1-indices
-         action = action + 1, # so they can be used as 1-indices
-         location_2 = ifelse(grepl("square", group), sq_p2_locs[location], tr_p2_locs[location]),
-         action_2 = ifelse(grepl("square", group), sq_p2_acts[action], tr_p2_acts[action]),
-         location_3 = ifelse(grepl("square", group), sq_p3_locs[location], tr_p3_locs[location]),
-         action_3 = ifelse(grepl("square", group), sq_p3_acts[action], tr_p3_acts[action]),
-         location_4 = ifelse(grepl("square", group), sq_p4_locs[location], tr_p4_locs[location]),
-         action_4 = ifelse(grepl("square", group), sq_p4_acts[action], tr_p4_acts[action]),
-         location_5 = ifelse(grepl("square", group), sq_p5_locs[location], tr_p5_locs[location]),
-         action_5 = ifelse(grepl("square", group), sq_p5_acts[action], tr_p5_acts[action]),
-         location_6 = ifelse(grepl("square", group), sq_p6_locs[location], tr_p6_locs[location]),
-         action_6 = ifelse(grepl("square", group), sq_p6_acts[action], tr_p6_acts[action]),
-         location_7 = ifelse(grepl("square", group), sq_p7_locs[location], tr_p7_locs[location]),
-         action_7 = ifelse(grepl("square", group), sq_p7_acts[action], tr_p7_acts[action]),
-         location_8 = ifelse(grepl("square", group), sq_p8_locs[location], tr_p8_locs[location]),
-         action_8 = ifelse(grepl("square", group), sq_p8_acts[action], tr_p8_acts[action])) %>%
+         action = action + 1,
+         goal = goal + 1)
+
+dd_num_rows = nrow(distributional_similarity_data)
+# create permutations and permute the fractal but not door trials
+distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_num_rows), each=8),] %>%
+  mutate(
+    perm = rep(1:8, dd_num_rows), 
+    location = ifelse(trial_type == "door", location,
+               ifelse(grepl("square", group), 
+                      ifelse(perm==2, sq_p2_locs[location], 
+                      ifelse(perm==3, sq_p3_locs[location],
+                      ifelse(perm==4, sq_p4_locs[location],
+                      ifelse(perm==5, sq_p5_locs[location], 
+                      ifelse(perm==6, sq_p6_locs[location],
+                      ifelse(perm==7, sq_p7_locs[location],
+                      ifelse(perm==8, sq_p8_locs[location], location # default for perm 1
+                             ))))))),
+                      ifelse(perm==2, tr_p2_locs[location], 
+                      ifelse(perm==3, tr_p3_locs[location],
+                      ifelse(perm==4, tr_p4_locs[location],
+                      ifelse(perm==5, tr_p5_locs[location], 
+                      ifelse(perm==6, tr_p6_locs[location],
+                      ifelse(perm==7, tr_p7_locs[location],
+                      ifelse(perm==8, tr_p8_locs[location], location # default for perm 1
+                             )))))))
+                      )),
+    goal = ifelse(trial_type == "door", goal,
+           ifelse(grepl("square", group), 
+                      ifelse(perm==2, sq_p2_locs[goal], 
+                      ifelse(perm==3, sq_p3_locs[goal],
+                      ifelse(perm==4, sq_p4_locs[goal],
+                      ifelse(perm==5, sq_p5_locs[goal], 
+                      ifelse(perm==6, sq_p6_locs[goal],
+                      ifelse(perm==7, sq_p7_locs[goal],
+                      ifelse(perm==8, sq_p8_locs[goal], goal # default for perm 1
+                             ))))))),
+                      ifelse(perm==2, tr_p2_locs[goal], 
+                      ifelse(perm==3, tr_p3_locs[goal],
+                      ifelse(perm==4, tr_p4_locs[goal],
+                      ifelse(perm==5, tr_p5_locs[goal], 
+                      ifelse(perm==6, tr_p6_locs[goal],
+                      ifelse(perm==7, tr_p7_locs[goal],
+                      ifelse(perm==8, tr_p8_locs[goal], goal # default for perm 1
+                             )))))))
+                      )),
+    action = ifelse(trial_type == "door", action,
+             ifelse(grepl("square", group), 
+                      ifelse(perm==2, sq_p2_acts[action], 
+                      ifelse(perm==3, sq_p3_acts[action],
+                      ifelse(perm==4, sq_p4_acts[action],
+                      ifelse(perm==5, sq_p5_acts[action], 
+                      ifelse(perm==6, sq_p6_acts[action],
+                      ifelse(perm==7, sq_p7_acts[action],
+                      ifelse(perm==8, sq_p8_acts[action], action # default for perm 1
+                             ))))))),
+                      ifelse(perm==2, tr_p2_acts[action], 
+                      ifelse(perm==3, tr_p3_acts[action],
+                      ifelse(perm==4, tr_p4_acts[action],
+                      ifelse(perm==5, tr_p5_acts[action], 
+                      ifelse(perm==6, tr_p6_acts[action],
+                      ifelse(perm==7, tr_p7_acts[action],
+                      ifelse(perm==8, tr_p8_acts[action], action # default for perm 1
+                             )))))))
+                      ))) %>% 
   select(-action_count, -group) %>%
-  spread(trial_type, action_probability)
+  spread(trial_type, action_probability) 
   
 ```
+
+Analyze the overlap -- may need to rethink cases where a state is not visited
+```{r}
+distributional_similarity_data = distributional_similarity_data %>%
+  group_by(isomorphic, fractal_square_cycles, subject_id, perm) %>% 
+  summarize(L1 = sum(abs(door-fractal), na.rm=T)) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_square_cycles, subject_id) %>% 
+  summarize(avg_L1 = mean(L1), min_L1 = min(L1)) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_square_cycles) %>% 
+  summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
+            avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1))
+
+distributional_similarity_data
+```
+
