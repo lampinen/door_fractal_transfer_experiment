@@ -326,13 +326,13 @@ ggsave("figures/ex1/curve_plot.png", width=7,height=5)
 
 
 ```{r}
-ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, linetype=trial_type, color=isomorphic, group=trial_type)) +
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, linetype=trial_type, color=group, group=trial_type)) +
   geom_line() +
-  geom_point() +
+  geom_point(size=2) +
   geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
   geom_errorbar(aes(ymin=pct_correct_95ci_lower, ymax=pct_correct_95ci_upper), width=0.5) +
 #  ylim(0,1) +
-  facet_wrap(~ subject_id)
+  facet_wrap(~ isomorphic + subject_id)
 ```
 
 ```{r}
@@ -561,3 +561,25 @@ when_noticed_model = lm(when_noticed~  isomorphic * total_pct_correct_z, data=s2
 summary(sl_model)
 ```
 
+# distributional similarity analyses
+
+getting a distribution for each subject
+```{r}
+distributional_data = main_data %>%
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, trial_type, location, goal, action) %>% 
+  summarize(action_count = n()) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, trial_type, location, goal) %>% 
+  mutate(action_probability = action_count/sum(action_count)) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, trial_type) %>% 
+  complete(location, goal, action, fill=list(action_count=0, action_probability=0.)) %>%
+  ungroup()
+```
+
+
+Computing the L1 distance between the subjects door and fractal distribtuions averaged across all possible isomorphisms between the structures. Note that this is correlational -- can't tell if transfer or just due to the similar structures leading to similar behavior. Also since there is no canonical way to map between non-isomorphic groups, there could be some weird effects... Have to think carefully about it.
+
+```{r}
+
+```
