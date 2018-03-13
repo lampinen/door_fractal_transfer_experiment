@@ -287,8 +287,8 @@ collapsed_main_data = main_data %>%
             pct_correct_se=sqrt(pct_correct * (1-pct_correct))/sqrt(n()),
             pct_correct_95ci_lower=pct_correct-1.96*pct_correct_se,
             pct_correct_95ci_upper=pct_correct+1.96*pct_correct_se) %>%
-  ungroup() %>%
-  mutate(session = factor(session))
+  ungroup() # %>%
+  #mutate(session = factor(session))
 ```
 
 ```{r}
@@ -574,12 +574,12 @@ distributional_data = main_data %>%
   ungroup() %>%
   group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type) %>% 
   complete(location, goal, action, fill=list(action_count=NA, action_probability=NA)) %>%
-  ungroup() #%>%
-  # group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal) %>% 
-  # mutate(never_visited = all(is.na(action_count)),
-  #        action_probability=ifelse(never_visited, NA, 
-  #                                  ifelse(is.na(action_probability), 0., action_probability))) %>%
-  # ungroup() 
+  ungroup() %>%
+  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal) %>% 
+  mutate(never_visited = all(is.na(action_count)),
+         action_probability=ifelse(never_visited, NA, 
+                                   ifelse(is.na(action_probability), 0., action_probability))) %>%
+  ungroup() 
   
 ```
 
@@ -691,24 +691,37 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
                              )))))))
                       ))) %>% 
   select(-action_count, -group) %>%
-  spread(trial_type, action_probability) 
-  
-```
-
-Analyze the overlap -- may need to rethink cases where a state is not visited
-```{r}
-distributional_similarity_data = distributional_similarity_data %>%
+  spread(trial_type, action_probability) %>%
 #  filter(!(subject_id %in% c(5, 7, 15, 26))) %>% # exclude subjects who showed obvious learning -- is there still an effect
   group_by(isomorphic, fractal_square_cycles, subject_id, perm) %>% 
   summarize(L1 = sum(abs(door-fractal), na.rm=T)) %>%
   ungroup() %>%
   group_by(isomorphic, fractal_square_cycles, subject_id) %>% 
-  summarize(avg_L1 = mean(L1), min_L1 = min(L1)) %>%
-  ungroup() %>%
+  summarize(avg_L1 = mean(L1), min_L1 = min(L1),
+            perm_at_min = perm[which(L1 == min_L1)][1],
+            perm_at_min_swaps = mean(perm[which(L1 == min_L1)] %in% c(2,4,5,7)) * fractal_square_cycles[1]) %>% # in case multiple mins
+  ungroup()
+ 
+```
+
+```{r}
+
+distributaional_similarity_summary = distributional_similarity_data %>%
   group_by(isomorphic, fractal_square_cycles) %>% 
   summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
             avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1))
 
-distributional_similarity_data
+distributaional_similarity_summary 
+```
+
+# does distributional similarity predict correspondence?
+
+```{r}
+dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_data)
+```
+
+```{r}
+dist_corr_correct_model = glm(correspondence_correct ~ fractal_square_cycles + total_pct_correct_z + perm_at_min_swaps, data=dist_corr_data)
+summary(dist_corr_correct_model)
 ```
 
