@@ -20,14 +20,14 @@
         return a[Math.floor(Math.random() * a.length)];
     }
 
-    let this_group =  new square_cycles();
+    let this_group =  new hexagon_tri();
     var elements = this_group.get_elements();
 
-    var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/grn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/ylw_pnk.png', 'images/ylw_slt.png'];
+    var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/ylw_slt.png'];
     jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
         
     var this_mutagen_assignment = [1, 0];
-    var this_room_assignment = ["red", "green", "blue", "grey", "orange", "pink", "yellow", "purple"];
+    var this_room_assignment = ["red", "green", "blue", "grey", "yellow", "purple"];
     var this_door_generator_assignment = [1, 0];
     var this_door_color_assignment = ["white", "black"];
 
@@ -76,22 +76,21 @@
     shuffle(dragging_images);
     var drag_test = {
 	type: 'drag-drop-on-image',
-	background_image: "images/diagrams/square_cycles.png",
+	background_image: "images/diagrams/hexagon_bi.png",
 	dragging_images: dragging_images,
-	target_locations: [{"x": 280, "y": 0}, {"x": 500, "y": 0},
-            {"x": 281, "y": 220}, {"x": 500, "y": 220},
-            {"x": 180, "y": 104}, {"x": 401, "y": 103},
-            {"x": 180, "y": 320}, {"x": 400, "y": 320}],
+	target_locations: [{"x": 341, "y": 0}, {"x": 500, "y": 84},
+            {"x": 500, "y": 237}, {"x": 341, "y": 320},
+            {"x": 180, "y": 237}, {"x": 180, "y": 84}],
 	location_labels: [0, 1],
         preplaced_image: this_fractal_assignment[0],
-        preplaced_image_location: 6, // This is the ``0'' location in the group_theory.js representation 
+        preplaced_image_location: 0, // This is the ``0'' location in the group_theory.js representation 
         instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = acid, blue arrows = gamma ray). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
     }
 
     var diagram_selection = {
 	type: 'survey-multi-choice',
 	questions: [ "The fractal relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
-	 options: [["<img src='images/diagrams/square_cycles.png'>", "<img src='images/diagrams/tri_cycles.png'>"]],
+	 options: [["<img src='images/diagrams/hexagon_bi.png'>", "<img src='images/diagrams/hexagon_tri.png'>"]],
     }
 
     var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
@@ -102,7 +101,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [correspondence_identification, diagram_selection, drag_test, test_room, test_room_2, test_fractal, test_fractal_2],
+            timeline: [drag_test, correspondence_identification, diagram_selection, test_room, test_room_2, test_fractal, test_fractal_2],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
