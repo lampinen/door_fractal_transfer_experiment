@@ -132,6 +132,8 @@ def BFS(state, goal, group, generators=None):
 
 def BFS_unique_optimal_action(state, goal, group):
     """Returns *unique* optimal action if it exists, or -1 if not unique""" 
+    if state == goal:
+        return -1
 
     solution_paths = BFS(state, goal, group)
     if len(solution_paths) > 1:
@@ -153,16 +155,31 @@ if __name__ == "__main__":
 #    np.savetxt("d6_table.csv", d6_table, fmt='%i', delimiter=',')
 #    np.savetxt("dc12_table.csv", dc12_table, fmt='%i', delimiter=',')
 
-    sq = square_cycles() 
-    tr = tri_cycles() 
-    sq_table = np.full([8, 8], fill_value=-1)
+#    sq = square_cycles() 
+#    tr = tri_cycles() 
+#    sq_table = np.full([8, 8], fill_value=-1)
+#
+#    tr_table = np.full([8, 8], fill_value=-1)
+#
+#    for state in xrange(8):
+#        for goal in xrange(8):
+#            sq_table[state, goal] = BFS_unique_optimal_action(state, goal, sq) 
+#            tr_table[state, goal] = BFS_unique_optimal_action(state, goal, tr) 
+#
+#    np.savetxt("sq_table.csv", sq_table, fmt='%i', delimiter=',')
+#    np.savetxt("tr_table.csv", tr_table, fmt='%i', delimiter=',')
 
-    tr_table = np.full([8, 8], fill_value=-1)
 
-    for state in xrange(8):
-        for goal in xrange(8):
-            sq_table[state, goal] = BFS_unique_optimal_action(state, goal, sq) 
-            tr_table[state, goal] = BFS_unique_optimal_action(state, goal, tr) 
+    hb = hexagon_bi() 
+    ht = hexagon_tri() 
+    hb_table = np.full([6, 6], fill_value=-1)
 
-    np.savetxt("sq_table.csv", sq_table, fmt='%i', delimiter=',')
-    np.savetxt("tr_table.csv", tr_table, fmt='%i', delimiter=',')
+    ht_table = np.full([6, 6], fill_value=-1)
+
+    for state in xrange(6):
+        for goal in xrange(6):
+            hb_table[state, goal] = BFS_unique_optimal_action(state, goal, hb) 
+            ht_table[state, goal] = BFS_unique_optimal_action(state, goal, ht) 
+
+    np.savetxt("hb_table.csv", hb_table, fmt='%i', delimiter=',')
+    np.savetxt("ht_table.csv", ht_table, fmt='%i', delimiter=',')

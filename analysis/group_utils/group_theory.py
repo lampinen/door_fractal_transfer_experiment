@@ -128,3 +128,100 @@ class tri_cycles(object):
 		
 	return res 
 
+
+
+class hexagon_bi(object):
+    def __init__(self):
+        self.order = 6 
+
+    def get_some_generators(self):
+        return [0, 1]
+
+    def operation(self, x, y):
+	if (y != 0 and y != 1):
+	    print("Hexagon bi operation error!");
+	    return y;
+
+	if (y == 1):
+	    if (x == 0):
+		res = 1;
+	    elif (x == 1):
+		res = 0;
+	    elif (x == 2):
+		res = 3;
+	    elif (x == 3):
+		res = 2;
+	    elif (x == 4):
+		res = 5;
+	    elif (x == 5):
+		res = 4;
+	    else:
+		print("Hexagon bi operation error!");
+		return x;
+	else:
+	    if (x == 0):
+		res = 5;
+	    elif (x == 1):
+		res = 2;
+	    elif (x == 2):
+		res = 1;
+	    elif (x == 3):
+		res = 4;
+	    elif (x == 4):
+		res = 3;
+	    elif (x == 5):
+		res = 0;
+	    else:
+		print("Hexagon bi operation error!");
+		return x;
+
+	return res
+	
+
+class hexagon_tri(object):
+    def __init__(self):
+        self.order = 6 
+
+    def get_some_generators(self):
+        return [0, 1]
+
+    def operation(self, x, y):
+	if (y != 0 and y != 1):
+	    print("Hexagon tri operation error! %i %i" % (x, y))
+	    return y;
+
+	if (y == 1):
+	    if (x == 0):
+		res = 1;
+	    elif (x == 1):
+		res = 5;
+	    elif (x == 5):
+		res = 0;
+	    elif (x == 2):
+		res = 3;
+	    elif (x == 3):
+		res = 4;
+	    elif (x == 4):
+		res = 2;
+	    else:
+                print("Hexagon tri operation error! %i %i" % (x, y))
+		return x;
+	else:
+	    if (x == 0):
+		res = 5;
+	    elif (x == 4):
+		res = 0;
+	    elif (x == 5):
+		res = 4;
+	    elif (x == 1):
+		res = 3;
+	    elif (x == 2):
+		res = 1;
+	    elif (x == 3):
+		res = 2;
+	    else:
+                print("Hexagon tri operation error! %i %i" % (x, y))
+		return x;
+        return res
+
+
