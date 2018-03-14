@@ -294,3 +294,146 @@ tri_cycles.prototype.operation = function(x, y) {
     
     return res
 }
+
+// hexagon with 2-cycles
+
+function hexagon_bi() {
+    this.order = 6;
+    this.elements = range(6);
+}
+
+hexagon_bi.prototype.get_order = function() {
+    return this.order;
+}
+
+hexagon_bi.prototype.get_elements = function() {
+    return this.elements;
+}
+
+hexagon_bi.prototype.get_name = function() {
+    return "hexagon_bi"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+hexagon_bi.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+hexagon_bi.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Hexagon bi operation error!");
+        return y;
+    }
+
+    var res;
+    if (y == 1) {
+        if (x == 0) {
+            res = 1;
+        } else if (x == 1) {
+            res = 0; 
+        } else if (x == 2) {
+            res = 3;
+        } else if (x == 3) {
+            res = 2;
+        } else if (x == 4) {
+            res = 5;
+        } else if (x == 5) {
+            res = 4;
+        } else {
+            alert("Hexagon bi operation error!");
+            return x;
+        }
+    } else { // y == 0
+        if (x == 0) {
+            res = 5;
+        } else if (x == 1) {
+            res = 2; 
+        } else if (x == 2) {
+            res = 1;
+        } else if (x == 3) {
+            res = 4;
+        } else if (x == 4) {
+            res = 3;
+        } else if (x == 5) {
+            res = 0;
+        } else {
+            alert("Hexagon bi operation error!");
+            return x;
+        }
+    }
+    
+    return res
+}
+
+// hexagon with 3-cycles
+
+function hexagon_tri() {
+    this.order = 6;
+    this.elements = range(6);
+}
+
+hexagon_tri.prototype.get_order = function() {
+    return this.order;
+}
+
+hexagon_tri.prototype.get_elements = function() {
+    return this.elements;
+}
+
+hexagon_tri.prototype.get_name = function() {
+    return "hexagon_tri"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+hexagon_tri.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+hexagon_tri.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Hexagon tri operation error!");
+        return y;
+    }
+
+    var res;
+    if (y == 1) {
+        if (x == 0) {
+            res = 1;
+        } else if (x == 1) {
+            res = 5; 
+        } else if (x == 5) {
+            res = 0;
+        } else if (x == 2) {
+            res = 3;
+        } else if (x == 3) {
+            res = 4;
+        } else if (x == 4) {
+            res = 2;
+        } else {
+            alert("Hexagon tri operation error!");
+            return x;
+        }
+    } else { // y == 0
+        if (x == 0) {
+            res = 5;
+        } else if (x == 4) {
+            res = 0;
+        } else if (x == 5) {
+            res = 4;
+        } else if (x == 1) {
+            res = 3; 
+        } else if (x == 2) {
+            res = 1;
+        } else if (x == 3) {
+            res = 2;
+        } else {
+            alert("Hexagon tri operation error!");
+            return x;
+        }
+    }
+    
+    return res
+}
+
