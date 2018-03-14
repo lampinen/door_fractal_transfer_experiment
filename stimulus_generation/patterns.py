@@ -1,7 +1,7 @@
 """Generating patterns of location visits for the experiment"""
 from numpy.random import shuffle
-num_locations = 8
-num_trials = 50
+num_locations = 6
+num_trials = 60
 
 num_perms = (num_trials // num_locations) + 1
 
