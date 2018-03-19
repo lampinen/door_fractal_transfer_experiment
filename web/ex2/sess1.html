@@ -71,57 +71,6 @@
 
 
         var block_timeline = [
-            {start: 4, goal: 1},
-            {start: 1, goal: 5},
-            {start: 5, goal: 3},
-            {start: 3, goal: 2},
-            {start: 2, goal: 0},
-            {start: 0, goal: 1},
-            {start: 1, goal: 3},
-            {start: 3, goal: 4},
-            {start: 4, goal: 5},
-            {start: 5, goal: 2},
-            {start: 2, goal: 0},
-            {start: 0, goal: 2},
-            {start: 2, goal: 5},
-            {start: 5, goal: 0},
-            {start: 0, goal: 3},
-            {start: 3, goal: 4},
-            {start: 4, goal: 1},
-            {start: 1, goal: 3},
-            {start: 3, goal: 5},
-            {start: 5, goal: 1},
-            {start: 1, goal: 4},
-            {start: 4, goal: 2},
-            {start: 2, goal: 0},
-            {start: 0, goal: 3},
-            {start: 3, goal: 2},
-            {start: 2, goal: 1},
-            {start: 1, goal: 0},
-            {start: 0, goal: 5},
-            {start: 5, goal: 4},
-            {start: 4, goal: 3},
-            {start: 3, goal: 4},
-            {start: 4, goal: 2},
-            {start: 2, goal: 0},
-            {start: 0, goal: 1},
-            {start: 1, goal: 5},
-            {start: 5, goal: 4},
-            {start: 4, goal: 3},
-            {start: 3, goal: 1},
-            {start: 1, goal: 0},
-            {start: 0, goal: 5},
-            {start: 5, goal: 2},
-            {start: 2, goal: 1},
-            {start: 1, goal: 4},
-            {start: 4, goal: 0},
-            {start: 0, goal: 2},
-            {start: 2, goal: 3},
-            {start: 3, goal: 5},
-            {start: 5, goal: 2},
-            {start: 2, goal: 4},
-            {start: 4, goal: 0},
-            {start: 0, goal: 5},
             {start: 5, goal: 3},
             {start: 3, goal: 1},
             {start: 1, goal: 0},
@@ -170,7 +119,8 @@
             {start: 0, goal: 2},
             {start: 2, goal: 4},
             {start: 4, goal: 1},
-            {start: 1, goal: 5}
+            {start: 1, goal: 5},
+            {start: 5, goal: 3}
         ]
 
         var welcome_instructions = {
@@ -187,7 +137,7 @@
             show_clickable_nav: true,
             pages: [
                 "You are now returning to the second experiment, which investigates learning of relationships between visual patterns.",
-                "As a reminder, in this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. However, the results are not always predictable. Your job is to learn to make a particular fractal, by using acid (by pressing 'a' on your keyboard) or gamma rays (by pressing 'g')."
+                "As a reminder, in this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn\'s moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow rules, but because mutations are somewhat random the rules only hold most of the time. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g')." 
             ]
         }
 
@@ -213,7 +163,7 @@
             show_clickable_nav: true,
             pages: [
                "You are now returning to the first experiment, which investigates spatial learning.",
-               "As a reminder, in this experiment, you are exploring a haunted house. The house has many rooms, each of a different color.  Your task will be to learn to find your way to any room from any other room.  Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and you will get a chance to learn when you can get to from each room. BEWARE: because the house is haunted, the dark passages between the rooms may not always take you to the same place..."
+               "As a reminder, in this experiment, you are exploring a haunted house. The house has many rooms, each of a different color. Your task is to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right. Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and over the experiment you will get a chance to learn where each door goes. However, BEWARE: because the house is haunted, the dark passages between the rooms may occasionally lead you to a different place than they usually do..." 
             ]
         }
 
