@@ -82,6 +82,8 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var tube_bend_angle = -0.25 * Math.PI;
     var tube_bend_fudge = -0.05; // slop to make bezier curve tube approx. same width throughout
     var tube_2_len = 0.7;
+
+
     
     // to hold drop location
     var drop_x, drop_y;
@@ -595,6 +597,9 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         return new_location;
     }
 
+
+    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
+    var earning_string = "(+4" + cent_sign + ")";
     function display_congratulations() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         draw.fillStyle = "White";
@@ -602,7 +607,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.fillStyle = "Black";
         draw.textAlign = "center";
         draw.font = "50px Helvetica";
-        draw.fillText("You did it!", canvas.width/2, canvas.height/2);
+        draw.fillText("You did it! " + earning_string, canvas.width/2, canvas.height/2);
 
     }
 

@@ -566,6 +566,8 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         return new_location;
     }
 
+    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
+    var earning_string = "+4" + cent_sign;
     function display_congratulations() {
         // reduce opacity of background
         draw.globalAlpha = 0.9;
@@ -577,6 +579,8 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.fillStyle = "white";
         draw.font = "40px Arial";
         draw.fillText("Congratulations!", canvas.width/2, canvas.height/2);
+        draw.fillText(earning_string, canvas.width/2, canvas.height/2 + 75);
+
     }
 
     canvas.addEventListener('mousedown', function(e) {
