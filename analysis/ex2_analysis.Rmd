@@ -1,0 +1,771 @@
+---
+title: "Implicit Learning Experiment 0 Analysis"
+output: html_notebook
+---
+
+```{r}
+library(rjson)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+library(lmerTest)
+```
+
+# Data loading
+```{r}
+num_subjects = 62
+data_dir = "../anonymized_data/ex2"
+drag_drop_target_locations_order = 1:6
+```
+
+```{r message=FALSE, warning=FALSE}
+auxiliary_data = list()
+main_data = data.frame()
+question_data = data.frame()
+for (i in 1:num_subjects) {
+  if (!all(file.exists(c(
+    sprintf("%s/%s/%i.json", data_dir,"aux",i),
+    sprintf("%s/%s/%i.json", data_dir,"s0",i),
+    #sprintf("%s/%s/%i.json", data_dir,"s1",i),
+    sprintf("%s/%s/%i.json", data_dir,"s2",i)
+  )))) {
+    print(sprintf("Skipping %i -- missing file", i))
+    next
+  }
+  aux_d_list = fromJSON(file=sprintf("%s/%s/%i.json", data_dir,"aux",i))
+  aux_d_frame = data.frame(aux_d_list[c("fractal_hexagon_bi", "isomorphic")])
+  aux_d_frame$subject_id = i
+  aux_d_frame$this_fractal_assignment = list(aux_d_list$this_fractal_assignment)
+  aux_d_frame$this_room_assignment = list(aux_d_list$this_room_assignment)
+  aux_d_frame$this_mutagen_assignment = list(aux_d_list$this_mutagen_assignment)
+  aux_d_frame$this_door_color_assignment = list(aux_d_list$this_door_color_assignment)
+  aux_d_frame$this_door_generator_assignment = list(aux_d_list$this_door_generator_assignment)
+  auxiliary_data = rbind(auxiliary_data, aux_d_frame)
+  
+  for (s in c(0, 2)) {
+    main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
+    main_d_frame = data.frame()
+    question_d_frame = data.frame()
+    for (trial_i in 1:length(main_d_list)) {
+      this_trial = main_d_list[[trial_i]]
+      
+      if (this_trial$trial_type == "two-door-navigation" | this_trial$trial_type == "fractal-mutation") {
+        # data trial
+        this_trial$location_rts = fromJSON(this_trial$location_rts)
+        this_trial$action_history = fromJSON(this_trial$action_history)
+        this_trial$location_history = fromJSON(this_trial$location_history)[1:length(this_trial$action_history)] # chop off known last location
+        
+        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed", "location_history", "action_history", "location_rts")])
+        this_trial_d$session = s
+#        if (this_trial$trial_type == "two-door-navigation") {
+#          this_trial_d$object_history = list(fromJSON(this_trial$door_history))
+#        } else {
+#          this_trial_d$object_history = list(fromJSON(this_trial$mutagen_history))
+#        }
+        main_d_frame = bind_rows(main_d_frame, this_trial_d)
+      } else if (grepl("survey",this_trial$trial_type)) {
+        # debrief or demographics
+        parsed_responses = fromJSON(this_trial$responses)
+        for (name in names(parsed_responses)) {
+          this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+          this_Q_d$session = s
+          this_Q_d$name = name
+          this_Q_d$response = as.character(parsed_responses[[name]])
+          question_d_frame = bind_rows(question_d_frame, this_Q_d)
+        }
+      } else if (grepl("drag-drop-on-image",this_trial$trial_type)) {
+        this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+        this_Q_d$session = s
+        this_Q_d$assignments = list(this_trial$assignments)
+        this_Q_d$num_assignments_correct = sum(this_trial$assignments[drag_drop_target_locations_order] == aux_d_frame$this_fractal_assignment[[1]]) #TODO: fix
+        question_d_frame = bind_rows(question_d_frame, this_Q_d)      
+      } else {
+        # instructions or other
+        next
+      }
+    }
+    main_d_frame$subject_id = i
+    main_data = bind_rows(main_data, main_d_frame)
+    if (nrow(question_d_frame) > 0) {
+      question_d_frame$subject_id = i
+      question_data = bind_rows(question_data, question_d_frame)
+    }
+  }
+}
+
+auxiliary_data = data.frame(auxiliary_data)
+main_data = data.frame(main_data)
+question_data = data.frame(question_data)
+```
+# data manipulation
+Easy get of condition variables
+```{r}
+main_data = inner_join(main_data, 
+                       auxiliary_data %>%
+                         select(fractal_hexagon_bi, isomorphic, subject_id))
+```
+
+Some renaming for convenience/clarity
+```{r}
+main_data = main_data %>%
+  rename(location=location_history, action=action_history) %>%
+  mutate(group = ifelse(grepl("hexagon_bi", group), "hexagon_bi", "hexagon_tri"),
+         trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"))
+```
+
+Load correct action info
+```{r}
+hb_opt_tab = read.csv('group_utils/hb_table.csv', header=F)
+hb_opt_tab[hb_opt_tab == -1] = NA
+ht_opt_tab = read.csv('group_utils/ht_table.csv', header=F)
+ht_opt_tab[ht_opt_tab == -1] = NA
+
+hb_optimal_action = function(state, goal) {
+  return(hb_opt_tab[state+1, goal+1])
+}
+hb_optimal_action = Vectorize(hb_optimal_action)
+
+ht_optimal_action = function(state, goal) {
+  return(ht_opt_tab[state+1, goal+1])
+}
+ht_optimal_action = Vectorize(ht_optimal_action)
+```
+
+Label actions as correct or incorrect
+```{r}
+main_data = main_data %>%
+  mutate(correct_action = ifelse(group=="hexagon_bi",
+                                 hb_optimal_action(location, goal),
+                                 ht_optimal_action(location, goal)),
+         action_correct = action == correct_action)
+```
+
+# question data manipulation
+
+```{r}
+question_data = question_data %>%
+  mutate(question = ifelse(session < 2 | trial_index == 118,
+                           "comments",
+                    ifelse(trial_index == 105,
+                           "door_hyp_guess",
+                    ifelse(trial_index == 106,
+                           "fractal_hyp_guess",
+                    ifelse(trial_index == 107,
+                           "diagram_selection",
+                    ifelse(trial_index == 108,
+                           "drag_drop_on_diagram",
+                    ifelse(trial_index == 109,
+                           "similarity_likert",
+                    ifelse(trial_index == 110,
+                           "similarity_descr",
+                    ifelse(trial_index == 111,
+                           "correspondence_suspect",
+                    ifelse(trial_index == 112,
+                           "when_noticed",
+                    ifelse(trial_index == 113,
+                           "correspondence_descr",
+                    ifelse(trial_index == 114,
+                           "one_task_helpful_for_other",
+                    ifelse(trial_index == 115,
+                           "which_condition",
+                    ifelse(trial_index == 116 & name == "Q0",
+                           "correspondence_identify",
+                    ifelse(trial_index == 116 & name == "Q1",
+                           "correspondence_identify_confidence",
+                    ifelse(trial_index == 117 & name == "Q0",
+                           "age",
+                    ifelse(trial_index == 117 & name == "Q1",
+                           "education",
+                    ifelse(trial_index == 117 & name == "Q2",
+                           "gender",
+                    ifelse(trial_index == 117 & name == "Q3",
+                           "race",
+                           NA)))))))))))))))))))
+  
+
+any(is.na(question_data$question))
+```
+
+hacky way of doing exactly the comparison I want to do (vector-wise comparison of vectors whose elements are lists).
+```{r}
+compare_lists_of_lists = function(l1, l2) {
+  res = c()
+  for (i in 1:length(l1)) {
+    if (identical(l1[[i]], l2[[i]])) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+
+compare_lol_to_list = function(lol, l) {
+  res = c()
+  for (i in 1:length(lol)) {
+    if (identical(lol[[i]], l)) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+```
+
+```{r}
+question_data = inner_join(question_data,
+                           auxiliary_data %>%
+                             select(fractal_hexagon_bi,
+                                    isomorphic,
+                                    this_door_color_assignment,
+                                    this_door_generator_assignment,
+                                    this_mutagen_assignment,
+                                    subject_id)) %>%
+  mutate(correspondence_correct = ifelse(question != "correspondence_identify" | !isomorphic,
+                                         NA,
+                                         (substring(response, 47) == " ray" & compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment)) | (substring(response, 47) == "acid" & !compare_lists_of_lists(this_door_generator_assignment, this_mutagen_assignment))))
+```
+
+```{r}
+question_data = question_data %>%
+  mutate(subject_id = factor(subject_id))
+```
+
+# demographics
+
+```{r}
+demographic_data = question_data %>%
+  filter(question %in% c("race", "gender", "age", "education")) %>%
+  select(subject_id, question, response) %>%
+  spread(question, response)  %>%
+  mutate(education_high = grepl("PhD|Master|Bachelor", education))
+  
+```
+
+factoring
+```{r}
+main_data = main_data %>% 
+  mutate(trial_type = factor(trial_type),
+         group = factor(group),
+         subject_id = factor(subject_id))
+```
+
+```{r}
+main_data = inner_join(main_data, demographic_data) 
+```
+
+
+# More main data + collapsed data
+
+Centering as appropriate
+```{r}
+main_data = main_data %>%
+  mutate(session_c = session-1, #scale(session, center=T, scale=F), # center session variable
+         trial_index_by_type = ifelse(trial_type == "fractal", trial_index - 55, trial_index-3), # align indices for door and fractal trials
+         trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T)) %>%
+  group_by(subject_id) %>% 
+  mutate(rt_z_by_subj = scale(location_rts, center=T, scale=T)) %>%
+  ungroup()
+```
+
+```{r}
+# quick test
+#main_data = main_data %>% filter(trial_type=="fractal")
+```
+
+
+```{r}
+collapsed_main_data = main_data %>%
+#  filter(trial_index_by_type >= 50) %>%
+  group_by(subject_id, isomorphic, fractal_hexagon_bi, group, trial_type, session) %>%
+  summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)),
+            pct_correct_se=sqrt(pct_correct * (1-pct_correct))/sqrt(n()),
+            pct_correct_95ci_lower=pct_correct-1.96*pct_correct_se,
+            pct_correct_95ci_upper=pct_correct+1.96*pct_correct_se) %>%
+  ungroup() # %>%
+  #mutate(session = factor(session))
+```
+
+```{r}
+fully_summarized_data = collapsed_main_data %>%
+  group_by(isomorphic, group, session) %>%
+  summarize(mean_pct_correct = mean(pct_correct), sd_pct_correct = sd(pct_correct)) %>%
+  mutate(c95_lower = mean_pct_correct - 1.96*sd_pct_correct/sqrt(n()),
+         c95_upper = mean_pct_correct + 1.96*sd_pct_correct/sqrt(n()))
+```
+
+# Most basic analyses
+```{r}
+theme_set(theme_bw() +
+            theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()))
+```
+
+
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=isomorphic, y=pct_correct, fill=group)) +
+  geom_violin()
+```
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, color=isomorphic, group=interaction(subject_id, isomorphic, group, trial_type))) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+#  ylim(0,1) +
+  facet_wrap(~ group)
+```
+```{r}
+ggsave("figures/ex2/curve_plot.png", width=7,height=5)
+```
+
+
+```{r}
+ggplot(data=collapsed_main_data, aes(x=session, y=pct_correct, linetype=trial_type, color=group, group=trial_type)) +
+  geom_line() +
+  geom_point(size=2) +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+  geom_errorbar(aes(ymin=pct_correct_95ci_lower, ymax=pct_correct_95ci_upper), width=0.5) +
+#  ylim(0,1) +
+  facet_wrap(~ isomorphic + subject_id)
+```
+
+```{r}
+ggsave("figures/ex2/individual_curve_plot.png", width=10,height=10)
+```
+
+```{r}
+ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fill=isomorphic)) +
+  geom_bar(stat="identity",position="dodge") +
+  geom_errorbar(aes(ymin=c95_lower, ymax = c95_upper), position=position_dodge(width=1), width=0.5) +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+  ylim(0,1) +
+  facet_wrap(~ group)
+```
+
+```{r}
+#ggsave("figures/ex2/basic_plot.png", width=7,height=5)
+```
+
+# basic models
+## pct correct correlation
+```{r}
+pcc_data = collapsed_main_data %>%
+  mutate(pct_correct = pct_correct-0.5) %>% #center at chance
+  select(-c(group, pct_correct_se, pct_correct_95ci_lower, pct_correct_95ci_upper)) %>%
+  spread(trial_type, pct_correct) %>%
+  rename(fractal_pct_correct = fractal,
+         door_pct_correct = door) 
+```
+
+```{r}
+pcc_data %>%
+  group_by(isomorphic) %>%
+  summarize(pct_correct_dot = mean(fractal_pct_correct * door_pct_correct), pct_correct_dot_sd = sd(fractal_pct_correct * door_pct_correct))
+```
+
+```{r}
+ggplot(data=pcc_data, aes(x=door_pct_correct, y=fractal_pct_correct, color=isomorphic)) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1, linetype=2, alpha=0.5) +
+  xlim(-0.5,0.5) +
+  ylim(-0.5,0.5) +
+  facet_wrap(~ isomorphic)
+```
+```{r}
+pcc2_data = pcc_data %>%
+  group_by(subject_id, isomorphic) %>%
+  summarize(pct_correct_dot = mean(fractal_pct_correct * door_pct_correct))
+```
+
+```{r}
+ggplot(data=pcc2_data, aes(x=isomorphic, y= pct_correct_dot, color=isomorphic)) +
+  geom_point(position="jitter")
+```
+
+
+```{r}
+pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + fractal_hexagon_bi + (1|subject_id), data=pcc_data)
+summary(pc_model)
+```
+
+```{r}
+pc2_model=lm(pct_correct_dot ~ isomorphic, data=pcc2_data)
+summary(pc2_model)
+```
+
+
+## action correct
+Just looking at condition and extremely important controls and random effects
+```{r}
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1  + correct_action | subject_id), family=binomial, data=main_data)
+summary(basic_non_time_dependent_model)
+```
+
+Time dependent:
+```{r}
+basic_time_dependent_model = glmer(action_correct ~ isomorphic * group + session_c + I(session_c^2)  + trial_type + trial_index_by_type_z + (1 + correct_action | subject_id), family=binomial, data=main_data)
+summary(basic_time_dependent_model)
+```
+
+
+```{r}
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * group * session_c + trial_index_by_type_z  + (1 + session_c + correct_action | subject_id), family=binomial, data=main_data)
+summary(time_dependent_interaction_model)
+```
+
+
+```{r}
+action_model = glmer(action ~ (isomorphic + session_c + I(session_c^2)) * correct_action * group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + (1 | subject_id), family=binomial, data=main_data)
+summary(action_model)
+```
+
+# num steps
+```{r}
+num_steps_per_trial_data = main_data %>%
+  group_by(subject_id, isomorphic, group, session_c, trial_type, trial_index_by_type_z) %>%
+  summarize(num_steps_needed=n())
+```
+
+```{r}
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c) * group + trial_type + trial_index_by_type_z  + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+summary(ns_time_dependent_model)
+```
+
+# explicit from implicit
+```{r}
+s2_joined_question_data = inner_join(question_data,
+                                     collapsed_main_data %>%
+                                       group_by(subject_id, session, trial_type, isomorphic, fractal_hexagon_bi) %>%
+                                       summarize(pct_correct = mean(pct_correct)) %>%
+                                       ungroup() %>%
+                                       filter(session==2) %>%
+                                       spread(trial_type, pct_correct) %>%
+                                       rename(fractal_pct_correct = fractal, door_pct_correct=door) %>%
+                                       mutate(abs_fpc_d = abs(fractal_pct_correct - 0.5), abs_dpc_d = abs(door_pct_correct - 0.5)))
+```
+
+## drag + drop
+```{r}
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic * fractal_pct_correct + fractal_hexagon_bi, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_model)
+```
+
+## diagram selection
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("hexagon_bi", response), fractal_hexagon_bi, !fractal_hexagon_bi)))
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)),
+       aes(x=fractal_pct_correct, y = ds_correct, color=ds_correct)) +
+  geom_point() +
+  facet_wrap(~ isomorphic)
+```
+
+```{r}
+ds_correct_model = glm(ds_correct ~ fractal_hexagon_bi + isomorphic * fractal_pct_correct, data=s2_joined_question_data)
+summary(ds_correct_model)
+```
+
+# similarity likert
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
+         total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
+         abs_tpc_d = abs(total_pct_correct-0.5))
+```
+
+
+```{r}
+sl_model = lm(response ~  isomorphic * total_pct_correct_z, data=s2_joined_question_data %>%
+                filter(question == "similarity_likert"))
+summary(sl_model)
+```
+
+# one task helpful for other? 
+
+```{r}
+oth_model = lm(response ~  isomorphic * total_pct_correct_z + fractal_hexagon_bi, data=s2_joined_question_data %>%
+                filter(question == "one_task_helpful_for_other"))
+summary(oth_model)
+```
+
+What if we look at deviations from chance rather than just pct correct?
+```{r}
+oth_d_model = lm(response ~  isomorphic * abs_tpc_d + fractal_hexagon_bi, data=s2_joined_question_data %>%
+                filter(question == "one_task_helpful_for_other"))
+summary(oth_d_model)
+```
+
+# correspondence correct
+```{r}
+correspondence_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + total_pct_correct_z, data=s2_joined_question_data)
+summary(correspondence_correct_model)
+```
+```{r}
+cc_data = inner_join(s2_joined_question_data,
+                                         pcc2_data %>%
+                                           rename(subject_pct_correct_correlation=pct_correct_dot))
+```
+```{r}
+correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_hexagon_bi + total_pct_correct_z + subject_pct_correct_correlation, data=cc_data)
+summary(correspondence_correct_model_2)
+```
+# when noticed
+```{r}
+code_when_noticed = function(response) {
+  if(is.na(response)) {
+    return(NA)
+  } else if (response == "During session 1") {
+    return(-2)
+  } else if (response == "Between sessions 1 and 2") {
+    return(-1)
+  } else if (response == "During session 2") {
+    return(0)
+  } else if (response == "Between sessions 2 and 3") {
+    return(1)
+  } else if (response == "During this session") {
+    return(2)
+  } else {
+    return(NA)
+  }
+}
+
+code_when_noticed = Vectorize(code_when_noticed)
+```
+
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(ever_noticed = ifelse(question != "when_noticed", NA,
+                                !(grepl("During these questions|Did not notice",response))),
+         when_noticed = ifelse(is.na(ever_noticed), NA, 
+                               code_when_noticed(response)))
+```
+
+```{r}
+ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic +  total_pct_correct_z, data=s2_joined_question_data)
+summary(ever_noticed_model)
+```
+
+```{r}
+when_noticed_model = lm(when_noticed~  isomorphic * total_pct_correct_z, data=s2_joined_question_data %>%
+                filter(!is.na(when_noticed)))
+summary(sl_model)
+```
+
+# distributional similarity analyses
+
+getting a distribution for each subject
+```{r}
+distributional_data = main_data %>%
+  group_by(isomorphic, fractal_hexagon_bi, group, subject_id, session, trial_type, location, goal, action) %>% 
+  summarize(action_count = n()) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_hexagon_bi, group, subject_id, session, trial_type, location, goal) %>% 
+  mutate(action_probability = action_count/sum(action_count)) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_hexagon_bi, group, subject_id, session, trial_type) %>% 
+  complete(location, goal, action, fill=list(action_count=NA, action_probability=NA)) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_hexagon_bi, group, subject_id, session, trial_type, location, goal) %>% 
+  mutate(never_visited = all(is.na(action_count)),
+         action_probability=ifelse(never_visited, NA, 
+                                   ifelse(is.na(action_probability), 0., action_probability))) %>%
+  ungroup() 
+  
+```
+
+All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that hb_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.) Needs to be redone for new experiment.
+```{r}
+# rotation symmetries
+hb_p2_locs = c(2, 3, 4, 5, 6, 1)
+hb_p2_acts = c(2, 1)
+hb_p3_locs = c(3, 4, 5, 6, 1, 2)
+hb_p3_acts = c(1, 2)
+hb_p4_locs = c(4, 5, 6, 1, 2 ,3)
+hb_p4_acts = c(2, 1)
+hb_p5_locs = c(5, 6, 1, 2, 3, 4)
+hb_p5_acts = c(1, 2)
+hb_p6_locs = c(6, 1, 2, 3, 4, 5)
+hb_p6_acts = c(2, 1)
+# flips
+hb_p7_locs = c(2, 1, 6, 5, 4, 3)
+hb_p7_acts = c(1, 2)
+hb_p8_locs = c(3, 2, 1, 6, 5, 4)
+hb_p8_acts = c(2, 1)
+hb_p9_locs = c(4, 3, 2, 1, 6, 5)
+hb_p9_acts = c(1, 2)
+hb_p10_locs = c(5, 4, 3, 2, 1, 6)
+hb_p10_acts = c(2, 1)
+hb_p11_locs = c(6, 5, 4, 3, 2, 1)
+hb_p11_acts = c(1, 2)
+hb_p12_locs = c(1, 6, 5, 4, 3, 2)
+hb_p12_acts = c(2, 1)
+
+
+# 
+ht_p2_locs = c(6, 5, 4, 3, 2, 1)
+ht_p2_acts = c(2, 1)
+ht_p3_locs = c(4, 5, 6, 1, 2, 3)
+ht_p3_acts = c(1, 2)
+ht_p4_locs = c(3, 2, 1, 6, 5, 4)
+ht_p4_acts = c(2, 1)
+# tri-cycles only has 3 non-trivial isomorphism, but it's easiest to code by making another 8 dummies
+ht_p5_locs = 1:6
+ht_p5_acts = 1:2
+ht_p6_locs = ht_p2_locs
+ht_p6_acts = ht_p2_acts
+ht_p7_locs = ht_p3_locs
+ht_p7_acts = ht_p3_acts
+ht_p8_locs = ht_p4_locs 
+ht_p8_acts = ht_p4_acts 
+ht_p9_locs = 1:6
+ht_p9_acts = 1:2
+ht_p10_locs = ht_p2_locs
+ht_p10_acts = ht_p2_acts
+ht_p11_locs = ht_p3_locs
+ht_p11_acts = ht_p3_acts
+ht_p12_locs = ht_p4_locs 
+ht_p12_acts = ht_p4_acts 
+```
+
+Computing the L1 distance between the subjects door and fractal distribtuions averaged across all possible isomorphisms between the structures. Note that this is correlational -- can't tell if transfer or just due to the similar structures leading to similar behavior. Also since there is no canonical way to map between non-isomorphic groups, there could be some weird effects... Have to think carefully about it.
+
+
+```{r}
+distributional_similarity_data = distributional_data %>%
+  filter(session==2) %>% # TODO: remove and analyze by session?
+  mutate(location = location + 1, # so they can be used as 1-indices
+         action = action + 1,
+         goal = goal + 1)
+
+dd_num_rows = nrow(distributional_similarity_data)
+# create permutations and permute the fractal but not door trials
+distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_num_rows), each=12),] %>%
+  mutate(
+    perm = rep(1:12, dd_num_rows), 
+    location = ifelse(trial_type == "door", location,
+               ifelse(grepl("hexagon_bi", group), 
+                      ifelse(perm==2, hb_p2_locs[location], 
+                      ifelse(perm==3, hb_p3_locs[location],
+                      ifelse(perm==4, hb_p4_locs[location],
+                      ifelse(perm==5, hb_p5_locs[location], 
+                      ifelse(perm==6, hb_p6_locs[location],
+                      ifelse(perm==7, hb_p7_locs[location],
+                      ifelse(perm==8, hb_p8_locs[location], 
+                      ifelse(perm==9, hb_p9_locs[location], 
+                      ifelse(perm==10, hb_p10_locs[location],
+                      ifelse(perm==11, hb_p11_locs[location],
+                      ifelse(perm==12, hb_p12_locs[location], location # default for perm 1
+                             ))))))))))),
+                      ifelse(perm==2, ht_p2_locs[location], 
+                      ifelse(perm==3, ht_p3_locs[location],
+                      ifelse(perm==4, ht_p4_locs[location],
+                      ifelse(perm==5, ht_p5_locs[location], 
+                      ifelse(perm==6, ht_p6_locs[location],
+                      ifelse(perm==7, ht_p7_locs[location],
+                      ifelse(perm==8, ht_p8_locs[location],
+                      ifelse(perm==9, ht_p9_locs[location], 
+                      ifelse(perm==10, ht_p10_locs[location],
+                      ifelse(perm==11, ht_p11_locs[location],
+                      ifelse(perm==12, ht_p12_locs[location], location # default for perm 1
+                             )))))))))))
+                      )),
+    goal = ifelse(trial_type == "door", goal,
+               ifelse(grepl("hexagon_bi", group), 
+                      ifelse(perm==2, hb_p2_locs[goal], 
+                      ifelse(perm==3, hb_p3_locs[goal],
+                      ifelse(perm==4, hb_p4_locs[goal],
+                      ifelse(perm==5, hb_p5_locs[goal], 
+                      ifelse(perm==6, hb_p6_locs[goal],
+                      ifelse(perm==7, hb_p7_locs[goal],
+                      ifelse(perm==8, hb_p8_locs[goal], 
+                      ifelse(perm==9, hb_p9_locs[goal], 
+                      ifelse(perm==10, hb_p10_locs[goal],
+                      ifelse(perm==11, hb_p11_locs[goal],
+                      ifelse(perm==12, hb_p12_locs[goal], goal # default for perm 1
+                             ))))))))))),
+                      ifelse(perm==2, ht_p2_locs[goal], 
+                      ifelse(perm==3, ht_p3_locs[goal],
+                      ifelse(perm==4, ht_p4_locs[goal],
+                      ifelse(perm==5, ht_p5_locs[goal], 
+                      ifelse(perm==6, ht_p6_locs[goal],
+                      ifelse(perm==7, ht_p7_locs[goal],
+                      ifelse(perm==8, ht_p8_locs[goal],
+                      ifelse(perm==9, ht_p9_locs[goal], 
+                      ifelse(perm==10, ht_p10_locs[goal],
+                      ifelse(perm==11, ht_p11_locs[goal],
+                      ifelse(perm==12, ht_p12_locs[goal], goal # default for perm 1
+                             )))))))))))
+                      )),
+    action = ifelse(trial_type == "door", action,
+               ifelse(grepl("hexagon_bi", group), 
+                      ifelse(perm==2, hb_p2_acts[action], 
+                      ifelse(perm==3, hb_p3_acts[action],
+                      ifelse(perm==4, hb_p4_acts[action],
+                      ifelse(perm==5, hb_p5_acts[action], 
+                      ifelse(perm==6, hb_p6_acts[action],
+                      ifelse(perm==7, hb_p7_acts[action],
+                      ifelse(perm==8, hb_p8_acts[action], 
+                      ifelse(perm==9, hb_p9_acts[action], 
+                      ifelse(perm==10, hb_p10_acts[action],
+                      ifelse(perm==11, hb_p11_acts[action],
+                      ifelse(perm==12, hb_p12_acts[action], action # default for perm 1
+                             ))))))))))),
+                      ifelse(perm==2, ht_p2_acts[action], 
+                      ifelse(perm==3, ht_p3_acts[action],
+                      ifelse(perm==4, ht_p4_acts[action],
+                      ifelse(perm==5, ht_p5_acts[action], 
+                      ifelse(perm==6, ht_p6_acts[action],
+                      ifelse(perm==7, ht_p7_acts[action],
+                      ifelse(perm==8, ht_p8_acts[action],
+                      ifelse(perm==9, ht_p9_acts[action], 
+                      ifelse(perm==10, ht_p10_acts[action],
+                      ifelse(perm==11, ht_p11_acts[action],
+                      ifelse(perm==12, ht_p12_acts[action], action # default for perm 1
+                             )))))))))))
+                      ))) %>% 
+  select(-action_count, -group) %>%
+  spread(trial_type, action_probability) %>%
+#  filter(!(subject_id %in% c(5, 7, 15, 26))) %>% # exclude subjects who showed obvious learning -- is there still an effect
+  group_by(isomorphic, fractal_hexagon_bi, subject_id, perm) %>% 
+  summarize(L1 = sum(abs(door-fractal), na.rm=T)) %>%
+  ungroup() %>%
+  group_by(isomorphic, fractal_hexagon_bi, subject_id) %>% 
+  summarize(avg_L1 = mean(L1), min_L1 = min(L1),
+            perm_at_min = perm[which(L1 == min_L1)][1], # in case multiple mins
+            perm_at_min_swaps = mean(perm[which(L1 == min_L1)] %in% c(2,4,6,8,10,12))) %>% #TODO: fix for these isos
+  ungroup()
+ 
+```
+
+```{r}
+
+distributaional_similarity_summary = distributional_similarity_data %>%
+  group_by(isomorphic, fractal_hexagon_bi) %>% 
+  summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
+            avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1))
+
+distributaional_similarity_summary 
+```
+
+# does distributional similarity predict correspondence?
+
+```{r}
+dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_data)
+```
+
+```{r}
+dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + total_pct_correct_z + perm_at_min_swaps, data=dist_corr_data)
+summary(dist_corr_correct_model)
+```
+
