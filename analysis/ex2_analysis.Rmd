@@ -27,7 +27,7 @@ for (i in 1:num_subjects) {
   if (!all(file.exists(c(
     sprintf("%s/%s/%i.json", data_dir,"aux",i),
     sprintf("%s/%s/%i.json", data_dir,"s0",i),
-    #sprintf("%s/%s/%i.json", data_dir,"s1",i),
+    sprintf("%s/%s/%i.json", data_dir,"s1",i),
     sprintf("%s/%s/%i.json", data_dir,"s2",i)
   )))) {
     print(sprintf("Skipping %i -- missing file", i))
@@ -43,7 +43,7 @@ for (i in 1:num_subjects) {
   aux_d_frame$this_door_generator_assignment = list(aux_d_list$this_door_generator_assignment)
   auxiliary_data = rbind(auxiliary_data, aux_d_frame)
   
-  for (s in c(0, 2)) {
+  for (s in 0:2) {
     main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
     main_d_frame = data.frame()
     question_d_frame = data.frame()
@@ -288,8 +288,10 @@ collapsed_main_data = main_data %>%
             pct_correct_se=sqrt(pct_correct * (1-pct_correct))/sqrt(n()),
             pct_correct_95ci_lower=pct_correct-1.96*pct_correct_se,
             pct_correct_95ci_upper=pct_correct+1.96*pct_correct_se) %>%
-  ungroup() # %>%
-  #mutate(session = factor(session))
+  ungroup() %>%
+  group_by(subject_id) %>%
+  mutate(ever_off_chance = any(pct_correct_95ci_lower > 0.5)) %>%
+  ungroup()
 ```
 
 ```{r}
@@ -350,7 +352,7 @@ ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fi
 ```
 
 ```{r}
-#ggsave("figures/ex2/basic_plot.png", width=7,height=5)
+ggsave("figures/ex2/basic_plot.png", width=7,height=5)
 ```
 
 # basic models
@@ -410,13 +412,13 @@ summary(basic_non_time_dependent_model)
 
 Time dependent:
 ```{r}
-basic_time_dependent_model = glmer(action_correct ~ isomorphic * group + session_c + I(session_c^2)  + trial_type + trial_index_by_type_z + (1 + correct_action | subject_id), family=binomial, data=main_data)
+basic_time_dependent_model = glmer(action_correct ~ isomorphic * group + session_c +I(session_c^2) + trial_type + trial_index_by_type_z + (1 + correct_action | subject_id), family=binomial, data=main_data)
 summary(basic_time_dependent_model)
 ```
 
 
 ```{r}
-time_dependent_interaction_model = glmer(action_correct ~ isomorphic * group * session_c + trial_index_by_type_z  + (1 + session_c + correct_action | subject_id), family=binomial, data=main_data)
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic * group * (session_c + I(session_c^2)) + trial_type + trial_index_by_type_z  + (1 + session_c + correct_action | subject_id), family=binomial, data=main_data)
 summary(time_dependent_interaction_model)
 ```
 
@@ -434,7 +436,51 @@ num_steps_per_trial_data = main_data %>%
 ```
 
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c) * group + trial_type + trial_index_by_type_z  + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+num_steps_summarized_data = num_steps_per_trial_data %>%
+  group_by(subject_id, isomorphic, group, session_c, trial_type) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se)
+```
+
+```{r}
+ggplot(data=num_steps_summarized_data, aes(x=session_c, y=num_steps_needed, linetype=trial_type, color=group, group=trial_type)) +
+  geom_line() +
+  geom_point(size=2) +
+  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax=num_steps_needed_95ci_upper), width=0.5) +
+#  ylim(0,1) +
+  facet_wrap(~ isomorphic + subject_id)
+```
+
+```{r}
+ggsave("./figures/ex2/ns_individual_curve_plot.png", width=10, height=10)
+```
+
+```{r}
+num_steps_fully_summarized_data = num_steps_summarized_data  %>%
+  group_by(isomorphic, group, session_c) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  ungroup() %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se)  
+```
+
+
+```{r}
+ggplot(data=num_steps_fully_summarized_data, aes(x=factor(session_c), y=num_steps_needed, fill=isomorphic)) +
+  geom_bar(stat="identity",position="dodge") +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), position=position_dodge(width=1), width=0.5) +
+  facet_wrap(~ group)
+```
+```{r}
+ggsave("figures/ex2/ns_basic_plot.png")
+```
+
+```{r}
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) * group  + trial_type + trial_index_by_type_z  + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 summary(ns_time_dependent_model)
 ```
 
@@ -765,7 +811,7 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + total_pct_correct_z + perm_at_min_swaps, data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + perm_at_min_swaps+ total_pct_correct_z , data=dist_corr_data)
 summary(dist_corr_correct_model)
 ```
 
