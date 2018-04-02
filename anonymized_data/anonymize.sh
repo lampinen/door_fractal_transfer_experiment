@@ -1,5 +1,5 @@
 #!/bin/bash
-subdir=ex0
+subdir=ex2
 origin=../data
 target=.
 
