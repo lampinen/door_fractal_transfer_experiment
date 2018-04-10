@@ -101,7 +101,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [drag_test, correspondence_identification, diagram_selection, test_room, test_room_2, test_fractal, test_fractal_2],
+            timeline: [test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection, drag_test, correspondence_identification],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
