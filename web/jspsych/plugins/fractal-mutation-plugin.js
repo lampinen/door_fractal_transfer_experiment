@@ -13,7 +13,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     //trial.mutagen_generator_assignment = assignment of colors white and black to left and right doors, resp. 
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
-    trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.15 : trial.action_noise; // how often an action "misses"
+    trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
     trial.image_height = trial.image_height || 300;
