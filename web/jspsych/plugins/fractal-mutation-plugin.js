@@ -13,11 +13,19 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     //trial.mutagen_generator_assignment = assignment of colors white and black to left and right doors, resp. 
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
+    //optional: trial.progress, update of progress bar after
+
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
     trial.image_height = trial.image_height || 300;
     trial.image_width = trial.image_width || 300;
+
+    //hacky p-bar update but I don't want to change to jspsych 6
+    if (typeof trial.progress !== 'undefined') {
+      $('body').prepend($('<div id="jspsych-progressbar-container"><span>Completion Progress</span><div id="jspsych-progressbar-outer"><div id="jspsych-progressbar-inner"></div></div></div>'));
+      $('#jspsych-progressbar-inner').css('width', trial.progress + "%");
+    }
 
     display_element.append($('<canvas>', {
         "id": "mutation-canvas",

@@ -14,9 +14,16 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.door_generator_assignment = assignment of door positions to generators (should be [0, 1] or [1, 0])
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
+    //optional: trial.progress, update of progress bar after
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
+
+    //hacky p-bar update but I don't want to change to jspsych 6
+    if (typeof trial.progress !== 'undefined') {
+      $('body').prepend($('<div id="jspsych-progressbar-container"><span>Completion Progress</span><div id="jspsych-progressbar-outer"><div id="jspsych-progressbar-inner"></div></div></div>')); 
+      $('#jspsych-progressbar-inner').css('width', trial.progress + "%");
+    }
 
     display_element.append($('<canvas>', {
         "id": "room-canvas",
@@ -697,6 +704,10 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     }
 
     ////// End room stuff /////////////////////////////////////////////////////////
+      function drawProgressBar() {
+              
+                }
+
     
     function end_function() {
 
@@ -718,6 +729,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
       jsPsych.finishTrial(trial_data);
     }
+
 
     draw_current_room(current_location);
     clickable = true;
