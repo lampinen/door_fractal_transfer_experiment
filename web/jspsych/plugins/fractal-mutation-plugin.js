@@ -23,7 +23,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
     //hacky p-bar update but I don't want to change to jspsych 6
     if (typeof trial.progress !== 'undefined') {
-      $('body').prepend($('<div id="jspsych-progressbar-container"><span>Completion Progress</span><div id="jspsych-progressbar-outer"><div id="jspsych-progressbar-inner"></div></div></div>'));
+      $('body').prepend($('<div id="jspsych-progressbar-container"><span>HIT Progress</span><div id="jspsych-progressbar-outer"><div id="jspsych-progressbar-inner"></div></div></div>'));
       $('#jspsych-progressbar-inner').css('width', trial.progress + "%");
     }
 
