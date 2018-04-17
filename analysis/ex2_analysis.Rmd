@@ -141,6 +141,7 @@ main_data = main_data %>%
          action_correct = action == correct_action)
 ```
 
+
 # question data manipulation
 
 ```{r}
@@ -548,6 +549,54 @@ ggsave("figures/ex2/ns_basic_plot.png")
 ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) * (group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 summary(ns_time_dependent_model)
 ```
+# dumping perf for encouragement
+
+```{r}
+perf_data = num_steps_per_trial_data %>%
+  group_by(group, start, goal) %>%
+  do(data.frame(t(quantile(.$num_steps_needed, probs=seq(0,1, 0.1))))) %>%
+  ungroup()
+```
+```{r}
+#num_steps_per_trial_data %>%
+#  group_by(group, start, goal) %>% 
+#  summarize(max_ns = max(num_steps_needed), min_ns=min(num_steps_needed))
+```
+```{r}
+perf_data = perf_data %>%
+  select(-X90., -X100.) %>%
+  rename(X90=X0., X80=X10., X70=X20., X60=X30., X50=X40., X40=X50., X30=X60., X20=X70., X10=X80.) # "better than" percentiles
+```
+
+```{r}
+hb_perf_structure = rep(list(rep(list(list(X90=NA, X80=NA, X70=NA, X60=NA, X50=NA, X40=NA, X30=NA, X20=NA, X10=NA)), 6)), 6)
+ht_perf_structure = rep(list(rep(list(list(X90=NA, X80=NA, X70=NA, X60=NA, X50=NA, X40=NA, X30=NA, X20=NA, X10=NA)), 6)), 6)
+```
+
+```{r}
+for (start_i in 1:6) {
+  for (goal_i in 1:6) {
+    hb_perf_structure[[start_i]][[goal_i]] = as.list((perf_data %>% 
+                                                filter(start==start_i-1, goal==goal_i-1, group=="hexagon_bi") %>%
+                                                select(-c(group, start, goal)))[1,])
+    ht_perf_structure[[start_i]][[goal_i]] = as.list((perf_data %>% 
+                                                filter(start==start_i-1, goal==goal_i-1, group=="hexagon_tri") %>%
+                                                select(-c(group, start, goal)))[1,])
+  }
+}
+```
+
+```{r}
+write(toJSON(hb_perf_structure),
+      "../web/distributions/hexagon_bi.json")
+```
+
+```{r}
+write(toJSON(ht_perf_structure),
+      "../web/distributions/hexagon_tri.json")
+```
+
+
 
 # explicit from implicit
 ```{r}
