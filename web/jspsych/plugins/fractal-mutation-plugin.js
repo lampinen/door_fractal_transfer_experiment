@@ -626,14 +626,13 @@ jsPsych.plugins['fractal-mutation'] = (function() {
             pct = 20;
         }
 
-        if (pct == 90) {
-            return "You made it in the minimum number of steps!";
-        } else if (pct > 60) {
-            return "You did better than "+pct+"% of participants!";
+        if (pct == 90) { 
+            return ["Congratulations!", "You got there with the minimum number of mutations!"];
+        } else if (pct > 50) { 
+            return ["Pretty good!", "But you could have done even better."];
         } else {
-            return "You did better than "+pct+"% of participants.";
+            return ["You did it.", "But you could have done it much quicker."];
         }
-
     }
 
 

@@ -596,11 +596,11 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         }
 
         if (pct == 90) { 
-            return "You got there in the minimum number of steps!";
-        } else if (pct > 60) { 
-            return "You did better than "+pct+"% of participants!";
+            return ["Congratulations!", "You got there in the minimum number of steps!"];
+        } else if (pct > 50) { 
+            return ["Pretty good!", "But you could have done even better."];
         } else {
-            return "You did better than "+pct+"% of participants.";
+            return ["You got there.", "But you could have gotten there much quicker."];
         }
 
     }
@@ -617,11 +617,11 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.globalAlpha = 1;
         draw.textAlign = "center";
         draw.fillStyle = "white";
+        var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
         draw.font = "40px Arial";
-        draw.fillText("Congratulations!", canvas.width/2, canvas.height/2);
+        draw.fillText(achievement_strings[0], canvas.width/2, canvas.height/2);
         draw.font = "25px Arial";
-        var achievement_string = get_percentile_string(trial.start, trial.goal, num_steps);
-        draw.fillText(achievement_string, canvas.width/2, canvas.height/2 + 75);
+        draw.fillText(achievement_strings[1], canvas.width/2, canvas.height/2 + 75);
 
     }
 
