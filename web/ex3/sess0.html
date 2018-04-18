@@ -11,7 +11,7 @@
     <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
     <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
     <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
-    <link href="css/other.css" rel="stylesheet" type="text/css"></link>
+    <link href="../css/other.css" rel="stylesheet" type="text/css"></link>
 
 </head>
 <body>
@@ -123,9 +123,8 @@
         show_clickable_nav: true,
 	pages: [
 	    "Hi, welcome to our HIT. Please read the following instructions carefully, failure to follow them may result in your work being rejected.<br /><br />Note that if you are colorblind, this task will probably not be possible for you, and you should click 'Return HIT.'",
-	    "We are researchers from the Stanford Department of Psychology who are interested in learning in environments that have some noise or randomness. We are investigating this in several domains, so we have combined two experiments in this HIT: one on spatial learning, and another on learning of relationships between visual patterns. (In today's HIT, they each should take approximately 15 minutes, for 30 minutes total.)",
-	    "Because learning with noise is slow, we are looking at learning over time. We will post a follow-up HIT tomorrow, and another the following day. Each HIT will include the same experiments as this HIT, and should take about 30 minutes, although as you learn the experiments they should take less time. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three.", 
-	    "Note: because we are interested in intuitive learning under noise, we ask that you do your best without relying on notes or other external aids during any of these HITs."
+	    "We are researchers from the Stanford Department of Psychology who are interested in learning over time. We are investigating this in several domains, so we have combined two experiments in this HIT: one on spatial learning, and another on learning of relationships between visual patterns. In today's HIT, they each should take approximately 15 minutes, for 30 minutes total.",
+	    "Because we are investigating learning over time, we will give you the opportunity to do several experiments. We will post a follow-up HIT tomorrow, and another the following day. Each HIT will include the same experiments as this HIT, and should take about 30 minutes, although as you learn the experiments they should take less time. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for the third, for a total of $16 if you complete all three." 
 
 	]
     }
@@ -143,7 +142,7 @@
         show_clickable_nav: true,
 	pages: [
 	    "You are now beginning the second experiment, which investigates learning of relationships between visual patterns.",
-	    "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns, but because mutations are somewhat random the patterns are occasionally broken. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g')."
+	    "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g')."
 	]
     }
 
@@ -160,7 +159,7 @@
         show_clickable_nav: true,
 	pages: [
 	    "You are now beginning the first experiment, which investigates spatial learninhg.",
-	    "In this experiment, you are exploring a haunted house. The house nas many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and over the experiment you will get a chance to learn where each door goes. However, BEWARE: because the house is haunted, the dark passages between the rooms may occasionally lead you to a different place than they usually do..."
+	    "In this experiment, you are exploring a house. The house nas many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go throuh it. Each door will take you down a dark passage to anotherer room, and over the experiment you will get a chance to learn where each door goes."
 	]
 
     }
@@ -225,11 +224,10 @@
             }
         });
     };
+
     // load distribution data, load images, start experiment
     $.getJSON("../distributions/hexagon_bi.json", function(hb_result) {
-            alert("hb")
             $.getJSON("../distributions/hexagon_tri.json", function(ht_result) {
-                    alert("ht")
 		    if (this_group_a.get_name() == "hexagon_bi") {
 			this_group_a.distributions = hb_result;
 		    } else {

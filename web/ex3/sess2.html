@@ -129,7 +129,7 @@
             show_clickable_nav: true,
             pages: [
                 "Hi, welcome to the final session of our HIT. Thank you for returning!.",
-                "As a reminder, this HIT contains two experiments, and should take about 30 minutes total. Because we need data from all three HITS, you will be paid $4 for completing each of the first two HITs, and $8 for this one, for a total of $16 if you complete all three.  Each time you successfully complete a trial in the experiment, we'll show you the amount of the $4 base-pay that you've earned. (Since this is the final session you will also receive an extra $4, for a total of $8.)", // TODO: insert dates and payments
+                "As a reminder, this HIT contains two experiments, and should take about 30 minutes total. Because we need data from all three HITS, you were paid $4 for completing each of the first two HITs, and $8 for this one, for a total of $16 if you complete all three.", // TODO: insert dates and payments
             ]
         }
 
@@ -138,7 +138,7 @@
             show_clickable_nav: true,
             pages: [
                 "You are now returning to the second experiment, which investigates learning of relationships between visual patterns.",
-                "As a reminder, in this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns, but because mutations are somewhat random the patterns are occasionally broken. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g')." 
+                "As a reminder, in this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g')." 
             ]
         }
 
@@ -164,7 +164,7 @@
             show_clickable_nav: true,
             pages: [
                "You are now returning to the first experiment, which investigates spatial learning.",
-               "As a reminder, in this experiment, you are exploring a haunted house. The house has many rooms, each of a different color. Your task is to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right. Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and over the experiment you will get a chance to learn where each door goes. However, BEWARE: because the house is haunted, the dark passages between the rooms may occasionally lead you to a different place than they usually do..." 
+               "As a reminder, in this experiment, you are exploring a house. The house has many rooms, each of a different color. Your task is to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right. Click on a door to go throuh it. Each door will take you down a dark passage to annoter room, and over the experiment you will get a chance to learn where each door goes." 
             ]
         }
 
@@ -268,7 +268,26 @@
 		}
             });
         };
-        jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+
+	// load distribution data, load images, start experiment
+	$.getJSON("../distributions/hexagon_bi.json", function(hb_result) {
+		$.getJSON("../distributions/hexagon_tri.json", function(ht_result) {
+			if (this_group_a.get_name() == "hexagon_bi") {
+			    this_group_a.distributions = hb_result;
+			} else {
+			    this_group_a.distributions = ht_result;
+			}
+
+			if (this_group_b.get_name() == "hexagon_bi") {
+			    this_group_b.distributions = hb_result;
+			} else {
+			    this_group_b.distributions = ht_result;
+			}
+		    
+			jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+		    });
+	    });
+
     };
 </script>
 </html>
