@@ -24,7 +24,6 @@
     var elements = this_group.get_elements();
 
     var this_fractal_assignment = ['images/blu_wht.png', 'images/cyn_red.png', 'images/gry_blk.png', 'images/org_blu.png', 'images/pnk_blu.png', 'images/ylw_slt.png'];
-    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
         
     var this_mutagen_assignment = [1, 0];
     var this_room_assignment = ["red", "green", "blue", "grey", "yellow", "purple"];
@@ -102,10 +101,29 @@
     var start_experiment = function() {
         jsPsych.init({
             timeline: [test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection, drag_test, correspondence_identification],
+            show_progress_bar: true,
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
         })
     };
+    
+    $.getJSON("../web/distributions/hexagon_bi.json", function(hb_result) { // TODO: don't forget to change url
+
+            //TODO: update and expand
+            if (this_group.get_name() == "hexagon_bi") {
+                this_group.distributions = hb_result;
+            }
+            
+            $.getJSON("distributions/hexagon_tri.json", function(ht_result) {// TODO: don't forget to change url
+                    //TODO: update and expand
+                    if (this_group.get_name() == "hexagon_tri") {
+                        this_group.distributions = ht_result;
+                    }
+                
+                    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+                });
+        });
+    
     </script>
 </html>
