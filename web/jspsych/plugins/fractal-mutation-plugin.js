@@ -647,10 +647,10 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.fillStyle = "Black";
         draw.textAlign = "center";
         draw.font = "50px Helvetica";
-        draw.fillText("You did it!", canvas.width/2, canvas.height/2);
+        var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
+        draw.fillText(achievement_strings[0], canvas.width/2, canvas.height/2);
         draw.font = "25px Arial";
-        var achievement_string = get_percentile_string(trial.start, trial.goal, num_steps);
-        draw.fillText(achievement_string, canvas.width/2, canvas.height/2 + 100);
+        draw.fillText(achievement_strings[1], canvas.width/2, canvas.height/2 + 100);
 
 
 
