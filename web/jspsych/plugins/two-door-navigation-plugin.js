@@ -573,8 +573,41 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         return new_location;
     }
 
-    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
-    var earning_string = "+4" + cent_sign;
+
+    function get_percentile_string(start, goal, num_steps) {
+        var quants = trial.group.distributions[start][goal];
+        var pct = 10;
+        if (num_steps <= quants.X90) {
+            pct = 90;
+        } else if (num_steps <= quants.X80) {
+            pct = 80;
+        } else if (num_steps <= quants.X70) {
+            pct = 70;
+        } else if (num_steps <= quants.X60) {
+            pct = 60;
+        } else if (num_steps <= quants.X50) {
+            pct = 50;
+        } else if (num_steps <= quants.X40) {
+            pct = 40;
+        } else if (num_steps <= quants.X30) {
+            pct = 30;
+        } else if (num_steps <= quants.X20) {
+            pct = 20;
+        }
+
+        if (pct == 90) { 
+            return "You got there in the minimum number of steps!";
+        } else if (pct > 60) { 
+            return "You did better than "+pct+"% of participants!";
+        } else {
+            return "You did better than "+pct+"% of participants.";
+        }
+
+    }
+
+//    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
+//    var earning_string = "+4" + cent_sign;
+    var num_steps;
     function display_congratulations() {
         // reduce opacity of background
         draw.globalAlpha = 0.9;
@@ -586,7 +619,9 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.fillStyle = "white";
         draw.font = "40px Arial";
         draw.fillText("Congratulations!", canvas.width/2, canvas.height/2);
-        draw.fillText(earning_string, canvas.width/2, canvas.height/2 + 75);
+        draw.font = "25px Arial";
+        var achievement_string = get_percentile_string(trial.start, trial.goal, num_steps);
+        draw.fillText(achievement_string, canvas.width/2, canvas.height/2 + 75);
 
     }
 
@@ -624,8 +659,9 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
             if (current_location == trial.goal) {
                 setTimeout(function() {
+                    num_steps = door_history.length;
                     display_congratulations();
-                    setTimeout(end_function, 2000); 
+                    setTimeout(end_function, 2500); 
                 }, 500);
             } else {
                 clickable = true;
