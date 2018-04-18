@@ -32,8 +32,8 @@
 <script>
 
 
-    var fractal_hexagon_bi = true; // will fractal task be hexagon_bi (otherwise hexagon_tri) 
-    var isomorphic = false; // will two tasks be isomorphic?
+    var fractal_hexagon_bi = false; // will fractal task be hexagon_bi (otherwise hexagon_tri) 
+    var isomorphic = true; // will two tasks be isomorphic?
 
     if (fractal_hexagon_bi) {
         var this_group_a = new hexagon_bi();
@@ -142,7 +142,7 @@
         show_clickable_nav: true,
 	pages: [
 	    "You are now beginning the second experiment, which investigates learning of relationships between visual patterns.",
-	    "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g')."
+	    "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g'). After you make each fractal, we'll give you feedback on how well you did."
 	]
     }
 
@@ -159,7 +159,7 @@
         show_clickable_nav: true,
 	pages: [
 	    "You are now beginning the first experiment, which investigates spatial learninhg.",
-	    "In this experiment, you are exploring a house. The house has many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes."
+	    "In this experiment, you are exploring a house. The house has many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path."
 	]
 
     }
