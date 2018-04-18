@@ -553,6 +553,9 @@ summary(ns_time_dependent_model)
 
 ```{r}
 perf_data = num_steps_per_trial_data %>%
+  group_by(subject_id, group, start, goal) %>%
+  summarize(num_steps_needed=median(num_steps_needed)) %>%
+  ungroup() %>%
   group_by(group, start, goal) %>%
   do(data.frame(t(quantile(.$num_steps_needed, probs=seq(0,1, 0.1))))) %>%
   ungroup()
