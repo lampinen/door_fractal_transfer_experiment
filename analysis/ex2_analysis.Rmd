@@ -490,18 +490,19 @@ summary(action_model)
 # num steps
 ```{r}
 num_steps_per_trial_data = main_data %>%
-  group_by(subject_id, isomorphic, group, session_c, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
+  group_by(subject_id, isomorphic, group, session_c, session, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
   summarize(num_steps_needed=n(),
             avg_rt=mean(pmin(location_rts/1000, 10)))
 ```
 
 ```{r}
 num_steps_summarized_data = num_steps_per_trial_data %>%
-  group_by(subject_id, isomorphic, group, session_c, trial_type, education_high) %>%
+  group_by(subject_id, isomorphic, group, session_c, session, trial_type, education_high) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
-         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se)
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se) %>%
+  ungroup()
 ```
 
 ```{r}
@@ -546,7 +547,7 @@ ggsave("figures/ex2/ns_basic_plot.png")
 ```
 
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) * (group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2) + group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 summary(ns_time_dependent_model)
 ```
 # dumping perf for encouragement
@@ -590,39 +591,48 @@ for (start_i in 1:6) {
 ```
 
 ```{r}
-write(toJSON(hb_perf_structure),
-      "../web/distributions/hexagon_bi.json")
+#write(toJSON(hb_perf_structure),
+#      "../web/distributions/hexagon_bi.json")
 ```
 
 ```{r}
-write(toJSON(ht_perf_structure),
-      "../web/distributions/hexagon_tri.json")
+#write(toJSON(ht_perf_structure),
+#      "../web/distributions/hexagon_tri.json")
 ```
 
 
 
 # explicit from implicit
 ```{r}
-s2_joined_question_data = inner_join(question_data,
-                                     collapsed_main_data %>%
-                                       group_by(subject_id, session, trial_type, isomorphic, fractal_hexagon_bi, education_high) %>%
-                                       summarize(pct_correct = mean(pct_correct),
-                                                 mean_rt=mean(mean_location_rt)/1000) %>%
-                                       ungroup() %>%
-                                       filter(session==2) %>%
-                                       gather(metric, outcome, pct_correct, mean_rt) %>%
-                                       mutate(condition=paste(trial_type, metric, sep="")) %>%
-                                       select(-c(metric, trial_type)) %>%
-                                       spread(condition, outcome) %>%
-                                       rename(fractal_pct_correct = fractalpct_correct, door_pct_correct=doorpct_correct,
-                                              fractal_mean_rt= fractalmean_rt, door_mean_rt = doormean_rt) %>%
-                                       mutate(abs_fpc_d = abs(fractal_pct_correct - 0.5), abs_dpc_d = abs(door_pct_correct - 0.5),
-                                              mean_rt=(door_mean_rt+fractal_mean_rt)/2))
+s2_joined_question_data = question_data %>% 
+  inner_join(.,
+             collapsed_main_data %>%
+               group_by(subject_id, session, trial_type, isomorphic, fractal_hexagon_bi, education_high) %>%
+               summarize(pct_correct = mean(pct_correct),
+                         mean_rt=mean(mean_location_rt)/1000) %>%
+               ungroup() %>%
+               filter(session==2) %>%
+               gather(metric, outcome, pct_correct, mean_rt) %>%
+               mutate(condition=paste(trial_type, metric, sep="")) %>%
+               select(-c(metric, trial_type)) %>%
+               spread(condition, outcome) %>%
+               rename(fractal_pct_correct = fractalpct_correct, door_pct_correct=doorpct_correct,
+                      fractal_mean_rt= fractalmean_rt, door_mean_rt = doormean_rt) %>%
+               mutate(abs_fpc_d = abs(fractal_pct_correct - 0.5), abs_dpc_d = abs(door_pct_correct - 0.5),
+                      mean_rt=(door_mean_rt+fractal_mean_rt)/2)) %>%
+  inner_join(., 
+             num_steps_summarized_data %>%
+               select(-c(education_high, num_steps_needed_95ci_lower, num_steps_needed_95ci_upper)) %>%
+               filter(session==2) %>%
+               gather(metric, outcome, num_steps_needed, num_steps_needed_se) %>%
+               mutate(condition=paste(trial_type, metric, sep="_")) %>%
+               select(-c(metric, trial_type, group)) %>%
+               spread(condition, outcome))
 ```
 
 ## drag + drop
 ```{r}
-num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic * fractal_pct_correct + education_high + fractal_hexagon_bi + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic + fractal_num_steps_needed + fractal_hexagon_bi + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
 
@@ -635,13 +645,13 @@ s2_joined_question_data = s2_joined_question_data %>%
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(!is.na(ds_correct)),
-       aes(x=fractal_pct_correct, y = ds_correct, color=ds_correct)) +
+       aes(x=fractal_num_steps_needed, y = ds_correct, color=ds_correct)) +
   geom_point() +
   facet_wrap(~ isomorphic)
 ```
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ fractal_hexagon_bi + isomorphic * fractal_pct_correct  + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data)
+ds_correct_model = glm(ds_correct ~ fractal_hexagon_bi + isomorphic + fractal_num_steps_needed + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data)
 summary(ds_correct_model)
 ```
 
@@ -650,12 +660,14 @@ summary(ds_correct_model)
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
          total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
+         avg_num_steps = (door_num_steps_needed + fractal_num_steps_needed)/2,
+         avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T)),
          abs_tpc_d = abs(total_pct_correct-0.5))
 ```
 
 
 ```{r}
-sl_model = lm(response ~  isomorphic * total_pct_correct_z + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
+sl_model = lm(response ~  isomorphic + avg_num_steps_z + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
                 filter(question == "similarity_likert"))
 summary(sl_model)
 ```
@@ -663,21 +675,15 @@ summary(sl_model)
 # one task helpful for other? 
 
 ```{r}
-oth_model = lm(response ~  isomorphic * (total_pct_correct_z)  + fractal_hexagon_bi  + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
+oth_model = lm(response ~  isomorphic * (avg_num_steps_z)  + fractal_hexagon_bi  + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
                 filter(question == "one_task_helpful_for_other"))
 summary(oth_model)
 ```
 
-What if we look at deviations from chance rather than just pct correct?
-```{r}
-oth_d_model = lm(response ~  isomorphic * abs_tpc_d + fractal_hexagon_bi, data=s2_joined_question_data %>%
-                filter(question == "one_task_helpful_for_other"))
-summary(oth_d_model)
-```
 
 # correspondence correct
 ```{r}
-correspondence_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + total_pct_correct_z + I(rt/1000) + mean_rt, data=s2_joined_question_data)
+correspondence_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + avg_num_steps_z + I(rt/1000) + mean_rt, data=s2_joined_question_data)
 summary(correspondence_correct_model)
 ```
 ```{r}
@@ -686,7 +692,7 @@ cc_data = inner_join(s2_joined_question_data,
                                            rename(subject_pct_correct_correlation=pct_correct_dot))
 ```
 ```{r}
-correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_hexagon_bi + total_pct_correct_z + subject_pct_correct_correlation, data=cc_data)
+correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_hexagon_bi + avg_num_steps_z + subject_pct_correct_correlation, data=cc_data)
 summary(correspondence_correct_model_2)
 ```
 # when noticed
@@ -721,12 +727,12 @@ s2_joined_question_data = s2_joined_question_data %>%
 ```
 
 ```{r}
-ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic * education_high  + I(rt/1000) + mean_rt+  total_pct_correct_z, data=s2_joined_question_data)
+ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic * avg_num_steps_z  + I(rt/1000) + mean_rt, data=s2_joined_question_data)
 summary(ever_noticed_model)
 ```
 
 ```{r}
-when_noticed_model = lm(when_noticed~  isomorphic * total_pct_correct_z  + I(rt/1000) + mean_rt , data=s2_joined_question_data %>%
+when_noticed_model = lm(when_noticed~  isomorphic * avg_num_steps_z  + I(rt/1000) + mean_rt , data=s2_joined_question_data %>%
                 filter(!is.na(when_noticed)))
 summary(when_noticed_model)
 ```
@@ -936,7 +942,7 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + (perm_swaps_minus_perm_non_swaps)  + I(rt/1000) + mean_rt + total_pct_correct_z , data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + (perm_swaps_minus_perm_non_swaps)  + I(rt/1000) + mean_rt + avg_num_steps_z, data=dist_corr_data)
 summary(dist_corr_correct_model)
 ```
 
