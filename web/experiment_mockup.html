@@ -91,16 +91,23 @@
     var drag_corr_test = {
 	type: 'drag-drop-on-image',
         background_images: ["images/room_snapshots/"+ this_room_assignment[0] + "_room_" + this_door_color_assignment[0] + "_left.png",
-            "images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png"],
-        background_image_locations: [],
-        bg_image_height: 54,
-        bg_image_width: 80,
-	dragging_images: dragging_images,
-	target_locations: [{"x": 341, "y": 0}, {"x": 500, "y": 84},
-            {"x": 500, "y": 237}, {"x": 341, "y": 320},
-            {"x": 180, "y": 237}, {"x": 180, "y": 84}],
+            "images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png",
+            "images/room_snapshots/"+ this_room_assignment[2] + "_room_" + this_door_color_assignment[0] + "_left.png",
+            "images/room_snapshots/"+ this_room_assignment[3] + "_room_" + this_door_color_assignment[0] + "_left.png",
+            "images/room_snapshots/"+ this_room_assignment[4] + "_room_" + this_door_color_assignment[0] + "_left.png",
+            "images/room_snapshots/"+ this_room_assignment[5] + "_room_" + this_door_color_assignment[0] + "_left.png"],
+        background_image_locations: [{"x": 200, "y": 0}, {"x": 400, "y": 0}, 
+            {"x": 200, "y": 140}, {"x": 400, "y": 140}, 
+            {"x": 200, "y": 280}, {"x": 400, "y": 280}],
+        bg_image_height: 120,
+        bg_image_width: 180,
+	dragging_images: dragging_images_2,
+	target_locations: [{"x": 250, "y": 20}, {"x": 450, "y": 20}, 
+            {"x": 250, "y": 160}, {"x": 450, "y": 160}, 
+            {"x": 250, "y": 300}, {"x": 450, "y": 300}],
 	location_labels: [0, 1],
-        instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = acid, blue arrows = gamma ray). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
+        snap_padding: 30,
+        instruction_text:"Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a fractal in the visual patterns experiment. Drag the fractals onto the rooms you think they corresponded to." 
     }
 
     var diagram_selection = {
@@ -111,14 +118,12 @@
 
     var correspondence_options = ["white door = acid, black door = ray", "black door = acid, white door = ray"];
     shuffle(correspondence_options);
-    var room_fractal_correspondence_examples = "<table class='correspondence-table'><tr><td><img src='images/room_snapshots/"+ this_room_assignment[0] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td><td><img src='images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td><td><img src='images/room_snapshots/"+ this_room_assignment[2] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td><td><img src='images/room_snapshots/"+ this_room_assignment[3] + "_room_" + this_door_color_assignment[0] + "_left.png' /></td></tr><tr><td><img src='"+ this_fractal_assignment[0] + "' /></td><td><img src='" + this_fractal_assignment[1] + "' /></td><td><img src='" + this_fractal_assignment[2] + "' /></td><td><img src='" + this_fractal_assignment[3] + "' /></td></tr></table>";
 
-    var correspondence_identification = {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a particular fractal in the visual pattern experiment, and one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. Below is a table showing you which fractals a few rooms corresponded to:<br />" + room_fractal_correspondence_examples + "<br />What is your best guess about what the correspondence between the doors and the gamma ray and acid was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]} 
+    var correspondence_identification = {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What is your best guess about what the correspondence between the doors and the gamma ray and acid was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]} 
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [drag_test, correspondence_identification, test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection],
-            show_progress_bar: true,
+            timeline: [drag_corr_test, correspondence_identification, drag_test, test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }

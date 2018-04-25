@@ -31,6 +31,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     trial.background_image = (typeof trial.background_image === 'undefined') ? "" : trial.background_image; //must provide this or background images and locations
     trial.background_images = (typeof trial.background_images === 'undefined') ? [trial.background_image] : trial.background_images; //must provide this or background image
     trial.background_image_locations = (typeof trial.background_image_locations === 'undefined') ? [{"x": trial.canvas_width - (trial.bg_image_width + 20), "y": 0}] : trial.background_image_locations; //must provide this or background image
+    trial.snap_padding = (typeof trial.snap_padding === 'undefined') ? 10 : trial.snap_padding; //how generous snapping is, in pixels.
 
     var frame_freq = 50; // ms between frames
 
@@ -90,7 +91,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     /////// the annoying part ////////////////////////////////////////////////////
 
     // "constructor" for the places the objects snap to 
-    var snap_padding = 10; //pixels
+    var snap_padding = trial.snap_padding; //pixels
     function snap_location(this_location) {
         this.x = this_location.x;
         this.y = this_location.y;
@@ -210,7 +211,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     for (var i = 0; i < trial.dragging_images.length; i++) {
         var this_draggable = new Draggable(dragging_image_objects[i], initial_locations[i], trial.dragging_images[i]);
         draggables_array.push(this_draggable);
-        if ((trial.preplaced_image !== "" && this_draggable.label == trial.preplaced_image) || (trial.preplaced_image === "" && i == trial.dragging_images.length-1)) { // first one placed to make it easier for old fogeys like Yochai
+        if (trial.preplaced_image !== "" && this_draggable.label == trial.preplaced_image) { // first one placed to make it easier for old fogeys like Yochai
             this_draggable.curr_location.free();
             target_locations[trial.preplaced_image_location].assign_draggable(this_draggable); 
         }
