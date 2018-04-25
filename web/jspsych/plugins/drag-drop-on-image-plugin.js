@@ -16,7 +16,6 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
 
 
     // expected parameters:
-    //trial.background_image = background image
     //trial.dragging_images = assignment of fractals to elements
     //trial.target_locations = locations of drop zones (rel. to background image) as {x: x, y: y, width: width, height: height} objects
     trial.preplaced_image = (typeof trial.preplaced_image === 'undefined') ? "" : trial.preplaced_image; //Which image to pre-place, if any 
@@ -24,11 +23,14 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     trial.location_labels = (typeof trial.location_labels === 'undefined') ? range(trial.locations.length()) : trial.location_labels; 
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
-    trial.bg_image_height = trial.bg_image_height || 400;
-    trial.bg_image_width = trial.bg_image_width || 400;
     trial.dragging_image_height = trial.dragging_image_height || 80;
     trial.dragging_image_width = trial.dragging_image_width || 80;
     trial.instruction_text = trial.instruction_text || ""; 
+    trial.bg_image_height = trial.bg_image_height || 400;
+    trial.bg_image_width = trial.bg_image_width || 400;
+    trial.background_image = (typeof trial.background_image === 'undefined') ? "" : trial.background_image; //must provide this or background images and locations
+    trial.background_images = (typeof trial.background_images === 'undefined') ? [trial.background_image] : trial.background_images; //must provide this or background image
+    trial.background_image_locations = (typeof trial.background_image_locations === 'undefined') ? [[trial.canvas_width - (trial.bg_image_width + 20), 0]] : trial.background_image_locations; //must provide this or background image
 
     var frame_freq = 50; // ms between frames
 
@@ -45,8 +47,13 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     $('#dragging-canvas')[0].width = trial.canvas_width;
     $('#dragging-canvas')[0].height = trial.canvas_height;
 
-    var bg_image_object = new Image(trial.bg_image_width, trial.bg_image_height);
-    bg_image_object.src = trial.background_image;
+    
+    var bg_image_objects = trial.background_images.map(function(x) {
+        var this_image = new Image(trial.bg_image_width, trial.bg_image_height);
+        this_image.src = x;
+        return this_image;
+        });
+
     var dragging_image_objects = trial.dragging_images.map(function(x) {
         var this_image = new Image(trial.dragging_image_width, trial.dragging_image_height);
         this_image.src = x;
@@ -212,11 +219,13 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
 
     function redraw() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
-        draw.drawImage(bg_image_object,
-                       trial.canvas_width - (trial.bg_image_width + 20),
-                       0,
-                       trial.bg_image_width,
-                       trial.bg_image_height);
+        for (var i = 0; i < bg_image_objects.length; i++) {
+            draw.drawImage(bg_image_objects[i],
+                           trial.background_image_locations[i][0],
+                           trial.background_image_locations[i][1],
+                           trial.bg_image_width,
+                           trial.bg_image_height);
+        }
 
         var currently_dragging = -1;
         for (var i = 0; i < draggables_array.length; i++) {
