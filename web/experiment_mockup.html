@@ -86,6 +86,23 @@
         instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = acid, blue arrows = gamma ray). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
     }
 
+    var dragging_images_2 = this_fractal_assignment.slice(); 
+    shuffle(dragging_images_2);
+    var drag_corr_test = {
+	type: 'drag-drop-on-image',
+        background_images: ["images/room_snapshots/"+ this_room_assignment[0] + "_room_" + this_door_color_assignment[0] + "_left.png",
+            "images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png"],
+        background_image_locations: [],
+        bg_image_height: 54,
+        bg_image_width: 80,
+	dragging_images: dragging_images,
+	target_locations: [{"x": 341, "y": 0}, {"x": 500, "y": 84},
+            {"x": 500, "y": 237}, {"x": 341, "y": 320},
+            {"x": 180, "y": 237}, {"x": 180, "y": 84}],
+	location_labels: [0, 1],
+        instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = acid, blue arrows = gamma ray). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
+    }
+
     var diagram_selection = {
 	type: 'survey-multi-choice',
 	questions: [ "The fractal relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
@@ -100,7 +117,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection, drag_test, correspondence_identification],
+            timeline: [drag_test, correspondence_identification, test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection],
             show_progress_bar: true,
             on_finish: function() {
                 jsPsych.data.displayData('json');

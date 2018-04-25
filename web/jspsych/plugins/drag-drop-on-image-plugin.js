@@ -30,7 +30,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     trial.bg_image_width = trial.bg_image_width || 400;
     trial.background_image = (typeof trial.background_image === 'undefined') ? "" : trial.background_image; //must provide this or background images and locations
     trial.background_images = (typeof trial.background_images === 'undefined') ? [trial.background_image] : trial.background_images; //must provide this or background image
-    trial.background_image_locations = (typeof trial.background_image_locations === 'undefined') ? [[trial.canvas_width - (trial.bg_image_width + 20), 0]] : trial.background_image_locations; //must provide this or background image
+    trial.background_image_locations = (typeof trial.background_image_locations === 'undefined') ? [{"x": trial.canvas_width - (trial.bg_image_width + 20), "y": 0}] : trial.background_image_locations; //must provide this or background image
 
     var frame_freq = 50; // ms between frames
 
@@ -221,8 +221,8 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         for (var i = 0; i < bg_image_objects.length; i++) {
             draw.drawImage(bg_image_objects[i],
-                           trial.background_image_locations[i][0],
-                           trial.background_image_locations[i][1],
+                           trial.background_image_locations[i].x,
+                           trial.background_image_locations[i].y,
                            trial.bg_image_width,
                            trial.bg_image_height);
         }
