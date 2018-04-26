@@ -13,6 +13,25 @@ function shuffle(a) {
     }
 }
 
+// Permute array according to index sequence
+function permute(a, indices) {
+    var i;
+    var res = [];
+    for (i = 0; i < indices.length; i ++) {
+        res[i] = a[indices[i]];
+    }
+    return res;
+}
+
+// Create an integer sequence from 0 to n-1
+function range(n) {
+    var res = [];
+    for (i = 0; i < n-1; i ++) {
+        res[i] = i;
+    }
+    return res;
+}
+
 // chooses a random element from an array 
 function choice(a) {
     return a[Math.floor(Math.random() * a.length)];
