@@ -26,7 +26,7 @@ function permute(a, indices) {
 // Create an integer sequence from 0 to n-1
 function range(n) {
     var res = [];
-    for (i = 0; i < n-1; i ++) {
+    for (i = 0; i < n; i ++) {
         res[i] = i;
     }
     return res;
