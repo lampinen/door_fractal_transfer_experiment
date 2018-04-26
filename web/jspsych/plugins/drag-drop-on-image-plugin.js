@@ -28,6 +28,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     trial.instruction_text = trial.instruction_text || ""; 
     trial.bg_image_height = trial.bg_image_height || 400;
     trial.bg_image_width = trial.bg_image_width || 400;
+    trial.background_order = (typeof trial.background_order === 'undefined') ? "" : trial.background_order;
     trial.background_image = (typeof trial.background_image === 'undefined') ? "" : trial.background_image; //must provide this or background images and locations
     trial.background_images = (typeof trial.background_images === 'undefined') ? [trial.background_image] : trial.background_images; //must provide this or background image
     trial.background_image_locations = (typeof trial.background_image_locations === 'undefined') ? [{"x": trial.canvas_width - (trial.bg_image_width + 20), "y": 0}] : trial.background_image_locations; //must provide this or background image
@@ -79,7 +80,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
 
     if (trial.dragging_images.length > 10) {
         alert("Not enough initial locations, truncating to 10 images...")
-        dragging_image_objects = dragging_image_objects.slice(10);
+        dragging_image_objects = dragging_image_objects.slice(0,10);
     }
 
     var initial_locations = [{"x": 0, "y": 0, "width": 80, "height": 80}, {"x": 80, "y": 0, "width": 80, "height": 80},
@@ -87,6 +88,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
                              {"x": 0, "y": 160, "width": 80, "height": 80}, {"x": 80, "y": 160, "width": 80, "height": 80},
                              {"x": 0, "y": 240, "width": 80, "height": 80}, {"x": 80, "y": 240, "width": 80, "height": 80},
                              {"x": 0, "y": 320, "width": 80, "height": 80}, {"x": 80, "y": 320, "width": 80, "height": 80}] //remember, you can't trust Marissa 
+    initial_locations = initial_locations.slice(0, dragging_image_objects.length);
 
     /////// the annoying part ////////////////////////////////////////////////////
 
@@ -314,6 +316,9 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
             "rt": (new Date()).getTime() - start_time,
             "assignments": get_current_assignments() 
         };
+        if (trial.background_order !== "") {
+            trial_data.background_order = trial.background_order; // save order if images were permuted
+        }
         //alert(JSON.stringify(trial_data))
 
         jsPsych.finishTrial(trial_data);

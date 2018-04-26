@@ -88,25 +88,31 @@
 
     var dragging_images_2 = this_fractal_assignment.slice(); 
     shuffle(dragging_images_2);
-    var drag_corr_test = {
+    var drag_corr_room_images = ["images/room_snapshots/"+ this_room_assignment[0] + "_room_" + this_door_color_assignment[0] + "_left.png",
+                                 "images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png",
+                                 "images/room_snapshots/"+ this_room_assignment[2] + "_room_" + this_door_color_assignment[0] + "_left.png",
+                                 "images/room_snapshots/"+ this_room_assignment[3] + "_room_" + this_door_color_assignment[0] + "_left.png",
+                                 "images/room_snapshots/"+ this_room_assignment[4] + "_room_" + this_door_color_assignment[0] + "_left.png",
+                                 "images/room_snapshots/"+ this_room_assignment[5] + "_room_" + this_door_color_assignment[0] + "_left.png"]
+    var drag_corr_room_order = range(drag_corr_room_images.length);
+    shuffle(drag_corr_room_order);
+    drag_corr_room_images = permute(drag_corr_room_images, drag_corr_room_order);
+
+    var drag_corr_test = { //TODO: fix paths, names
 	type: 'drag-drop-on-image',
-        background_images: ["images/room_snapshots/"+ this_room_assignment[0] + "_room_" + this_door_color_assignment[0] + "_left.png",
-            "images/room_snapshots/"+ this_room_assignment[1] + "_room_" + this_door_color_assignment[0] + "_left.png",
-            "images/room_snapshots/"+ this_room_assignment[2] + "_room_" + this_door_color_assignment[0] + "_left.png",
-            "images/room_snapshots/"+ this_room_assignment[3] + "_room_" + this_door_color_assignment[0] + "_left.png",
-            "images/room_snapshots/"+ this_room_assignment[4] + "_room_" + this_door_color_assignment[0] + "_left.png",
-            "images/room_snapshots/"+ this_room_assignment[5] + "_room_" + this_door_color_assignment[0] + "_left.png"],
-        background_image_locations: [{"x": 200, "y": 0}, {"x": 400, "y": 0}, 
-            {"x": 200, "y": 140}, {"x": 400, "y": 140}, 
-            {"x": 200, "y": 280}, {"x": 400, "y": 280}],
-        bg_image_height: 120,
-        bg_image_width: 180,
+        background_images: drag_corr_room_images,
+        background_image_locations: [{"x": 0, "y": 300}, {"x": 100, "y": 300}, 
+            {"x": 200, "y": 300}, {"x": 300, "y": 300}, 
+            {"x": 400, "y": 300}, {"x": 500, "y": 300}],
+        bg_image_height: 67,
+        bg_image_width: 100,
 	dragging_images: dragging_images_2,
-	target_locations: [{"x": 250, "y": 20}, {"x": 450, "y": 20}, 
-            {"x": 250, "y": 160}, {"x": 450, "y": 160}, 
-            {"x": 250, "y": 300}, {"x": 450, "y": 300}],
+        target_locations: [{"x": 10, "y": 300}, {"x": 110, "y": 300}, 
+            {"x": 210, "y": 300}, {"x": 310, "y": 300}, 
+            {"x": 410, "y": 300}, {"x": 510, "y": 300}],
 	location_labels: [0, 1],
-        snap_padding: 30,
+        snap_padding: 10,
+        background_order: drag_corr_room_order,
         instruction_text:"Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a fractal in the visual patterns experiment. Drag the fractals onto the rooms you think they corresponded to." 
     }
 
@@ -123,7 +129,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [drag_corr_test, correspondence_identification, drag_test, test_room, test_room_2, test_fractal, test_fractal_2, diagram_selection],
+            timeline: [drag_corr_test, correspondence_identification, drag_test],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
