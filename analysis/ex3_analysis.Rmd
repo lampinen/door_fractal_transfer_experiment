@@ -11,10 +11,114 @@ library(ggplot2)
 library(lme4)
 library(lmerTest)
 ```
+# stuff
+All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that hb_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.) 
+```{r}
+# rotation symmetries
+hb_p2_locs = c(2, 3, 4, 5, 6, 1)
+hb_p2_acts = c(2, 1)
+hb_p3_locs = c(3, 4, 5, 6, 1, 2)
+hb_p3_acts = c(1, 2)
+hb_p4_locs = c(4, 5, 6, 1, 2 ,3)
+hb_p4_acts = c(2, 1)
+hb_p5_locs = c(5, 6, 1, 2, 3, 4)
+hb_p5_acts = c(1, 2)
+hb_p6_locs = c(6, 1, 2, 3, 4, 5)
+hb_p6_acts = c(2, 1)
+# flips
+hb_p7_locs = c(2, 1, 6, 5, 4, 3)
+hb_p7_acts = c(1, 2)
+hb_p8_locs = c(3, 2, 1, 6, 5, 4)
+hb_p8_acts = c(2, 1)
+hb_p9_locs = c(4, 3, 2, 1, 6, 5)
+hb_p9_acts = c(1, 2)
+hb_p10_locs = c(5, 4, 3, 2, 1, 6)
+hb_p10_acts = c(2, 1)
+hb_p11_locs = c(6, 5, 4, 3, 2, 1)
+hb_p11_acts = c(1, 2)
+hb_p12_locs = c(1, 6, 5, 4, 3, 2)
+hb_p12_acts = c(2, 1)
+
+hb_perm_locs = list(c(1,2,3,4,5,6), hb_p2_locs, hb_p3_locs, hb_p4_locs, hb_p5_locs, hb_p6_locs, hb_p7_locs, hb_p8_locs, hb_p9_locs, hb_p10_locs, hb_p11_locs, hb_p12_locs)
+hb_perm_acts = list(c(1,2), hb_p2_acts, hb_p3_acts, hb_p4_acts, hb_p5_acts, hb_p6_acts, hb_p7_acts, hb_p8_acts, hb_p9_acts, hb_p10_acts, hb_p11_acts, hb_p12_acts)
+
+# 
+ht_p2_locs = c(6, 5, 4, 3, 2, 1)
+ht_p2_acts = c(2, 1)
+ht_p3_locs = c(4, 5, 6, 1, 2, 3)
+ht_p3_acts = c(1, 2)
+ht_p4_locs = c(3, 2, 1, 6, 5, 4)
+ht_p4_acts = c(2, 1)
+# tri-cycles only has 3 non-trivial isomorphism, but it's easiest to code by making another 8 dummies
+ht_p5_locs = 1:6
+ht_p5_acts = 1:2
+ht_p6_locs = ht_p2_locs
+ht_p6_acts = ht_p2_acts
+ht_p7_locs = ht_p3_locs
+ht_p7_acts = ht_p3_acts
+ht_p8_locs = ht_p4_locs 
+ht_p8_acts = ht_p4_acts 
+ht_p9_locs = 1:6
+ht_p9_acts = 1:2
+ht_p10_locs = ht_p2_locs
+ht_p10_acts = ht_p2_acts
+ht_p11_locs = ht_p3_locs
+ht_p11_acts = ht_p3_acts
+ht_p12_locs = ht_p4_locs 
+ht_p12_acts = ht_p4_acts 
+
+ht_perm_locs = list(c(1,2,3,4,5,6), ht_p2_locs, ht_p3_locs, ht_p4_locs, ht_p5_locs, ht_p6_locs, ht_p7_locs, ht_p8_locs, ht_p9_locs, ht_p10_locs, ht_p11_locs, ht_p12_locs)
+ht_perm_acts = list(c(1,2), ht_p2_acts, ht_p3_acts, ht_p4_acts, ht_p5_acts, ht_p6_acts, ht_p7_acts, ht_p8_acts, ht_p9_acts, ht_p10_acts, ht_p11_acts, ht_p12_acts)
+
+perms_which_flip = c(2,4,6,8,10,12) # permutations which flip the actions
+```
+
+hacky way of doing exactly the comparison I want to do (vector-wise comparison of lists whose elements are lists).
+```{r}
+compare_lists_of_lists = function(l1, l2) {
+  res = c()
+  for (i in 1:length(l1)) {
+    if (identical(l1[[i]], l2[[i]])) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+
+compare_lol_to_list = function(lol, l) {
+  res = c()
+  for (i in 1:length(lol)) {
+    if (identical(lol[[i]], l)) {
+      this_res = T
+    }
+    else {
+      this_res = F
+    }
+    res = c(res, this_res)
+  }
+  return(res)
+}
+```
+
+```{r}
+max_aligned_with_permutations = function(l1, l1_perms, l2) {
+  max_aligned = 0
+  max_perm = 0
+  for (perm_i in 1:length(l1_perms)) {
+    max_aligned = max(max_aligned, sum(l1[l1_perms[[perm_i]]] == l2))
+    max_perm = perm_i
+  }
+  return(c(max_aligned, max_perm))
+}
+```
 
 # Data loading
 ```{r}
-num_subjects = 21
+num_subjects = 62
 data_dir = "../anonymized_data/ex3"
 drag_drop_target_locations_order = 1:6
 ```
@@ -48,6 +152,10 @@ for (i in 1:num_subjects) {
       next
     }
     main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
+    two_corr_Qs = FALSE
+    if (s == 2 & length(main_d_list) == 120) { # later subjects got two correspondence questions instead of just one
+      two_corr_Qs = TRUE
+    }
     main_d_frame = data.frame()
     question_d_frame = data.frame()
     for (trial_i in 1:length(main_d_list)) {
@@ -72,6 +180,7 @@ for (i in 1:num_subjects) {
         parsed_responses = fromJSON(this_trial$responses)
         for (name in names(parsed_responses)) {
           this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+          this_Q_d$two_corr_Qs = two_corr_Qs
           this_Q_d$session = s
           this_Q_d$name = name
           this_Q_d$response = as.character(parsed_responses[[name]])
@@ -79,9 +188,21 @@ for (i in 1:num_subjects) {
         }
       } else if (grepl("drag-drop-on-image",this_trial$trial_type)) {
         this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+        this_Q_d$two_corr_Qs = two_corr_Qs
         this_Q_d$session = s
         this_Q_d$assignments = list(this_trial$assignments)
-        this_Q_d$num_assignments_correct = sum(this_trial$assignments[drag_drop_target_locations_order] == aux_d_frame$this_fractal_assignment[[1]]) #TODO: fix
+        if (trial_i == 118) { # drag drop correspondence, must undo shuffling of rooms
+          z = this_trial$background_order + 1
+          this_Q_d$assignments[[1]] = (this_Q_d$assignments[[1]])[z][z][z][z][z] # a little group theory -- x^5 = x^-1 for all x in S_6
+        }
+        if (aux_d_frame$fractal_hexagon_bi) {
+          perm_list = hb_perm_locs
+        } else {
+          perm_list = ht_perm_locs
+        }
+        blah = max_aligned_with_permutations(this_Q_d$assignments[[1]], perm_list, aux_d_frame$this_fractal_assignment[[1]])
+        this_Q_d$num_assignments_correct = blah[1]
+        this_Q_d$best_dd_perm_flips = blah[2] %in% perms_which_flip
         question_d_frame = bind_rows(question_d_frame, this_Q_d)      
       } else {
         # instructions or other
@@ -149,7 +270,7 @@ main_data = main_data %>%
 
 ```{r}
 question_data = question_data %>%
-  mutate(question = ifelse(session < 2 | trial_index == 118,
+  mutate(question = ifelse(session < 2 | ((!two_corr_Qs & trial_index == 118) | (two_corr_Qs & trial_index == 119)),
                            "comments",
                     ifelse(trial_index == 105,
                            "door_hyp_guess",
@@ -173,54 +294,26 @@ question_data = question_data %>%
                            "one_task_helpful_for_other",
                     ifelse(trial_index == 115,
                            "which_condition",
-                    ifelse(trial_index == 116 & name == "Q0",
+                    ifelse(two_corr_Qs & trial_index == 116,
+                           "correspondence_drag_drop",
+                    ifelse(((!two_corr_Qs & trial_index == 116) | (two_corr_Qs & trial_index == 117)) & name == "Q0",
                            "correspondence_identify",
-                    ifelse(trial_index == 116 & name == "Q1",
+                    ifelse(((!two_corr_Qs & trial_index == 116) | (two_corr_Qs & trial_index == 117)) & name == "Q1",
                            "correspondence_identify_confidence",
-                    ifelse(trial_index == 117 & name == "Q0",
+                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q0",
                            "age",
-                    ifelse(trial_index == 117 & name == "Q1",
+                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q1",
                            "education",
-                    ifelse(trial_index == 117 & name == "Q2",
+                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q2",
                            "gender",
-                    ifelse(trial_index == 117 & name == "Q3",
+                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q3",
                            "race",
-                           NA)))))))))))))))))))
+                           NA))))))))))))))))))))
   
 
 any(is.na(question_data$question))
 ```
 
-hacky way of doing exactly the comparison I want to do (vector-wise comparison of vectors whose elements are lists).
-```{r}
-compare_lists_of_lists = function(l1, l2) {
-  res = c()
-  for (i in 1:length(l1)) {
-    if (identical(l1[[i]], l2[[i]])) {
-      this_res = T
-    }
-    else {
-      this_res = F
-    }
-    res = c(res, this_res)
-  }
-  return(res)
-}
-
-compare_lol_to_list = function(lol, l) {
-  res = c()
-  for (i in 1:length(lol)) {
-    if (identical(lol[[i]], l)) {
-      this_res = T
-    }
-    else {
-      this_res = F
-    }
-    res = c(res, this_res)
-  }
-  return(res)
-}
-```
 
 ```{r}
 question_data = inner_join(question_data,
@@ -309,10 +402,6 @@ is_ev_off_chance = xtabs(~isomorphic + ever_off_chance, data=collapsed_main_data
 chisq.test(is_ev_off_chance) # at least they're not significantly worse...
 ```
 
-```{r}
-ev_off_chance_model = glm(ever_off_chance ~ education + age + gender + race + I(mean_location_rt/1000), family="binomial", data=collapsed_main_data %>% filter(session==2, trial_type=="door"))
-summary(ev_off_chance_model)
-```
 ```{r}
 pct_correct_model = lmer(pct_correct ~ education + age + gender + race + I(mean_location_rt/1000) + session + (1 + session|subject_id) , data=collapsed_main_data)
 summary(pct_correct_model)
@@ -550,9 +639,24 @@ ggsave("figures/ex3/ns_basic_plot.png")
 ```
 
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2)) * (group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2) + group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 summary(ns_time_dependent_model)
 ```
+```{r}
+explicit_similarity_data = question_data %>%
+  filter(question %in% c("correspondence_suspect", "similarity_likert", "which_condition")) %>%
+  select(subject_id, question, response) %>% 
+  spread(question, response)
+```
+```{r}
+es_joined_ns_data = inner_join(num_steps_per_trial_data, explicit_similarity_data)
+```
+```{r}
+ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2) + correspondence_suspect + group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
+summary(ns_time_dependent_model)
+```
+
+
 # dumping perf for encouragement
 
 ```{r}
@@ -730,7 +834,7 @@ s2_joined_question_data = s2_joined_question_data %>%
 ```
 
 ```{r}
-ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic  + I(rt/1000) + mean_rt+ avg_num_steps_z , data=s2_joined_question_data)
+ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic *  avg_num_steps_z   + I(rt/1000) + mean_rt, data=s2_joined_question_data)
 summary(ever_noticed_model)
 ```
 
@@ -762,59 +866,6 @@ distributional_data = main_data %>%
   
 ```
 
-All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that hb_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.) Needs to be redone for new experiment.
-```{r}
-# rotation symmetries
-hb_p2_locs = c(2, 3, 4, 5, 6, 1)
-hb_p2_acts = c(2, 1)
-hb_p3_locs = c(3, 4, 5, 6, 1, 2)
-hb_p3_acts = c(1, 2)
-hb_p4_locs = c(4, 5, 6, 1, 2 ,3)
-hb_p4_acts = c(2, 1)
-hb_p5_locs = c(5, 6, 1, 2, 3, 4)
-hb_p5_acts = c(1, 2)
-hb_p6_locs = c(6, 1, 2, 3, 4, 5)
-hb_p6_acts = c(2, 1)
-# flips
-hb_p7_locs = c(2, 1, 6, 5, 4, 3)
-hb_p7_acts = c(1, 2)
-hb_p8_locs = c(3, 2, 1, 6, 5, 4)
-hb_p8_acts = c(2, 1)
-hb_p9_locs = c(4, 3, 2, 1, 6, 5)
-hb_p9_acts = c(1, 2)
-hb_p10_locs = c(5, 4, 3, 2, 1, 6)
-hb_p10_acts = c(2, 1)
-hb_p11_locs = c(6, 5, 4, 3, 2, 1)
-hb_p11_acts = c(1, 2)
-hb_p12_locs = c(1, 6, 5, 4, 3, 2)
-hb_p12_acts = c(2, 1)
-
-
-# 
-ht_p2_locs = c(6, 5, 4, 3, 2, 1)
-ht_p2_acts = c(2, 1)
-ht_p3_locs = c(4, 5, 6, 1, 2, 3)
-ht_p3_acts = c(1, 2)
-ht_p4_locs = c(3, 2, 1, 6, 5, 4)
-ht_p4_acts = c(2, 1)
-# tri-cycles only has 3 non-trivial isomorphism, but it's easiest to code by making another 8 dummies
-ht_p5_locs = 1:6
-ht_p5_acts = 1:2
-ht_p6_locs = ht_p2_locs
-ht_p6_acts = ht_p2_acts
-ht_p7_locs = ht_p3_locs
-ht_p7_acts = ht_p3_acts
-ht_p8_locs = ht_p4_locs 
-ht_p8_acts = ht_p4_acts 
-ht_p9_locs = 1:6
-ht_p9_acts = 1:2
-ht_p10_locs = ht_p2_locs
-ht_p10_acts = ht_p2_acts
-ht_p11_locs = ht_p3_locs
-ht_p11_acts = ht_p3_acts
-ht_p12_locs = ht_p4_locs 
-ht_p12_acts = ht_p4_acts 
-```
 
 Computing the L1 distance between the subjects door and fractal distribtuions averaged across all possible isomorphisms between the structures. Note that this is correlational -- can't tell if transfer or just due to the similar structures leading to similar behavior. Also since there is no canonical way to map between non-isomorphic groups, there could be some weird effects... Have to think carefully about it.
 
@@ -921,8 +972,8 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
   group_by(isomorphic, fractal_hexagon_bi, subject_id, education_high) %>% 
   summarize(avg_L1 = mean(L1), min_L1 = min(L1),
             perm_at_min = perm[which(L1 == min_L1)][1], # in case multiple mins
-            perm_at_min_swaps = mean(perm[which(L1 == min_L1)] %in% c(2,4,6,8,10,12)),
-            perm_swaps_minus_perm_non_swaps = sum(L1[which(perm %in% c(2,4,6,8,10,12))]) - sum(L1[which(!(perm %in% c(2,4,6,8,10,12)))])) %>% 
+            perm_at_min_swaps = mean(perm[which(L1 == min_L1)] %in% perms_which_flip),
+            perm_swaps_minus_perm_non_swaps = sum(L1[which(perm %in% perms_which_flip)]) - sum(L1[which(!(perm %in% perms_which_flip))])) %>% 
   ungroup()
  
 ```
@@ -945,7 +996,17 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + (perm_swaps_minus_perm_non_swaps)  + I(rt/1000) + mean_rt + avg_num_steps_z , data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps))  +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=dist_corr_data)
 summary(dist_corr_correct_model)
 ```
 
+
+
+```{r}
+es_dist_corr_data = inner_join(dist_corr_data, explicit_similarity_data)
+```
+
+```{r}
+es_dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) * correspondence_suspect +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=es_dist_corr_data)
+summary(es_dist_corr_correct_model)
+```
