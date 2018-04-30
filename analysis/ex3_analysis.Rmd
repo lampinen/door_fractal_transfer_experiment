@@ -354,7 +354,7 @@ main_data = main_data %>%
 ```
 
 ```{r}
-main_data = inner_join(main_data, demographic_data) 
+main_data = inner_join(main_data, demographic_data) # Note: this implicitly excludes anyone who didn't complete all 3 sessions, use left_join to include
 ```
 
 
@@ -399,7 +399,7 @@ collapsed_main_data = main_data %>%
 
 ```{r}
 is_ev_off_chance = xtabs(~isomorphic + ever_off_chance, data=collapsed_main_data %>% filter(session==2, trial_type=="door"))
-chisq.test(is_ev_off_chance) # at least they're not significantly worse...
+chisq.test(is_ev_off_chance) 
 ```
 
 ```{r}
@@ -488,11 +488,17 @@ ggsave("figures/ex3/basic_plot.png", width=7,height=5)
 
 # RTs
 
+cleaner RTs for regression
+```{r}
+main_data = main_data %>%
+  mutate(truncated_RT = pmin(location_rts/1000,10))
+```
+
 ```{r}
 
 ggplot(data=main_data, aes(x=location_rts)) +
   geom_histogram() +
-  xlim(0, 1000) +
+  xlim(0, 2000) +
   facet_wrap( ~subject_id + isomorphic)
 ```
 
@@ -557,25 +563,25 @@ summary(pc2_model)
 ## action correct
 Just looking at condition and extremely important controls and random effects
 ```{r}
-basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +education_high + I(pmin(location_rts/1000,10)) + (1  + correct_action | subject_id), family=binomial, data=main_data)
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +education_high + truncated_RT + (1  + correct_action | subject_id), family=binomial, data=main_data)
 summary(basic_non_time_dependent_model)
 ```
 
 Time dependent:
 ```{r}
-basic_time_dependent_model = glmer(action_correct ~ isomorphic * group + session_c +I(session_c^2) + trial_type + trial_index_by_type_z + I(pmin(location_rts/1000,10))  + (1 + correct_action | subject_id), family=binomial, data=main_data)
+basic_time_dependent_model = glmer(action_correct ~ isomorphic * group + session_c +I(session_c^2) + trial_type + trial_index_by_type_z + truncated_RT+ (1 + correct_action | subject_id), family=binomial, data=main_data)
 summary(basic_time_dependent_model)
 ```
 
 
 ```{r}
-time_dependent_interaction_model = glmer(action_correct ~ isomorphic *  (session_c + I(session_c^2)) + group + trial_type + trial_index_by_type_z  + I(pmin(location_rts/1000,10)) + (1 + correct_action | subject_id), family=binomial, data=main_data)
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic *  (session_c + I(session_c^2)) * group + trial_type + trial_index_by_type_z  + truncated_RT + (1 + correct_action | subject_id), family=binomial, data=main_data)
 summary(time_dependent_interaction_model)
 ```
 
 
 ```{r}
-action_model = glmer(action ~ (isomorphic + session_c + I(session_c^2)) * correct_action * group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + I(pmin(location_rts/1000,10)) + (1 | subject_id), family=binomial, data=main_data)
+action_model = glmer(action ~ (isomorphic + session_c + I(session_c^2)) * correct_action * group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) + truncated_RT + (1 | subject_id), family=binomial, data=main_data)
 summary(action_model)
 ```
 
@@ -584,7 +590,7 @@ summary(action_model)
 num_steps_per_trial_data = main_data %>%
   group_by(subject_id, isomorphic, group, session, session_c, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
   summarize(num_steps_needed=n(),
-            avg_rt=mean(pmin(location_rts/1000, 10)))
+            avg_rt=mean(truncated_RT))
 ```
 
 ```{r}
@@ -629,9 +635,12 @@ num_steps_fully_summarized_data = num_steps_summarized_data  %>%
 
 
 ```{r}
-ggplot(data=num_steps_fully_summarized_data, aes(x=factor(session_c), y=num_steps_needed, fill=isomorphic)) +
-  geom_bar(stat="identity",position="dodge") +
-  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), position=position_dodge(width=1), width=0.5) +
+ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   facet_wrap(~ group)
 ```
 ```{r}
@@ -639,8 +648,15 @@ ggsave("figures/ex3/ns_basic_plot.png")
 ```
 
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2) + group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
-summary(ns_time_dependent_model)
+ns_time_dependent_model_0 = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data)
+ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * trial_type + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+ns_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (session_c  + trial_type)+ I(session_c^2) + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+ns_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (session_c ) *trial_type + I(session_c^2)  + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+AIC(ns_time_dependent_model_0)
+AIC(ns_time_dependent_model_0.5)
+AIC(ns_time_dependent_model_1)
+AIC(ns_time_dependent_model_1.5)
+summary(ns_time_dependent_model_0.5) # min AIC
 ```
 ```{r}
 explicit_similarity_data = question_data %>%
@@ -652,8 +668,15 @@ explicit_similarity_data = question_data %>%
 es_joined_ns_data = inner_join(num_steps_per_trial_data, explicit_similarity_data)
 ```
 ```{r}
-ns_time_dependent_model = lmer(num_steps_needed~ isomorphic * (session_c + I(session_c^2) + correspondence_suspect + group)  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
-summary(ns_time_dependent_model)
+ns_es_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect)  + session_c + I(session_c^2)+ group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
+ns_es_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect + session_c) + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
+ns_es_time_dependent_model_1.5b = lmer(num_steps_needed~ isomorphic * (trial_type + correspondence_suspect + session_c + I(session_c^2)) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
+ns_es_time_dependent_model_2 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect + session_c + I(session_c^2)) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
+AIC(ns_es_time_dependent_model_1)
+AIC(ns_es_time_dependent_model_1.5)
+AIC(ns_es_time_dependent_model_1.5b)
+AIC(ns_es_time_dependent_model_2)
+summary(ns_es_time_dependent_model_2) # min AIC
 ```
 
 
@@ -739,7 +762,7 @@ s2_joined_question_data = question_data %>%
 
 ## drag + drop
 ```{r}
-num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic * fractal_num_steps_needed + education_high + fractal_hexagon_bi + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic + fractal_num_steps_needed + education_high + fractal_hexagon_bi + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
 
@@ -802,6 +825,20 @@ cc_data = inner_join(s2_joined_question_data,
 correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_hexagon_bi + avg_num_steps + subject_pct_correct_correlation, data=cc_data)
 summary(correspondence_correct_model_2)
 ```
+
+
+# correspondence drag and drop
+
+```{r}
+corr_dd_model = lm(data=s2_joined_question_data %>% 
+                     filter(question == "correspondence_drag_drop",
+                            isomorphic),
+                   num_assignments_correct ~ fractal_hexagon_bi + avg_num_steps_z + I(rt/1000) + mean_rt)
+summary(corr_dd_model)
+```
+
+
+
 # when noticed
 ```{r}
 code_when_noticed = function(response) {
