@@ -170,6 +170,20 @@ if __name__ == "__main__":
 #    np.savetxt("tr_table.csv", tr_table, fmt='%i', delimiter=',')
 
 
+#    hb = hexagon_bi() 
+#    ht = hexagon_tri() 
+#    hb_table = np.full([6, 6], fill_value=-1)
+#
+#    ht_table = np.full([6, 6], fill_value=-1)
+#
+#    for state in xrange(6):
+#        for goal in xrange(6):
+#            hb_table[state, goal] = BFS_unique_optimal_action(state, goal, hb) 
+#            ht_table[state, goal] = BFS_unique_optimal_action(state, goal, ht) 
+#
+#    np.savetxt("hb_table.csv", hb_table, fmt='%i', delimiter=',')
+#    np.savetxt("ht_table.csv", ht_table, fmt='%i', delimiter=',')
+
     hb = hexagon_bi() 
     ht = hexagon_tri() 
     hb_table = np.full([6, 6], fill_value=-1)
@@ -178,8 +192,16 @@ if __name__ == "__main__":
 
     for state in xrange(6):
         for goal in xrange(6):
-            hb_table[state, goal] = BFS_unique_optimal_action(state, goal, hb) 
-            ht_table[state, goal] = BFS_unique_optimal_action(state, goal, ht) 
+            solution_paths = BFS(state, goal, hb) 
+            hb_table[state, goal] = len(solution_paths[0]) 
+            solution_paths = BFS(state, goal, ht) 
+            ht_table[state, goal] = len(solution_paths[0]) 
 
-    np.savetxt("hb_table.csv", hb_table, fmt='%i', delimiter=',')
-    np.savetxt("ht_table.csv", ht_table, fmt='%i', delimiter=',')
+    print(hb_table)
+    print(ht_table)
+    hb_table = hb_table[hb_table != -1]
+    ht_table = ht_table[ht_table != -1]
+
+    print(np.mean(hb_table))
+    print(np.mean(ht_table))
+
