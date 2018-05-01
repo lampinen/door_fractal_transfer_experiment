@@ -350,6 +350,7 @@ factoring
 main_data = main_data %>% 
   mutate(trial_type = factor(trial_type),
          group = factor(group),
+         structure = factor(group, levels=c("hexagon_bi", "hexagon_tri"), labels=c("Flipping", "Cycling")),
          subject_id = factor(subject_id))
 ```
 
@@ -615,13 +616,14 @@ ggplot(data=num_steps_summarized_data, aes(x=session_c, y=num_steps_needed, line
   geom_point(size=2) +
   geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax=num_steps_needed_95ci_upper), width=0.5) +
-#  ylim(0,1) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
   facet_wrap(~ isomorphic + subject_id)
 ```
 
 ```{r}
 ggsave("./figures/ex3/ns_individual_curve_plot.png", width=10, height=10)
 ```
+
 
 ```{r}
 num_steps_fully_summarized_data = num_steps_summarized_data  %>%
@@ -641,6 +643,7 @@ ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
   facet_wrap(~ group)
 ```
 ```{r}
@@ -648,16 +651,89 @@ ggsave("figures/ex3/ns_basic_plot.png")
 ```
 
 ```{r}
+ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed, color=group)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set1") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  facet_wrap(~ isomorphic)
+```
+
+
+
+```{r}
+num_steps_fully_summarized_data_by_type = num_steps_summarized_data  %>%
+  group_by(isomorphic, group, session_c, trial_type) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  ungroup() %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se)  
+```
+
+
+```{r}
+ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "fractal"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  labs(x="Session", y = "Average number of steps needed") +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ group)
+```
+
+```{r}
+ggsave("figures/ex3/ns_basic_plot_fractal.png")
+```
+
+
+```{r}
+ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "door"), aes(x=session_c, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ group)
+
+```
+
+```{r}
+ggsave("figures/ex3/ns_basic_plot_door.png")
+```
+
+
+```{r}
 ns_time_dependent_model_0 = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data)
-ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * trial_type + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * trial_type + session_c + I(session_c^2) + group  +  trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 ns_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (session_c  + trial_type)+ I(session_c^2) + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 ns_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (session_c ) *trial_type + I(session_c^2)  + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
 AIC(ns_time_dependent_model_0)
 AIC(ns_time_dependent_model_0.5)
 AIC(ns_time_dependent_model_1)
 AIC(ns_time_dependent_model_1.5)
+summary(ns_time_dependent_model_0)
 summary(ns_time_dependent_model_0.5) # min AIC
 ```
+
+```{r}
+ns_time_dependent_model_door = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_index_by_type_z + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="door"))
+ns_time_dependent_model_fractal = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_index_by_type_z + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="fractal"))
+```
+```{r}
+summary(ns_time_dependent_model_door)
+```
+
+```{r}
+
+summary(ns_time_dependent_model_fractal)
+```
+
+
 ```{r}
 explicit_similarity_data = question_data %>%
   filter(question %in% c("correspondence_suspect", "similarity_likert", "which_condition")) %>%
@@ -678,7 +754,60 @@ AIC(ns_es_time_dependent_model_1.5b)
 AIC(ns_es_time_dependent_model_2)
 summary(ns_es_time_dependent_model_2) # min AIC
 ```
+```{r}
 
+ns_es_time_dependent_model_2_fractal = lmer(num_steps_needed~ isomorphic * ( correspondence_suspect + session_c + I(session_c^2)) + group  + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
+summary(ns_es_time_dependent_model_2_fractal)
+```
+
+
+```{r}
+es_ns_summarized_data = es_joined_ns_data %>%
+  group_by(subject_id, isomorphic, group, session, session_c, trial_type, correspondence_suspect) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se) %>%
+  ungroup()
+```
+
+```{r}
+es_ns_fully_summarized_data = es_ns_summarized_data  %>%
+  group_by(isomorphic, group, session_c, correspondence_suspect) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  ungroup() %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se)  
+```
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_grid(correspondence_suspect ~ group)
+```
+
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c, y=num_steps_needed, color=correspondence_suspect)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set1") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_grid(isomorphic ~ group)
+```
+
+number of people in each condition
+```{r}
+xtabs( ~  isomorphic + correspondence_suspect + group, data = es_ns_summarized_data %>% filter(session_c == 1, trial_type == "fractal"))
+```
 
 # dumping perf for encouragement
 
@@ -771,6 +900,9 @@ summary(num_dd_assignments_correct_model)
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("hexagon_bi", response), fractal_hexagon_bi, !fractal_hexagon_bi)))
 ```
+```{r}
+xtabs(~ ds_correct + isomorphic, s2_joined_question_data)
+```
 
 ```{r}
 ggplot(data=s2_joined_question_data %>%
@@ -791,15 +923,24 @@ s2_joined_question_data = s2_joined_question_data %>%
   mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
          total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
          avg_num_steps = (door_num_steps_needed + fractal_num_steps_needed)/2,
-         avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T)),
-         abs_tpc_d = abs(total_pct_correct-0.5))
+         abs_tpc_d = abs(total_pct_correct-0.5)) %>%
+  group_by(isomorphic, subject_id, fractal_hexagon_bi) %>%
+  mutate(avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T))) %>%
+  ungroup()
 ```
 
-
+TODO: do the z-scoring within the cells
 ```{r}
 sl_model = lm(response ~  isomorphic * avg_num_steps_z + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
                 filter(question == "similarity_likert"))
 summary(sl_model)
+```
+```{r}
+ggplot(s2_joined_question_data %>%
+         filter(question == "similarity_likert") %>%
+         group_by()
+          
+      aes(x=avg_num_steps, y=response))
 ```
 
 # one task helpful for other? 
