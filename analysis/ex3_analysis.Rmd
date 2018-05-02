@@ -73,7 +73,7 @@ ht_perm_acts = list(c(1,2), ht_p2_acts, ht_p3_acts, ht_p4_acts, ht_p5_acts, ht_p
 perms_which_flip = c(2,4,6,8,10,12) # permutations which flip the actions
 ```
 
-hacky way of doing exactly the comparison I want to do (vector-wise comparison of lists whose elements are lists).
+hacky way of doing exactly the comparison I want to do (element-wise comparison of lists whose elements are lists).
 ```{r}
 compare_lists_of_lists = function(l1, l2) {
   res = c()
@@ -109,8 +109,11 @@ max_aligned_with_permutations = function(l1, l1_perms, l2) {
   max_aligned = 0
   max_perm = 0
   for (perm_i in 1:length(l1_perms)) {
+    prev_max_aligned = max_aligned
     max_aligned = max(max_aligned, sum(l1[l1_perms[[perm_i]]] == l2))
-    max_perm = perm_i
+    if (max_aligned != prev_max_aligned) {
+      max_perm = perm_i
+    }  
   }
   return(c(max_aligned, max_perm))
 }
@@ -191,7 +194,7 @@ for (i in 1:num_subjects) {
         this_Q_d$two_corr_Qs = two_corr_Qs
         this_Q_d$session = s
         this_Q_d$assignments = list(this_trial$assignments)
-        if (trial_i == 118) { # drag drop correspondence, must undo shuffling of rooms
+        if (trial_i == 117) { # drag drop correspondence, must undo shuffling of rooms
           z = this_trial$background_order + 1
           this_Q_d$assignments[[1]] = (this_Q_d$assignments[[1]])[z][z][z][z][z] # a little group theory -- x^5 = x^-1 for all x in S_6
         }
@@ -202,6 +205,7 @@ for (i in 1:num_subjects) {
         }
         blah = max_aligned_with_permutations(this_Q_d$assignments[[1]], perm_list, aux_d_frame$this_fractal_assignment[[1]])
         this_Q_d$num_assignments_correct = blah[1]
+        this_Q_d$best_dd_perm = blah[2]
         this_Q_d$best_dd_perm_flips = blah[2] %in% perms_which_flip
         question_d_frame = bind_rows(question_d_frame, this_Q_d)      
       } else {
@@ -425,6 +429,10 @@ ggplot(data=demographic_data, aes(x=education))+
 ```
 
 ```{r}
+ggsave("figures/ex3/demographics/education.png")
+```
+
+```{r}
 ggplot(data=demographic_data, aes(x=race))+
   geom_bar(stat="count")
 ```
@@ -433,8 +441,13 @@ ggplot(data=demographic_data, aes(x=race))+
 ggplot(data=demographic_data, aes(x=age))+
   geom_bar(stat="count")
 ```
+```{r}
+ggsave("figures/ex3/demographics/age.png")
+```
 
-# Most basic analyses
+# Most basic analyses of pct optimal actions
+NOTE: pct optimal seems not to be correct way to analyze this data -- some good strategies may merely truncate the long tail of the number of steps needed distribution without altering the amount of optimal actions much.
+
 ```{r}
 theme_set(theme_bw() +
             theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()))
@@ -492,7 +505,7 @@ ggsave("figures/ex3/basic_plot.png", width=7,height=5)
 cleaner RTs for regression
 ```{r}
 main_data = main_data %>%
-  mutate(truncated_RT = pmin(location_rts/1000,10))
+  mutate(truncated_RT = pmin(location_rts/1000,10)) # cut off long tail RTs
 ```
 
 ```{r}
@@ -561,10 +574,10 @@ summary(pc2_model)
 ```
 
 
-## action correct
+## action optimal
 Just looking at condition and extremely important controls and random effects
 ```{r}
-basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group + trial_type + trial_index_by_type_z + I(trial_index_by_type_z^2) +education_high + truncated_RT + (1  + correct_action | subject_id), family=binomial, data=main_data)
+basic_non_time_dependent_model = glmer(action_correct ~ isomorphic + group  + trial_index_by_type_z + I(trial_index_by_type_z^2) + truncated_RT + (1  + correct_action | subject_id), family=binomial, data=main_data %>% filter(trial_type=="fractal"))
 summary(basic_non_time_dependent_model)
 ```
 
@@ -587,16 +600,18 @@ summary(action_model)
 ```
 
 # num steps
+
+main outcome variable is number of steps needed to get to a goal
 ```{r}
 num_steps_per_trial_data = main_data %>%
-  group_by(subject_id, isomorphic, group, session, session_c, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
+  group_by(subject_id, isomorphic, group, session, session_c, structure, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
   summarize(num_steps_needed=n(),
             avg_rt=mean(truncated_RT))
 ```
 
 ```{r}
 num_steps_summarized_data = num_steps_per_trial_data %>%
-  group_by(subject_id, isomorphic, group, session, session_c, trial_type, education_high) %>%
+  group_by(subject_id, isomorphic, group, session, session_c, structure, trial_type, education_high) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
@@ -611,7 +626,7 @@ num_steps_summarized_data = num_steps_per_trial_data %>%
 ```
 
 ```{r}
-ggplot(data=num_steps_summarized_data, aes(x=session_c, y=num_steps_needed, linetype=trial_type, color=group, group=trial_type)) +
+ggplot(data=num_steps_summarized_data, aes(x=session_c, y=num_steps_needed, linetype=trial_type, color=structure, group=trial_type)) +
   geom_line() +
   geom_point(size=2) +
   geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
@@ -627,7 +642,7 @@ ggsave("./figures/ex3/ns_individual_curve_plot.png", width=10, height=10)
 
 ```{r}
 num_steps_fully_summarized_data = num_steps_summarized_data  %>%
-  group_by(isomorphic, group, session_c) %>%
+  group_by(isomorphic, group, session_c, structure) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -644,7 +659,7 @@ ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed
   geom_point(size=1.2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_wrap(~ group)
+  facet_wrap(~ structure)
 ```
 ```{r}
 ggsave("figures/ex3/ns_basic_plot.png")
@@ -664,7 +679,7 @@ ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed
 
 ```{r}
 num_steps_fully_summarized_data_by_type = num_steps_summarized_data  %>%
-  group_by(isomorphic, group, session_c, trial_type) %>%
+  group_by(isomorphic, group, session_c, structure, trial_type) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -680,9 +695,10 @@ ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "fr
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
   labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_wrap(~ group)
+  facet_wrap(~ structure )
 ```
 
 ```{r}
@@ -691,14 +707,16 @@ ggsave("figures/ex3/ns_basic_plot_fractal.png")
 
 
 ```{r}
-ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "door"), aes(x=session_c, y=num_steps_needed, color=isomorphic)) +
+ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "door"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
 #  geom_bar(stat="identity",position="dodge") +
   scale_color_brewer(palette="Set2") +
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_wrap(~ group)
+  facet_wrap(~ structure)
 
 ```
 
@@ -708,10 +726,10 @@ ggsave("figures/ex3/ns_basic_plot_door.png")
 
 
 ```{r}
-ns_time_dependent_model_0 = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data)
-ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * trial_type + session_c + I(session_c^2) + group  +  trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
-ns_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (session_c  + trial_type)+ I(session_c^2) + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
-ns_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (session_c ) *trial_type + I(session_c^2)  + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data )
+ns_time_dependent_model_0 = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F)
+ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * trial_type + session_c + I(session_c^2) + group  +  trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F )
+ns_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (session_c  + trial_type)+ I(session_c^2) + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data , REML=F)
+ns_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (session_c ) *trial_type + I(session_c^2)  + group + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F )
 AIC(ns_time_dependent_model_0)
 AIC(ns_time_dependent_model_0.5)
 AIC(ns_time_dependent_model_1)
@@ -721,15 +739,9 @@ summary(ns_time_dependent_model_0.5) # min AIC
 ```
 
 ```{r}
-ns_time_dependent_model_door = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_index_by_type_z + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="door"))
-ns_time_dependent_model_fractal = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_index_by_type_z + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="fractal"))
-```
-```{r}
+ns_time_dependent_model_door = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + structure + trial_index_by_type_z + I(trial_index_by_type_z^2) + avg_rt  + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="door"))
+ns_time_dependent_model_fractal = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + structure + trial_index_by_type_z + I(trial_index_by_type_z^2) + avg_rt + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="fractal"))
 summary(ns_time_dependent_model_door)
-```
-
-```{r}
-
 summary(ns_time_dependent_model_fractal)
 ```
 
@@ -738,26 +750,30 @@ summary(ns_time_dependent_model_fractal)
 explicit_similarity_data = question_data %>%
   filter(question %in% c("correspondence_suspect", "similarity_likert", "which_condition")) %>%
   select(subject_id, question, response) %>% 
-  spread(question, response)
+  spread(question, response) %>%
+  mutate(correspondence_suspect = factor(correspondence_suspect))
 ```
 ```{r}
 es_joined_ns_data = inner_join(num_steps_per_trial_data, explicit_similarity_data)
 ```
 ```{r}
-ns_es_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect)  + session_c + I(session_c^2)+ group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
-ns_es_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect + session_c) + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
-ns_es_time_dependent_model_1.5b = lmer(num_steps_needed~ isomorphic * (trial_type + correspondence_suspect + session_c + I(session_c^2)) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
-ns_es_time_dependent_model_2 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect + session_c + I(session_c^2)) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data )
+ns_es_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect)  + session_c + I(session_c^2)+ group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data , REML=F)
+ns_es_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect + session_c) + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data, REML=F )
+ns_es_time_dependent_model_1.5b = lmer(num_steps_needed~ isomorphic * (trial_type + correspondence_suspect + session_c + I(session_c^2)) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data, REML=F )
+ns_es_time_dependent_model_2 = lmer(num_steps_needed~ isomorphic * (trial_type * correspondence_suspect + session_c + I(session_c^2)) + group  + trial_type + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data, REML=F )
 AIC(ns_es_time_dependent_model_1)
 AIC(ns_es_time_dependent_model_1.5)
 AIC(ns_es_time_dependent_model_1.5b)
 AIC(ns_es_time_dependent_model_2)
 summary(ns_es_time_dependent_model_2) # min AIC
 ```
-```{r}
 
-ns_es_time_dependent_model_2_fractal = lmer(num_steps_needed~ isomorphic * ( correspondence_suspect + session_c + I(session_c^2)) + group  + trial_index_by_type_z + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
-summary(ns_es_time_dependent_model_2_fractal)
+
+```{r}
+contrasts(es_joined_ns_data$correspondence_suspect) = cbind(Yes=c(-1, 1)) # effect code just for this
+ns_es_time_dependent_model_1_fractal = lmer(num_steps_needed~ isomorphic * ( correspondence_suspect) + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
+summary(ns_es_time_dependent_model_1_fractal)
+contrasts(es_joined_ns_data$correspondence_suspect) = cbind(Yes=c(0, 1))
 ```
 
 
@@ -782,9 +798,11 @@ es_ns_fully_summarized_data = es_ns_summarized_data  %>%
 ```
 
 ```{r}
-ggplot(data=es_ns_fully_summarized_data, aes(x=session_c, y=num_steps_needed, color=isomorphic)) +
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=isomorphic)) +
 #  geom_bar(stat="identity",position="dodge") +
   scale_color_brewer(palette="Set2") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
@@ -793,15 +811,22 @@ ggplot(data=es_ns_fully_summarized_data, aes(x=session_c, y=num_steps_needed, co
 ```
 
 
+
 ```{r}
-ggplot(data=es_ns_fully_summarized_data, aes(x=session_c, y=num_steps_needed, color=correspondence_suspect)) +
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=correspondence_suspect)) +
 #  geom_bar(stat="identity",position="dodge") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
   scale_color_brewer(palette="Set1") +
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
   facet_grid(isomorphic ~ group)
+```
+
+```{r}
+ggsave("figures/ex3/ns_by_correspondence_suspect.png")
 ```
 
 number of people in each condition
@@ -881,17 +906,18 @@ s2_joined_question_data = question_data %>%
                       mean_rt=(door_mean_rt+fractal_mean_rt)/2)) %>%
   inner_join(., 
              num_steps_summarized_data %>%
-               select(-c(education_high, num_steps_needed_95ci_lower, num_steps_needed_95ci_upper)) %>%
+               select(-c(structure, education_high, num_steps_needed_95ci_lower, num_steps_needed_95ci_upper)) %>%
                filter(session==2) %>%
                gather(metric, outcome, num_steps_needed, num_steps_needed_se) %>%
                mutate(condition=paste(trial_type, metric, sep="_")) %>%
                select(-c(metric, trial_type, group)) %>%
-               spread(condition, outcome))
+               spread(condition, outcome)) %>%
+  mutate(fractal_Flipping=fractal_hexagon_bi)
 ```
 
 ## drag + drop
 ```{r}
-num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic + fractal_num_steps_needed + education_high + fractal_hexagon_bi + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic + fractal_num_steps_needed + fractal_Flipping + I(rt/1000), data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
 
@@ -900,20 +926,24 @@ summary(num_dd_assignments_correct_model)
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("hexagon_bi", response), fractal_hexagon_bi, !fractal_hexagon_bi)))
 ```
+
 ```{r}
 xtabs(~ ds_correct + isomorphic, s2_joined_question_data)
 ```
 
 ```{r}
 ggplot(data=s2_joined_question_data %>%
-         filter(!is.na(ds_correct)),
-       aes(x=fractal_num_steps_needed, y = ds_correct, color=ds_correct)) +
-  geom_point() +
-  facet_wrap(~ isomorphic)
+         filter(!is.na(ds_correct)) %>%
+         group_by(isomorphic, fractal_Flipping) %>%
+         summarize(pct_correct=mean(ds_correct)) %>%
+         ungroup(),
+       aes(x=isomorphic, y = pct_correct, fill=isomorphic)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~ fractal_Flipping)
 ```
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ fractal_hexagon_bi + isomorphic + fractal_num_steps_needed  + I(rt/1000) + fractal_mean_rt, data=s2_joined_question_data)
+ds_correct_model = glm(ds_correct ~ fractal_hexagon_bi + isomorphic, data=s2_joined_question_data)
 summary(ds_correct_model)
 ```
 
@@ -924,12 +954,11 @@ s2_joined_question_data = s2_joined_question_data %>%
          total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
          avg_num_steps = (door_num_steps_needed + fractal_num_steps_needed)/2,
          abs_tpc_d = abs(total_pct_correct-0.5)) %>%
-  group_by(isomorphic, subject_id, fractal_hexagon_bi) %>%
+  group_by(isomorphic, fractal_hexagon_bi) %>%
   mutate(avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T))) %>%
   ungroup()
 ```
 
-TODO: do the z-scoring within the cells
 ```{r}
 sl_model = lm(response ~  isomorphic * avg_num_steps_z + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
                 filter(question == "similarity_likert"))
@@ -937,10 +966,11 @@ summary(sl_model)
 ```
 ```{r}
 ggplot(s2_joined_question_data %>%
-         filter(question == "similarity_likert") %>%
-         group_by()
-          
-      aes(x=avg_num_steps, y=response))
+         filter(question == "similarity_likert"),
+      aes(x=avg_num_steps_z, y=response, color=isomorphic)) +
+  geom_point() +
+  xlim(-3, 3)
+  
 ```
 
 # one task helpful for other? 
@@ -974,7 +1004,7 @@ summary(correspondence_correct_model_2)
 corr_dd_model = lm(data=s2_joined_question_data %>% 
                      filter(question == "correspondence_drag_drop",
                             isomorphic),
-                   num_assignments_correct ~ fractal_hexagon_bi + avg_num_steps_z + I(rt/1000) + mean_rt)
+                   num_assignments_correct ~ fractal_hexagon_bi + avg_num_steps_z)
 summary(corr_dd_model)
 ```
 
@@ -1012,7 +1042,7 @@ s2_joined_question_data = s2_joined_question_data %>%
 ```
 
 ```{r}
-ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic *  avg_num_steps_z   + I(rt/1000) + mean_rt, data=s2_joined_question_data)
+ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic +  avg_num_steps_z   + I(rt/1000) + mean_rt, data=s2_joined_question_data)
 summary(ever_noticed_model)
 ```
 
@@ -1174,7 +1204,7 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps))  +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=dist_corr_data)
 summary(dist_corr_correct_model)
 ```
 
@@ -1182,9 +1212,55 @@ summary(dist_corr_correct_model)
 
 ```{r}
 es_dist_corr_data = inner_join(dist_corr_data, explicit_similarity_data)
+contrasts(es_dist_corr_data$correspondence_suspect) = cbind(Yes=c(-1, 1)) # effect code 
 ```
 
 ```{r}
 es_dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) * correspondence_suspect +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=es_dist_corr_data)
 summary(es_dist_corr_correct_model)
 ```
+
+
+# predicting from drag and drop
+```{r}
+es_dist_corr_data_2 = es_dist_corr_data %>%
+  filter(two_corr_Qs & question %in% c("correspondence_identify", "correspondence_drag_drop")) %>%
+  group_by(subject_id) %>%
+  mutate(best_dd_perm = mean(best_dd_perm, na.rm=T), # hacky way of spreading this value to all questions
+         best_dd_perm_flips = mean(best_dd_perm_flips, na.rm=T),
+         best_dd_equals_perm_at_min = best_dd_perm == perm_at_min) %>%
+  ungroup()
+```
+
+Is there residual variance in policy projections after controlling for their explicit guess at the correspondence? 
+```{r}
+dist_corr_correct_model_b = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) + best_dd_perm_flips +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=es_dist_corr_data_2)
+summary(dist_corr_correct_model_b)
+```
+Hard to say because of lack of power to detect the effect at all
+```{r}
+dist_corr_correct_model_b0 = glm(correspondence_correct ~ I(scale(perm_swaps_minus_perm_non_swaps)), data=es_dist_corr_data_2)
+summary(dist_corr_correct_model_b0)
+```
+
+```{r}
+ggplot(data=es_dist_corr_data %>%
+         filter(question=="correspondence_identify"),
+       aes(x=perm_swaps_minus_perm_non_swaps, fill=two_corr_Qs)) +
+  geom_histogram(position="dodge") + 
+  facet_wrap(~ correspondence_correct)
+```
+
+
+```{r}
+corr_dd_prediction_model = glm(data=es_dist_corr_data_2 %>% 
+                     filter(question == "correspondence_drag_drop", isomorphic),
+                     best_dd_equals_perm_at_min ~ fractal_hexagon_bi + avg_num_steps_z)
+summary(corr_dd_prediction_model)
+```
+
+```{r}
+xtabs(~ best_dd_perm + perm_at_min, data=es_dist_corr_data_2 %>%
+        filter(question=="correspondence_drag_drop"))
+```
+
