@@ -10,6 +10,7 @@ library(tidyr)
 library(ggplot2)
 library(lme4)
 library(lmerTest)
+library(boot)
 ```
 # stuff
 All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that hb_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.) 
@@ -917,7 +918,7 @@ s2_joined_question_data = question_data %>%
 
 ## drag + drop
 ```{r}
-num_dd_assignments_correct_model = lm(num_assignments_correct ~ isomorphic + fractal_num_steps_needed + fractal_Flipping + I(rt/1000), data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ fractal_num_steps_needed + fractal_Flipping, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
 
@@ -927,6 +928,16 @@ s2_joined_question_data = s2_joined_question_data %>%
   mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("hexagon_bi", response), fractal_hexagon_bi, !fractal_hexagon_bi)))
 ```
 
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
+         total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
+         avg_num_steps = (door_num_steps_needed + fractal_num_steps_needed)/2,
+         abs_tpc_d = abs(total_pct_correct-0.5)) %>%
+  group_by(isomorphic, fractal_hexagon_bi) %>%
+  mutate(avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T))) %>%
+  ungroup()
+```
 ```{r}
 xtabs(~ ds_correct + isomorphic, s2_joined_question_data)
 ```
@@ -943,24 +954,14 @@ ggplot(data=s2_joined_question_data %>%
 ```
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ fractal_hexagon_bi + isomorphic, data=s2_joined_question_data)
+ds_correct_model = glm(ds_correct ~ isomorphic + fractal_Flipping + avg_num_steps_z, data=s2_joined_question_data)
 summary(ds_correct_model)
 ```
 
 # similarity likert
-```{r}
-s2_joined_question_data = s2_joined_question_data %>%
-  mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
-         total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
-         avg_num_steps = (door_num_steps_needed + fractal_num_steps_needed)/2,
-         abs_tpc_d = abs(total_pct_correct-0.5)) %>%
-  group_by(isomorphic, fractal_hexagon_bi) %>%
-  mutate(avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T))) %>%
-  ungroup()
-```
 
 ```{r}
-sl_model = lm(response ~  isomorphic * avg_num_steps_z + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
+sl_model = lm(response ~  isomorphic * avg_num_steps_z, data=s2_joined_question_data %>%
                 filter(question == "similarity_likert"))
 summary(sl_model)
 ```
@@ -976,7 +977,7 @@ ggplot(s2_joined_question_data %>%
 # one task helpful for other? 
 
 ```{r}
-oth_model = lm(response ~  isomorphic * (avg_num_steps_z)  + fractal_hexagon_bi  + I(rt/1000) + mean_rt, data=s2_joined_question_data %>%
+oth_model = lm(response ~  isomorphic * (avg_num_steps_z)  + fractal_hexagon_bi, data=s2_joined_question_data %>%
                 filter(question == "one_task_helpful_for_other"))
 summary(oth_model)
 ```
@@ -992,6 +993,7 @@ cc_data = inner_join(s2_joined_question_data,
                                          pcc2_data %>%
                                            rename(subject_pct_correct_correlation=pct_correct_dot))
 ```
+
 ```{r}
 correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_hexagon_bi + avg_num_steps + subject_pct_correct_correlation, data=cc_data)
 summary(correspondence_correct_model_2)
@@ -1182,33 +1184,103 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
             perm_at_min = perm[which(L1 == min_L1)][1], # in case multiple mins
             perm_at_min_swaps = mean(perm[which(L1 == min_L1)] %in% perms_which_flip),
             perm_swaps_minus_perm_non_swaps = sum(L1[which(perm %in% perms_which_flip)]) - sum(L1[which(!(perm %in% perms_which_flip))])) %>% 
-  ungroup()
+  ungroup() %>%
+  mutate(fractal_Flipping = fractal_hexagon_bi)
  
 ```
 
 ```{r}
 
-distributaional_similarity_summary = distributional_similarity_data %>%
-  group_by(isomorphic, fractal_hexagon_bi, education_high) %>% 
+distributional_similarity_summary = distributional_similarity_data %>%
+  group_by(isomorphic, fractal_Flipping) %>% 
   summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
             avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1),
+            min_L1_95ci_lower = avg_min_L1 - 1.96* sd_min_L1/sqrt(n()),
+            min_L1_95ci_upper = avg_min_L1 + 1.96* sd_min_L1/sqrt(n()),
             avg_psmpns = mean(perm_swaps_minus_perm_non_swaps))
 
-distributaional_similarity_summary 
+distributional_similarity_full_summary = distributional_similarity_data %>%
+  group_by(isomorphic) %>% 
+  summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
+            avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1),
+            min_L1_95ci_lower = avg_min_L1 - 1.96* sd_min_L1/sqrt(n()),
+            min_L1_95ci_upper = avg_min_L1 + 1.96* sd_min_L1/sqrt(n()),
+            avg_psmpns = mean(perm_swaps_minus_perm_non_swaps))
+
+distributional_similarity_summary 
+```
+```{r}
+dist_sim_model = lm(min_L1 ~ isomorphic * fractal_Flipping, data=distributional_similarity_data)
+summary(dist_sim_model)
+```
+
+```{r}
+ggplot(distributional_similarity_full_summary, aes(x = isomorphic, y= avg_min_L1, fill=isomorphic)) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=min_L1_95ci_lower, ymax=min_L1_95ci_upper), width=0.25) +
+  scale_fill_brewer(palette="Set2") +
+  labs(y="Minimum L1 distance between policies") 
+  
+
+```
+
+```{r}
+ggsave("figures/ex3/distributional_similarities_by_isomorphic.png")
+```
+
+```{r}
+ggplot(distributional_similarity_summary, aes(x = isomorphic, y= avg_min_L1, fill=isomorphic)) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=min_L1_95ci_lower, ymax=min_L1_95ci_upper), width=0.25) +
+  scale_fill_brewer(palette="Set2") +
+  labs(y="Minimum L1 distance between policies") +
+  facet_grid(~ fractal_Flipping)
+  
+
+```
+
+```{r}
+ggsave("figures/ex3/distributional_similarities_by_group.png")
 ```
 
 # does distributional similarity predict correspondence?
 
 ```{r}
-dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_data)
+dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_data) %>%
+  mutate(psmnps_z = as.vector(scale(perm_swaps_minus_perm_non_swaps)),
+         rt=rt/1000)
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z +  avg_num_steps_z   + rt, data=dist_corr_data)
 summary(dist_corr_correct_model)
 ```
 
 
+```{r}
+ggplot(data=dist_corr_data %>% filter(!is.na(correspondence_correct)), aes(x=I(scale(perm_swaps_minus_perm_non_swaps)), y=1-correspondence_correct)) +
+  geom_point(aes(color=fractal_Flipping))  + 
+  geom_smooth(method="glm", method.args=list(family="binomial"), se=F)
+```
+
+```{r}
+coefficient_getter = function(data, indices) {
+  res = glm(correspondence_correct ~ psmnps_z +  avg_num_steps_z   + rt, data=data[indices,])
+  return(res$coefficients)
+}
+```
+
+```{r}
+bootstrap_results = boot(data=dist_corr_data, statistic=coefficient_getter, R=1000)
+```
+
+```{r}
+boot.ci(bootstrap_results, type="perc", index=1)
+boot.ci(bootstrap_results, type="perc", index=2)
+boot.ci(bootstrap_results, type="perc", index=3)
+boot.ci(bootstrap_results, type="perc", index=4)
+```
+All but RT remain significant at 95% confidence
 
 ```{r}
 es_dist_corr_data = inner_join(dist_corr_data, explicit_similarity_data)
