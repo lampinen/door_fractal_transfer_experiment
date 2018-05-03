@@ -184,6 +184,46 @@ Less abstract and more abstract reasoning can be seen as partially distinct task
 Abstraction is one type of task where we might look for transfer.
 \end{frame}
 
+\begin{frame}{A diagram of potential phenomena of interest}
+\begin{figure}
+\centering
+\begin{tikzpicture}[auto] %% TODO? highlighting
+\node [rectangle, draw, thick, text width=2cm, align=center ] (A) at (-3, 0) {Task A}; 
+\node [rectangle, draw, thick, text width=2cm, align=center] (B) at (3, 0) {Task B}; 
+\uncover<2->{
+\path [line, <->] (A.east) to node (proctrans) {} (B.west); 
+}
+\uncover<3->{
+\node [rectangle, draw, thick, text width=2cm, align=center] (Aabs) at (-3, 2.5) {Abstractions on A}; 
+\node [rectangle, draw, thick, text width=2cm, align=center] (Babs) at (3, 2.5) {Abstractions on B}; 
+\path [line, <->] (A.north) to  node (Atrans) {}(Aabs.south); 
+\path [line, <->] (B.north) to node (Btrans) {} (Babs.south); 
+}
+\uncover<4->{
+\path [line, <->] (Aabs.east) to node (abstrans) {} (Babs.west); 
+}
+\uncover<5->{
+\path [line, <->] ([yshift=-0.75em]proctrans.north) to node (procabstrans) {} (abstrans.south); 
+}
+\uncover<6->{
+\node [rectangle, draw, thick, text width=3cm, align=center] (ABabs) at (0, 5.5) {Abstractions about relationship between A and B}; 
+}
+\uncover<7->{
+\path [line, <->] (Aabs.north) to  (ABabs.south west); 
+\path [line, <->] (Babs.north) to  (ABabs.south east); 
+}
+\uncover<8->{
+\path [line, <->] ([yshift=-0.75em]abstrans.north) to(ABabs.south); 
+\path [line, <->, bend right] ([xshift=0.5em, yshift=-0.75em]proctrans.north) to([xshift=0.5em]ABabs.south); 
+}
+
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+\section{Experimental design}
+
 \begin{frame}[allowframebreaks]
 \bibliographystyle{plainnat}
 \blfootnote{\bibliography{transfer}}
