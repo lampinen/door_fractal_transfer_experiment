@@ -47,7 +47,7 @@
         mutagen_generator_assignment: this_mutagen_assignment,
         action_noise: 0,
         goal: 1,
-        start: 3
+        start: 4
     };
 
     var test_room = {
@@ -68,7 +68,7 @@
         door_generator_assignment: this_door_generator_assignment,
         action_noise: 0,
         goal: 1,
-        start: 3
+        start: 4
     };
 
     var dragging_images = this_fractal_assignment.slice(); 
@@ -127,9 +127,11 @@
 
     var correspondence_identification = {type: "survey-multi-choice", questions: ["Assuming the experiments were teaching you the same structure, one of the doors in the spatial navigation experiment corresponded to the gamma ray in the fractal experiment, and the other door corresponded to the acid. What is your best guess about what the correspondence between the doors and the gamma ray and acid was?", "How confident are you in your guess?"], options: [correspondence_options, ["Not at all confident", "Slightly confident", "Moderately confident", "Pretty confident", "Completely confident"]]} 
 
+    var correspondence_suspect = {type: "survey-multi-choice", questions: ["Did you suspect there was a correspondence between the relationships learned in the spatial learning experiment and the relationships learned in the visual patterns experiment?"], options: [["Yes", "No"]]}
+
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [drag_corr_test, correspondence_identification, drag_test],
+            timeline: [test_room, test_room_2, test_fractal, test_fractal_2, correspondence_suspect, drag_test, drag_corr_test, correspondence_identification],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
