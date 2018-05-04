@@ -864,7 +864,7 @@ ns_es_time_dependent_model_3_fractal = lmer(num_steps_needed~ isomorphic * which
 summary(ns_es_time_dependent_model_3_fractal)
 ```
 ```{r}
-ns_es_time_dependent_model_3_fractal = lmer(num_steps_needed~ isomorphic * I(as.numeric(one_task_helpful_for_other)-2) + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
+ns_es_time_dependent_model_3_fractal = lmer(num_steps_needed~ isomorphic * I(scale(as.numeric(one_task_helpful_for_other))) + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
 summary(ns_es_time_dependent_model_3_fractal)
 ```
 
@@ -1008,18 +1008,6 @@ s2_joined_question_data = question_data %>%
   mutate(fractal_Flipping=fractal_hexagon_bi)
 ```
 
-## drag + drop
-```{r}
-num_dd_assignments_correct_model = lm(num_assignments_correct ~ fractal_num_steps_needed + fractal_Flipping, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
-summary(num_dd_assignments_correct_model)
-```
-
-## diagram selection
-```{r}
-s2_joined_question_data = s2_joined_question_data %>%
-  mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("hexagon_bi", response), fractal_hexagon_bi, !fractal_hexagon_bi)))
-```
-
 ```{r}
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(total_pct_correct = door_pct_correct + fractal_pct_correct,
@@ -1031,8 +1019,54 @@ s2_joined_question_data = s2_joined_question_data %>%
          avg_num_steps_fractal_z = as.vector(scale(fractal_num_steps_needed, center=T, scale=T))) %>%
   ungroup()
 ```
+
+## drag + drop
+```{r}
+num_dd_assignments_correct_model = lm(num_assignments_correct ~ avg_num_steps_fractal_z + fractal_Flipping + isomorphic, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_model)
+```
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram"),
+       aes(x=-avg_num_steps_fractal_z, y=num_assignments_correct))+
+  geom_point(aes(color=isomorphic)) +
+  geom_smooth(method="lm", color="black") +
+  labs(x="Performance (reverse number of steps, Z-scored within condition)", y="Number of fractals correctly assigned") +
+  scale_color_brewer(palette="Set2")
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_ns.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram") %>%
+         group_by(isomorphic) %>%
+         summarize(nac = mean(num_assignments_correct), nac_se=sd(num_assignments_correct)/sqrt(n()),
+                   ci_lower=nac - 1.96*nac_se, ci_upper=nac + 1.96*nac_se) %>%
+         ungroup(),
+       aes(x=isomorphic, y=nac, fill=isomorphic))+
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25) +
+  labs(y="Number of fractals correctly assigned") +
+  scale_fill_brewer(palette="Set2")
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso.png", width=7, height=5)
+```
+
+## diagram selection
+```{r}
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("hexagon_bi", response), fractal_hexagon_bi, !fractal_hexagon_bi)))
+```
+
+
 ```{r}
 xtabs(~ ds_correct + isomorphic, s2_joined_question_data)
+
 ```
 
 ```{r}
@@ -1046,22 +1080,24 @@ ggplot(data=s2_joined_question_data %>%
        aes(x=isomorphic, y = pct_correct, fill=isomorphic)) +
   geom_bar(stat="identity") +
   #geom_errorbar(aes(ymin=pct_correct_95ci_lower, ymax=pct_correct_95ci_upper)) +
+  ylim(0, 1) +
   scale_fill_brewer(palette="Set2") 
 #  facet_wrap(~ fractal_Flipping)
 ```
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ isomorphic + fractal_Flipping + avg_num_steps_fractal_z, data=s2_joined_question_data)
+ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=s2_joined_question_data)
 summary(ds_correct_model)
 ```
 
 # similarity likert
 
 ```{r}
-sl_model = lm(response ~  isomorphic + avg_num_steps_fractal_z, data=s2_joined_question_data %>%
+sl_model = lm(response ~  isomorphic , data=s2_joined_question_data %>%
                 filter(question == "similarity_likert"))
 summary(sl_model)
 ```
+
 ```{r}
 ggplot(s2_joined_question_data %>%
          filter(question == "similarity_likert"),
@@ -1075,27 +1111,42 @@ ggplot(s2_joined_question_data %>%
 # one task helpful for other? 
 
 ```{r}
-oth_model = lm(response ~  isomorphic * (avg_num_steps_fractal_z)  + fractal_hexagon_bi, data=s2_joined_question_data %>%
+oth_model = lm(response ~  isomorphic  + fractal_hexagon_bi, data=s2_joined_question_data %>%
                 filter(question == "one_task_helpful_for_other"))
 summary(oth_model)
 ```
 
 # correspondence correct
 ```{r}
-correspondence_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi + avg_num_steps_z + I(rt/1000) + mean_rt, data=s2_joined_question_data)
+correspondence_correct_model = glm(correspondence_correct ~ avg_num_steps_z, family="binomial", data=s2_joined_question_data)
 summary(correspondence_correct_model)
 ```
 
+# which condition
 ```{r}
-cc_data = inner_join(s2_joined_question_data,
-                                         pcc2_data %>%
-                                           rename(subject_pct_correct_correlation=pct_correct_dot))
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(which_condition_correct = ifelse(question != "which_condition", NA, 
+                                          ifelse(grepl("Same", response), isomorphic, !isomorphic)))
 ```
 
 ```{r}
-correspondence_correct_model_2 = glm(correspondence_correct ~ fractal_hexagon_bi + avg_num_steps + subject_pct_correct_correlation, data=cc_data)
-summary(correspondence_correct_model_2)
+wc_model = glm(which_condition_correct ~ avg_num_steps_z, family="binomial", data=s2_joined_question_data)
+summary(wc_model)
 ```
+
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(which_condition_correct)), aes(x=-avg_num_steps_z, y=1*which_condition_correct)) +
+  geom_point() +
+  labs(x="Performance (reverse number of steps, Z-scored within condition)", y="Correct about same/different structures") +
+  geom_smooth(method="glm", method.args=list(family="binomial"), color="black")
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/wc_by_ns.png", width=7, height=5)
+```
+
 
 
 # correspondence drag and drop
@@ -1121,12 +1172,12 @@ s2_joined_question_data = s2_joined_question_data %>%
 ```
 
 ```{r}
-ever_noticed_model = glm(ever_noticed ~ fractal_hexagon_bi + isomorphic +  avg_num_steps_z   + I(rt/1000) + mean_rt, data=s2_joined_question_data)
+ever_noticed_model = glm(ever_noticed ~ isomorphic +  avg_num_steps_z, family="binomial", data=s2_joined_question_data)
 summary(ever_noticed_model)
 ```
 
 ```{r}
-when_noticed_model = lm(when_noticed~  isomorphic + avg_num_steps_z  + I(rt/1000) + mean_rt , data=s2_joined_question_data %>%
+when_noticed_model = lm(when_noticed~  isomorphic + avg_num_steps_z , data=s2_joined_question_data %>%
                 filter(!is.na(when_noticed)))
 summary(when_noticed_model)
 ```
@@ -1291,7 +1342,7 @@ distributional_similarity_full_summary = distributional_similarity_data %>%
 distributional_similarity_summary 
 ```
 ```{r}
-dist_sim_model = lm(min_L1 ~ isomorphic * fractal_Flipping, data=distributional_similarity_data)
+dist_sim_model = lm(min_L1 ~ isomorphic, data=distributional_similarity_data)
 summary(dist_sim_model)
 ```
 
@@ -1308,6 +1359,7 @@ ggplot(distributional_similarity_full_summary, aes(x = isomorphic, y= avg_min_L1
 ```{r}
 ggsave("figures/ex3/distributional_similarities_by_isomorphic.png")
 ```
+
 ```{r}
 ggplot(distributional_similarity_full_summary, aes(x = isomorphic, y= avg_avg_L1, fill=isomorphic)) +
   geom_bar(stat="identity") +
@@ -1342,8 +1394,6 @@ ggplot(distributional_similarity_summary, aes(x = isomorphic, y= avg_avg_L1, fil
   scale_fill_brewer(palette="Set2") +
   labs(y="Minimum L1 distance between policies") +
   facet_grid(~ fractal_Flipping)
-  
-
 ```
 
 ```{r}
@@ -1358,29 +1408,29 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z  +  avg_num_steps_z   + rt, data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z  +  avg_num_steps_z   + I(rt/1000), family="binomial", data=dist_corr_data)
 summary(dist_corr_correct_model)
 ```
 
 ```{r}
-dist_corr_correct_model_0 = glm(correspondence_correct ~ perm_at_min_swaps  +  avg_num_steps_z   + rt, data=dist_corr_data)
+dist_corr_correct_model_0 = glm(correspondence_correct ~ perm_at_min_swaps  +  avg_num_steps_z   + rt, family="binomial", data=dist_corr_data)
 summary(dist_corr_correct_model_0)
 ```
 
 ```{r}
-dist_corr_correct_model_2 = glm(correspondence_correct ~ perm_at_min_swaps + psmnps_z +  avg_num_steps_z   + rt, data=dist_corr_data)
+dist_corr_correct_model_2 = glm(correspondence_correct ~ perm_at_min_swaps + psmnps_z +  avg_num_steps_z   + rt, family="binomial", data=dist_corr_data)
 summary(dist_corr_correct_model_2)
 ```
 
 ```{r}
 ggplot(data=dist_corr_data %>% filter(!is.na(correspondence_correct)), aes(x=I(scale(perm_swaps_minus_perm_non_swaps)), y=1-correspondence_correct)) +
   geom_point(aes(color=fractal_Flipping))  + 
-  geom_smooth(method="glm", method.args=list(family="binomial"), se=F)
+  geom_smooth(method="glm", method.args=list(family="binomial"), color="black", se=F)
 ```
 
 ```{r}
 coefficient_getter = function(data, indices) {
-  res = glm(correspondence_correct ~ psmnps_z +  avg_num_steps_z   + rt, data=data[indices,])
+  res = glm(correspondence_correct ~ psmnps_z +  avg_num_steps_z   + I(rt/1000), family="binomial", data=data[indices,])
   return(res$coefficients)
 }
 ```
@@ -1395,16 +1445,16 @@ boot.ci(bootstrap_results, type="perc", index=2)
 boot.ci(bootstrap_results, type="perc", index=3)
 boot.ci(bootstrap_results, type="perc", index=4)
 ```
-All but RT remain significant at 95% confidence
 
 
 ```{r}
-es_dist_corr_data = inner_join(dist_corr_data, explicit_similarity_data)
+es_dist_corr_data = inner_join(dist_corr_data, explicit_similarity_data %>%
+                                 select(subject_id, correspondence_suspect))
 contrasts(es_dist_corr_data$correspondence_suspect) = cbind(Yes=c(-1, 1)) # effect code 
 ```
 
 ```{r}
-es_dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) * correspondence_suspect +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=es_dist_corr_data)
+es_dist_corr_correct_model = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) * correspondence_suspect +  avg_num_steps_z   + I(rt/1000) + mean_rt , family="binomial", data=es_dist_corr_data)
 summary(es_dist_corr_correct_model)
 ```
 
@@ -1424,12 +1474,12 @@ es_dist_corr_data_2 = es_dist_corr_data %>%
 
 Is there residual variance in policy projections after controlling for their explicit guess at the correspondence? 
 ```{r}
-dist_corr_correct_model_b = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) + best_dd_perm_flips +  avg_num_steps_z   + I(rt/1000) + mean_rt , data=es_dist_corr_data_2)
+dist_corr_correct_model_b = glm(correspondence_correct ~ fractal_hexagon_bi  + I(scale(perm_swaps_minus_perm_non_swaps)) + best_dd_perm_flips +  avg_num_steps_z   + I(rt/1000) + mean_rt , family="binomial", data=es_dist_corr_data_2)
 summary(dist_corr_correct_model_b)
 ```
 Hard to say because of lack of power to detect the effect at all
 ```{r}
-dist_corr_correct_model_b0 = glm(correspondence_correct ~ I(scale(perm_swaps_minus_perm_non_swaps)), data=es_dist_corr_data_2)
+dist_corr_correct_model_b0 = glm(correspondence_correct ~ I(scale(perm_swaps_minus_perm_non_swaps)), family="binomial", data=es_dist_corr_data_2)
 summary(dist_corr_correct_model_b0)
 ```
 
@@ -1445,7 +1495,7 @@ ggplot(data=es_dist_corr_data %>%
 ```{r}
 corr_dd_prediction_model = glm(data=es_dist_corr_data_2 %>% 
                      filter(question == "correspondence_drag_drop", isomorphic),
-                     perm_at_min_in_best_dd_perms ~ fractal_hexagon_bi + avg_num_steps_z)
+                     perm_at_min_in_best_dd_perms ~ 1)
 summary(corr_dd_prediction_model)
 ```
 
