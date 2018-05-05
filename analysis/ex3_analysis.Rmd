@@ -122,6 +122,9 @@ max_aligned_with_permutations = function(l1, l1_perms, l2) {
   }
   return(c(max_aligned, max_perm, max_perms))
 }
+
+chance_alignments_hb = 2.9
+chance_alignments_ht = 2.111
 ```
 
 # Data loading
@@ -409,7 +412,7 @@ collapsed_main_data = main_data %>%
 
 
 ```{r}
-is_ev_off_chance = xtabs(~isomorphic + ever_off_chance, data=collapsed_main_data %>% filter(session==2, trial_type=="door"))
+is_ev_off_chance = xtabs(~isomorphic + ever_off_chance, data=collapsed_main_data %>% filter(session==2, trial_type=="fractal"))
 chisq.test(is_ev_off_chance) 
 ```
 
@@ -589,13 +592,13 @@ summary(basic_non_time_dependent_model)
 
 Time dependent:
 ```{r}
-basic_time_dependent_model = glmer(action_correct ~ isomorphic * group + session_c +I(session_c^2) + trial_type + trial_index_by_type_z + truncated_RT+ (1 + correct_action | subject_id), family=binomial, data=main_data)
+basic_time_dependent_model = glmer(action_correct ~ isomorphic + group + session_c +I(session_c^2) + trial_index_by_type_z + truncated_RT+ (1 + correct_action | subject_id), family=binomial, data=main_data  %>% filter(trial_type == "fractal"))
 summary(basic_time_dependent_model)
 ```
 
 
 ```{r}
-time_dependent_interaction_model = glmer(action_correct ~ isomorphic *  (session_c + I(session_c^2)) * group + trial_type + trial_index_by_type_z  + truncated_RT + (1 + correct_action | subject_id), family=binomial, data=main_data)
+time_dependent_interaction_model = glmer(action_correct ~ isomorphic *  (session_c) + I(session_c^2) + group + trial_index_by_type_z  + truncated_RT + (1 + correct_action | subject_id), family=binomial, data=main_data %>% filter(trial_type == "fractal"))
 summary(time_dependent_interaction_model)
 ```
 
@@ -1022,7 +1025,15 @@ s2_joined_question_data = s2_joined_question_data %>%
 
 ## drag + drop
 ```{r}
-num_dd_assignments_correct_model = lm(num_assignments_correct ~ avg_num_steps_fractal_z + fractal_Flipping + isomorphic, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(corrected_nac = ifelse(question != "drag_drop_on_diagram", NA,
+                                ifelse(fractal_hexagon_bi, num_assignments_correct-chance_alignments_hb, num_assignments_correct-chance_alignments_ht))) %>%
+  inner_join(explicit_similarity_data %>% select(subject_id, correspondence_suspect))
+```
+
+
+```{r}
+num_dd_assignments_correct_model = lm(corrected_nac ~ isomorphic  * fractal_Flipping + correspondence_suspect + avg_num_steps_fractal_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
 ```{r}
@@ -1036,13 +1047,13 @@ ggplot(data=s2_joined_question_data %>%
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex3/ds_by_ns.png", width=7, height=5)
+ggsave("../writing/talks/figures/ex3/nac_by_ns.png", width=7, height=5)
 ```
 
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(question == "drag_drop_on_diagram") %>%
-         group_by(isomorphic) %>%
+         group_by(isomorphic, fractal_Flipping) %>% 
          summarize(nac = mean(num_assignments_correct), nac_se=sd(num_assignments_correct)/sqrt(n()),
                    ci_lower=nac - 1.96*nac_se, ci_upper=nac + 1.96*nac_se) %>%
          ungroup(),
@@ -1050,12 +1061,34 @@ ggplot(data=s2_joined_question_data %>%
   geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25) +
   labs(y="Number of fractals correctly assigned") +
-  scale_fill_brewer(palette="Set2")
+  scale_fill_brewer(palette="Set2") +
+  facet_grid(~fractal_Flipping)
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex3/ds_by_iso.png", width=7, height=5)
+ggsave("../writing/talks/figures/ex3/nac_by_iso.png", width=7, height=5)
 ```
+
+```{r}
+coefficient_getter = function(data, indices) {
+  corr_nac_model = lm(corrected_nac ~ isomorphic  * fractal_Flipping + avg_num_steps_fractal_z, data=data[indices,])
+  return(corr_nac_model$coefficients)
+ 
+}
+```
+```{r}
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"), statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+boot.ci(bootstrap_results, type="perc", index=1) #
+boot.ci(bootstrap_results, type="perc", index=2) #isomorphic
+boot.ci(bootstrap_results, type="perc", index=3) #flipping
+boot.ci(bootstrap_results, type="perc", index=4) #avg_num_steps_z
+boot.ci(bootstrap_results, type="perc", index=5) #isomorphic:flipping
+```
+
+
 
 ## diagram selection
 ```{r}
@@ -1065,7 +1098,7 @@ s2_joined_question_data = s2_joined_question_data %>%
 
 
 ```{r}
-xtabs(~ ds_correct + isomorphic, s2_joined_question_data)
+xtabs(~ ds_correct + isomorphic + fractal_Flipping, s2_joined_question_data)
 
 ```
 
@@ -1081,13 +1114,63 @@ ggplot(data=s2_joined_question_data %>%
   geom_bar(stat="identity") +
   #geom_errorbar(aes(ymin=pct_correct_95ci_lower, ymax=pct_correct_95ci_upper)) +
   ylim(0, 1) +
+  labs(y="% correctly identified structure") +
   scale_fill_brewer(palette="Set2") 
 #  facet_wrap(~ fractal_Flipping)
 ```
 
 ```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram"),
+       aes(x=-avg_num_steps_fractal_z, y=num_assignments_correct))+
+  geom_point(aes(color=isomorphic)) +
+  geom_smooth(method="lm", color="black") +
+  labs(x="Performance (reverse number of steps, Z-scored within condition)", y="Number of fractals correctly assigned") +
+  scale_color_brewer(palette="Set2")
+```
+
+
+```{r}
 ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=s2_joined_question_data)
 summary(ds_correct_model)
+```
+
+
+# aggregating
+
+```{r}
+explicit_fractal_aggregated_data = s2_joined_question_data %>%
+  filter(question %in% c("diagram_selection", "drag_drop_on_diagram")) %>%
+  group_by(subject_id, isomorphic, fractal_Flipping, avg_num_steps_fractal_z, mean_rt) %>%
+  summarize(nac=mean(num_assignments_correct, na.rm=T), #hacky
+            dsc=mean(ds_correct, na.rm=T)) %>%
+  ungroup() %>%
+  mutate(weighted_nac = ifelse(is.na(nac), 0, nac/var(nac, na.rm=T)), weighted_dsc = ifelse(is.na(dsc), 0, dsc/var(dsc, na.rm=T)),
+         agg_ef_score = weighted_nac + weighted_dsc)
+```
+
+```{r}
+aef_model = lm(agg_ef_score ~ isomorphic, data=explicit_fractal_aggregated_data)
+summary(aef_model)
+```
+```{r}
+coefficient_getter = function(data, indices) {
+  aef_model = lm(agg_ef_score ~ isomorphic, data=data[indices,])
+  return(aef_model$coefficients)
+}
+```
+
+```{r}
+bootstrap_results = boot(data=explicit_fractal_aggregated_data, statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+boot.ci(bootstrap_results, type="perc", index=1)
+boot.ci(bootstrap_results, type="perc", conf=0.9, index=2)
 ```
 
 # similarity likert
@@ -1378,7 +1461,7 @@ ggplot(distributional_similarity_summary, aes(x = isomorphic, y= avg_min_L1, fil
   geom_errorbar(aes(ymin=min_L1_95ci_lower, ymax=min_L1_95ci_upper), width=0.25) +
   scale_fill_brewer(palette="Set2") +
   labs(y="Minimum L1 distance between policies") +
-  facet_grid(~ fractal_Flipping)
+  facet_grid(~ I((isomorphic & fractal_Flipping) | (!isomorphic & !fractal_Flipping))) 
   
 
 ```
@@ -1408,7 +1491,7 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z  +  avg_num_steps_z   + I(rt/1000), family="binomial", data=dist_corr_data)
+dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z  
 summary(dist_corr_correct_model)
 ```
 
@@ -1425,7 +1508,7 @@ summary(dist_corr_correct_model_2)
 ```{r}
 ggplot(data=dist_corr_data %>% filter(!is.na(correspondence_correct)), aes(x=I(scale(perm_swaps_minus_perm_non_swaps)), y=1-correspondence_correct)) +
   geom_point(aes(color=fractal_Flipping))  + 
-  geom_smooth(method="glm", method.args=list(family="binomial"), color="black", se=F)
+  geom_smooth(method="glm", method.args=list(family="binomial"), color="black", se=T)
 ```
 
 ```{r}
@@ -1436,7 +1519,7 @@ coefficient_getter = function(data, indices) {
 ```
 
 ```{r}
-bootstrap_results = boot(data=dist_corr_data, statistic=coefficient_getter, R=1000)
+bootstrap_results = boot(data=dist_corr_data, statistic=coefficient_getter, R=5000)
 ```
 
 ```{r}
@@ -1494,8 +1577,9 @@ ggplot(data=es_dist_corr_data %>%
 
 ```{r}
 corr_dd_prediction_model = glm(data=es_dist_corr_data_2 %>% 
-                     filter(question == "correspondence_drag_drop", isomorphic),
-                     perm_at_min_in_best_dd_perms ~ 1)
+                     filter(question == "correspondence_drag_drop"),
+                     family="binomial",
+                     perm_at_min_in_best_dd_perms ~ isomorphic)
 summary(corr_dd_prediction_model)
 ```
 
