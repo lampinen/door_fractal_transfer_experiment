@@ -1008,7 +1008,8 @@ s2_joined_question_data = question_data %>%
                mutate(condition=paste(trial_type, metric, sep="_")) %>%
                select(-c(metric, trial_type, group)) %>%
                spread(condition, outcome)) %>%
-  mutate(fractal_Flipping=fractal_hexagon_bi)
+  mutate(fractal_Flipping=fractal_hexagon_bi,
+         structure=ifelse(fractal_Flipping, "Flipping", "Cycling"))
 ```
 
 ```{r}
@@ -1033,17 +1034,17 @@ s2_joined_question_data = s2_joined_question_data %>%
 
 
 ```{r}
-num_dd_assignments_correct_model = lm(corrected_nac ~ isomorphic  * fractal_Flipping + correspondence_suspect + avg_num_steps_fractal_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+num_dd_assignments_correct_model = lm(corrected_nac ~ isomorphic  * structure + correspondence_suspect + avg_num_steps_fractal_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(question == "drag_drop_on_diagram"),
-       aes(x=-avg_num_steps_fractal_z, y=num_assignments_correct))+
-  geom_point(aes(color=isomorphic)) +
+       aes(x=avg_num_steps, y=num_assignments_correct))+
+  geom_point() +
   geom_smooth(method="lm", color="black") +
-  labs(x="Performance (reverse number of steps, Z-scored within condition)", y="Number of fractals correctly assigned") +
-  scale_color_brewer(palette="Set2")
+  labs(x="Avg. number of steps needed", y="Number of fractals correctly assigned") 
+  
 ```
 
 ```{r}
@@ -1053,16 +1054,15 @@ ggsave("../writing/talks/figures/ex3/nac_by_ns.png", width=7, height=5)
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(question == "drag_drop_on_diagram") %>%
-         group_by(isomorphic, fractal_Flipping) %>% 
+         group_by(isomorphic, structure) %>% 
          summarize(nac = mean(num_assignments_correct), nac_se=sd(num_assignments_correct)/sqrt(n()),
                    ci_lower=nac - 1.96*nac_se, ci_upper=nac + 1.96*nac_se) %>%
          ungroup(),
-       aes(x=isomorphic, y=nac, fill=isomorphic))+
-  geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25) +
+       aes(x=structure, y=nac, fill=isomorphic))+
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
   labs(y="Number of fractals correctly assigned") +
-  scale_fill_brewer(palette="Set2") +
-  facet_grid(~fractal_Flipping)
+  scale_fill_brewer(palette="Set2")
 ```
 
 ```{r}
@@ -1073,9 +1073,9 @@ ggsave("../writing/talks/figures/ex3/nac_by_iso.png", width=7, height=5)
 coefficient_getter = function(data, indices) {
   corr_nac_model = lm(corrected_nac ~ isomorphic  * fractal_Flipping + avg_num_steps_fractal_z, data=data[indices,])
   return(corr_nac_model$coefficients)
- 
 }
 ```
+
 ```{r}
 bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"), statistic=coefficient_getter, R=5000)
 ```
@@ -1103,18 +1103,62 @@ xtabs(~ ds_correct + isomorphic + fractal_Flipping, s2_joined_question_data)
 ```
 
 ```{r}
+ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=s2_joined_question_data)
+summary(ds_correct_model)
+
+old_contrasts = contrasts(s2_joined_question_data$isomorphic)
+contrasts(s2_joined_question_data$isomorphic) = cbind(`FALSE`=c(1,0))
+ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=s2_joined_question_data)
+summary(ds_correct_model)
+contrasts(s2_joined_question_data$isomorphic) = old_contrasts
+```
+
+
+```{r}
+coefficient_getter = function(data, indices) {
+  contrasts(data$isomorphic) = c(1, 0)
+  ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=data[indices,])
+  contrasts(data$isomorphic) = c(0, 1)
+  ds_correct_model_2 = glm(ds_correct ~ isomorphic, family="binomial", data=data[indices,])
+  return(c(ds_correct_model$coefficients, ds_correct_model_2$coefficients))
+}
+```
+
+```{r}
+sigmoid = function(x) {
+  return(1/(1+exp(-x)))
+}
+sigmoid = Vectorize(sigmoid)
+```
+
+```{r}
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"), statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+ds_boot_iso = boot.ci(bootstrap_results, type="perc", index=1) #isomorphic mean
+ds_boot_noniso = boot.ci(bootstrap_results, type="perc", index=3) #non-iso mean
+ds_ci95_iso = sigmoid(ds_boot_iso$percent[4:5]) # iso mean 95% bootstrap CI
+ds_ci95_noniso =sigmoid(ds_boot_noniso$percent[4:5]) # noniso mean 95% bootstrap CI
+ds_ci_data = data.frame(isomorphic=c(F, T), ci95_lower = c(ds_ci95_noniso[1], ds_ci95_iso[1]), ci95_upper = c(ds_ci95_noniso[2], ds_ci95_iso[2]))
+```
+
+```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(!is.na(ds_correct)) %>%
          group_by(isomorphic) %>%
-         summarize(pct_correct=mean(ds_correct), pct_correct_se=sqrt(n()*pct_correct * (1-pct_correct)),
-                   pct_correct_95ci_lower=pct_correct - 1.96*pct_correct_se,
-                   pct_correct_95ci_upper=pct_correct + 1.96*pct_correct_se) %>%
-         ungroup(),
+         summarize(pct_correct=mean(ds_correct)) %>%
+         ungroup() %>%
+         inner_join(., ds_ci_data),
        aes(x=isomorphic, y = pct_correct, fill=isomorphic)) +
   geom_bar(stat="identity") +
-  #geom_errorbar(aes(ymin=pct_correct_95ci_lower, ymax=pct_correct_95ci_upper)) +
-  ylim(0, 1) +
-  labs(y="% correctly identified structure") +
+  geom_hline(aes(yintercept=0.5), linetype=2, alpha=0.5) +
+  geom_errorbar(aes(ymin=ci95_lower, ymax=ci95_upper),  width=0.25,) +
+  labs(y="% of subjects that correctly identified structure") +
+  annotate("text", x=2, y= 1, size=10, alpha=0.5, label="**") +
+  annotate("text", x=1, y= 1.03, size=6,alpha=0.5, label="ns") +
+  annotate("segment", x=1, xend=2, y=1.1,alpha=0.5, yend=1.1) +
+  annotate("text", x=1.5, y= 1.15, size=6, alpha=0.5,label="ns") +
   scale_fill_brewer(palette="Set2") 
 #  facet_wrap(~ fractal_Flipping)
 ```
@@ -1124,20 +1168,59 @@ ggsave("../writing/talks/figures/ex3/ds_by_iso.png", width=7, height=5)
 ```
 
 ```{r}
-ggplot(data=s2_joined_question_data %>%
-         filter(question == "drag_drop_on_diagram"),
-       aes(x=-avg_num_steps_fractal_z, y=num_assignments_correct))+
-  geom_point(aes(color=isomorphic)) +
-  geom_smooth(method="lm", color="black") +
-  labs(x="Performance (reverse number of steps, Z-scored within condition)", y="Number of fractals correctly assigned") +
-  scale_color_brewer(palette="Set2")
+coefficient_getter = function(data, indices) {
+  ds_correct_model = glm(ds_correct ~ isomorphic * structure, family="binomial", data=data[indices,])
+  return(c(ds_correct_model$coefficients[1], #noniso, cycling
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[2], #iso, cycling
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[3], #noniso, flipping
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[2] +ds_correct_model$coefficients[3] + ds_correct_model$coefficients[4] #iso, flipping
+           ))
+}
 ```
-
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=s2_joined_question_data)
-summary(ds_correct_model)
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"), statistic=coefficient_getter, R=5000)
 ```
+
+```{r}
+ds_boot_noniso_cycling = boot.ci(bootstrap_results, type="perc", index=1) 
+ds_boot_iso_cycling = boot.ci(bootstrap_results, type="perc", index=2) 
+ds_boot_noniso_flipping = boot.ci(bootstrap_results, type="perc", index=3) 
+ds_boot_iso_flipping = boot.ci(bootstrap_results, type="perc", index=4) 
+ds_ci95_noniso_cycling =sigmoid(ds_boot_noniso_cycling$percent[4:5]) 
+ds_ci95_iso_cycling = sigmoid(ds_boot_iso_cycling$percent[4:5]) 
+ds_ci95_noniso_flipping =sigmoid(ds_boot_noniso_flipping$percent[4:5]) 
+ds_ci95_iso_flipping = sigmoid(ds_boot_iso_flipping$percent[4:5]) 
+
+ds_ci_data = data.frame(isomorphic=c(F, T, F, T), structure=factor(rep(c("Cycling", "Flipping"), each=2)),
+                        ci95_lower = c(ds_ci95_noniso_cycling[1], ds_ci95_iso_cycling[1], 
+                                       ds_ci95_noniso_flipping[1], ds_ci95_iso_flipping[1]),
+                        ci95_upper = c(ds_ci95_noniso_cycling[2], ds_ci95_iso_cycling[2], 
+                                       ds_ci95_noniso_flipping[2], ds_ci95_iso_flipping[2]))
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)) %>%
+         group_by(isomorphic, structure) %>%
+         summarize(pct_correct=mean(ds_correct)) %>%
+         ungroup() %>%
+         inner_join(., ds_ci_data),
+       aes(x=isomorphic, y = pct_correct, fill=isomorphic)) +
+  geom_bar(stat="identity") +
+  geom_hline(aes(yintercept=0.5), linetype=2, alpha=0.5) +
+  geom_errorbar(aes(ymin=ci95_lower, ymax=ci95_upper), width=0.25) +
+  ylim(0, 1) +
+  labs(y="% correctly identified structure") +
+  scale_fill_brewer(palette="Set2") +
+  facet_wrap(~ structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso_by_group.png", width=7, height=5)
+```
+
+
 
 
 # aggregating
