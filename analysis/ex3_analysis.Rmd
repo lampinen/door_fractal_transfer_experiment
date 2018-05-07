@@ -883,12 +883,13 @@ es_ns_summarized_data = es_joined_ns_data %>%
 
 ```{r}
 es_ns_fully_summarized_data = es_ns_summarized_data  %>%
-  group_by(isomorphic, group, session_c, correspondence_suspect) %>%
+  group_by(isomorphic, session_c, correspondence_suspect) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
   mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
-         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se)  
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se,
+         is_isomorphic=ifelse(isomorphic, "Isomorphic", "Non-isomorphic"))  
 ```
 
 ```{r}
@@ -917,12 +918,12 @@ ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, 
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   guides(color=guide_legend(title = "Suspect?")) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_grid(isomorphic ~ group)
+  facet_wrap(~ is_isomorphic)
 ```
 
 ```{r}
 ggsave("figures/ex3/ns_by_correspondence_suspect.png")
-ggsave("../writing/talks/figures/ex3/ns_by_correspondence_suspect.png")
+ggsave("../writing/talks/figures/ex3/ns_by_correspondence_suspect.png", width=7, height=5)
 ```
 
 number of people in each condition
@@ -1032,16 +1033,21 @@ s2_joined_question_data = s2_joined_question_data %>%
   inner_join(explicit_similarity_data %>% select(subject_id, correspondence_suspect))
 ```
 
-
 ```{r}
-num_dd_assignments_correct_model = lm(corrected_nac ~ isomorphic  * structure + correspondence_suspect + avg_num_steps_fractal_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+num_dd_assignments_correct_model = lm(corrected_nac ~ isomorphic, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
 summary(num_dd_assignments_correct_model)
 ```
+
+```{r}
+num_dd_assignments_correct_model = lm(corrected_nac ~ isomorphic  * structure + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_model)
+```
+
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(question == "drag_drop_on_diagram"),
        aes(x=avg_num_steps, y=num_assignments_correct))+
-  geom_point() +
+  geom_point(size=3, alpha=0.3, position=position_jitter(height=0.2, width=0)) +
   geom_smooth(method="lm", color="black") +
   labs(x="Avg. number of steps needed", y="Number of fractals correctly assigned") 
   
@@ -1054,6 +1060,29 @@ ggsave("../writing/talks/figures/ex3/nac_by_ns.png", width=7, height=5)
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(question == "drag_drop_on_diagram") %>%
+         group_by(isomorphic) %>% 
+         summarize(nac = mean(num_assignments_correct), nac_se=sd(num_assignments_correct)/sqrt(n()),
+                   ci_lower=nac - 1.96*nac_se, ci_upper=nac + 1.96*nac_se) %>%
+         ungroup(),
+       aes(x=isomorphic, y=nac, fill=isomorphic))+
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
+  geom_hline(aes(yintercept=2.505), linetype=2, alpha=0.5)+
+  labs(y="Number of fractals correctly assigned") +
+  annotate("text", x=2, y= 5.8, size=10, alpha=0.5, label="***") +
+  annotate("text", x=1, y= 5.8, size=10,alpha=0.5, label="***") +
+  annotate("segment", x=1, xend=2, y=6.2,alpha=0.5, yend=6.2) +
+  annotate("text", x=1.5, y= 6.4, size=6, alpha=0.5,label="ns") +
+  scale_fill_brewer(palette="Set2")
+```
+```{r}
+ggsave("../writing/talks/figures/ex3/nac_by_iso.png", width=7, height=5)
+```
+
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram") %>%
          group_by(isomorphic, structure) %>% 
          summarize(nac = mean(num_assignments_correct), nac_se=sd(num_assignments_correct)/sqrt(n()),
                    ci_lower=nac - 1.96*nac_se, ci_upper=nac + 1.96*nac_se) %>%
@@ -1062,11 +1091,49 @@ ggplot(data=s2_joined_question_data %>%
   geom_bar(stat="identity", position="dodge") +
   geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
   labs(y="Number of fractals correctly assigned") +
+  annotate("segment", x=0.5, xend=1.5, y=2.111, yend=2.111, alpha=0.5, linetype=2) +
+  annotate("segment", x=1.5, xend=2.5, y=2.9, yend=2.9, alpha=0.5, linetype=2) +
+  annotate("segment", x=1, xend=2, y=6.2,alpha=0.5, yend=6.2) +
+  annotate("text", x=1.5, y= 6.4, size=10, alpha=0.5,label="*") +
+  annotate("segment", x=0.5, xend=1.5, y=6.2,alpha=0.5, yend=6.2) +
+  annotate("text", x=1, y= 6.4, size=10, alpha=0.5,label="*") +
   scale_fill_brewer(palette="Set2")
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex3/nac_by_iso.png", width=7, height=5)
+ggsave("../writing/talks/figures/ex3/nac_by_iso_by_group.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram"),
+       aes(x=avg_num_steps_z, y=num_assignments_correct, color=isomorphic))+
+  geom_point() +
+  geom_smooth(method="lm") +
+  labs(y="Number of fractals correctly assigned") +
+  scale_fill_brewer(palette="Set2") +
+  facet_wrap(~structure)
+```
+
+```{r}
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"), statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+ds_boot_noniso_cycling = boot.ci(bootstrap_results, type="perc", index=1) 
+ds_boot_iso_cycling = boot.ci(bootstrap_results, type="perc", index=2) 
+ds_boot_noniso_flipping = boot.ci(bootstrap_results, type="perc", index=3) 
+ds_boot_iso_flipping = boot.ci(bootstrap_results, type="perc", index=4) 
+ds_ci95_noniso_cycling =sigmoid(ds_boot_noniso_cycling$percent[4:5]) 
+ds_ci95_iso_cycling = sigmoid(ds_boot_iso_cycling$percent[4:5]) 
+ds_ci95_noniso_flipping =sigmoid(ds_boot_noniso_flipping$percent[4:5]) 
+ds_ci95_iso_flipping = sigmoid(ds_boot_iso_flipping$percent[4:5]) 
+
+ds_ci_data = data.frame(isomorphic=c(F, T, F, T), structure=factor(rep(c("Cycling", "Flipping"), each=2)),
+                        ci95_lower = c(ds_ci95_noniso_cycling[1], ds_ci95_iso_cycling[1], 
+                                       ds_ci95_noniso_flipping[1], ds_ci95_iso_flipping[1]),
+                        ci95_upper = c(ds_ci95_noniso_cycling[2], ds_ci95_iso_cycling[2], 
+                                       ds_ci95_noniso_flipping[2], ds_ci95_iso_flipping[2]))
 ```
 
 ```{r}
@@ -1220,7 +1287,59 @@ ggplot(data=s2_joined_question_data %>%
 ggsave("../writing/talks/figures/ex3/ds_by_iso_by_group.png", width=7, height=5)
 ```
 
+```{r}
+coefficient_getter = function(data, indices) {
+  ds_correct_model = glm(ds_correct ~ isomorphic * correspondence_suspect, family="binomial", data=data[indices,])
+  return(c(ds_correct_model$coefficients[1], #noniso, nosus
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[2], #iso, nosus
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[3], #noniso, yessus
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[2] +ds_correct_model$coefficients[3] + ds_correct_model$coefficients[4] #iso, yessus
+           ))
+}
+```
 
+```{r}
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"), statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+ds_boot_noniso_nosus = boot.ci(bootstrap_results, type="perc", index=1) 
+ds_boot_iso_nosus = boot.ci(bootstrap_results, type="perc", index=2) 
+ds_boot_noniso_yessus = boot.ci(bootstrap_results, type="perc", index=3) 
+ds_boot_iso_yessus = boot.ci(bootstrap_results, type="perc", index=4) 
+ds_ci95_noniso_nosus =sigmoid(ds_boot_noniso_nosus$percent[4:5])
+ds_ci95_iso_nosus = sigmoid(ds_boot_iso_nosus$percent[4:5])
+ds_ci95_noniso_yessus = sigmoid(ds_boot_noniso_yessus$percent[4:5])
+ds_ci95_iso_yessus = sigmoid(ds_boot_iso_yessus$percent[4:5])
+
+ds_ci_data = data.frame(isomorphic=factor(c(F, T, F, T)), correspondence_suspect=factor(rep(c("No", "Yes"), each=2)),
+                        ci95_lower = c(ds_ci95_noniso_nosus[1], ds_ci95_iso_nosus[1], 
+                                       ds_ci95_noniso_yessus[1], ds_ci95_iso_yessus[1]),
+                        ci95_upper = c(ds_ci95_noniso_nosus[2], ds_ci95_iso_nosus[2], 
+                                       ds_ci95_noniso_yessus[2], ds_ci95_iso_yessus[2]))
+
+contrasts(ds_ci_data$isomorphic) = old_contrasts
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)) %>%
+         group_by(isomorphic, correspondence_suspect) %>%
+         summarize(pct_correct=mean(ds_correct)) %>%
+         ungroup() %>%
+         inner_join(., ds_ci_data),
+       aes(x=isomorphic, y = pct_correct, fill=correspondence_suspect)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_hline(aes(yintercept=0.5), linetype=2, alpha=0.5) +
+  geom_errorbar(aes(ymin=ci95_lower, ymax=ci95_upper), width=0.25, position=position_dodge(width=0.9)) +
+  ylim(0, 1) +
+  labs(y="% correctly identified structure") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso_by_cs.png", width=7, height=5)
+```
 
 
 # aggregating
@@ -1318,14 +1437,26 @@ ggsave("../writing/talks/figures/ex3/wc_by_ns.png", width=7, height=5)
 # correspondence drag and drop
 
 ```{r}
-corr_dd_model = lm(data=s2_joined_question_data %>% 
-                     filter(question == "correspondence_drag_drop",
-                            isomorphic),
-                   num_assignments_correct ~ fractal_hexagon_bi + avg_num_steps_z)
-summary(corr_dd_model)
+s2_joined_question_data = s2_joined_question_data %>%
+  mutate(corrected_nac = ifelse(question != "correspondence_drag_drop", corrected_nac,
+                                ifelse(fractal_hexagon_bi, num_assignments_correct-chance_alignments_hb, num_assignments_correct-chance_alignments_ht)))
 ```
 
 
+```{r}
+corr_dd_model = lm(data=s2_joined_question_data %>% 
+                     filter(question == "correspondence_drag_drop"),
+                   corrected_nac ~ isomorphic)
+summary(corr_dd_model)
+
+old_contrasts = contrasts(s2_joined_question_data$isomorphic) 
+contrasts(s2_joined_question_data$isomorphic) = cbind(`FALSE`=c(1, 0))
+corr_dd_model = lm(data=s2_joined_question_data %>% 
+                     filter(question == "correspondence_drag_drop"),
+                   corrected_nac ~ isomorphic)
+summary(corr_dd_model)
+contrasts(s2_joined_question_data$isomorphic) = old_contrasts
+```
 
 # when noticed
 
@@ -1471,34 +1602,55 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
   spread(trial_type, action_probability) %>%
 #  filter(!(subject_id %in% c(5, 7, 15, 26))) %>% # exclude subjects who showed obvious learning -- is there still an effect
   group_by(isomorphic, fractal_hexagon_bi, subject_id, perm, education_high) %>% 
-  summarize(L1 = sum(abs(door-fractal), na.rm=T)) %>%
+  summarize(L1 = sum(abs(door-fractal), na.rm=T),
+            L2 = sum((door-fractal)^2, na.rm=T),
+            Linf = max(abs(door-fractal), na.rm=T)) %>%
   ungroup() %>%
   group_by(isomorphic, fractal_hexagon_bi, subject_id, education_high) %>% 
-  summarize(avg_L1 = mean(L1), min_L1 = min(L1),
+  summarize(avg_L1 = mean(L1), min_L1 = min(L1), 
+            avg_L2 = mean(L2), min_L2 = min(L2), 
+            avg_Linf = mean(Linf), min_Linf = min(Linf), 
             perm_at_min = perm[which(L1 == min_L1)][1], # in case multiple mins
+            len_perms_at_min = length(perm[which(L1 == min_L1)]),
             perm_at_min_swaps = mean(perm[which(L1 == min_L1)] %in% perms_which_flip),
-            perm_swaps_minus_perm_non_swaps = sum(L1[which(perm %in% perms_which_flip)]) - sum(L1[which(!(perm %in% perms_which_flip))])) %>% 
+            perm_swaps_minus_perm_non_swaps = sum(L1[which(perm %in% perms_which_flip)]) - sum(L1[which(!(perm %in% perms_which_flip))]),
+            perm_at_min_L2 = perm[which(L2 == min_L2)][1], # in case multiple mins
+            perm_at_min_swaps_L2 = mean(perm[which(L2 == min_L2)] %in% perms_which_flip),
+            perm_swaps_minus_perm_non_swaps_L2 = sum(L2[which(perm %in% perms_which_flip)]) - sum(L2[which(!(perm %in% perms_which_flip))]),
+            perm_at_min_Linf = perm[which(Linf == min_Linf)][1], # in case multiple mins
+            perm_at_min_swaps_Linf = mean(perm[which(Linf == min_Linf)] %in% perms_which_flip),
+            perm_swaps_minus_perm_non_swaps_Linf = sum(Linf[which(perm %in% perms_which_flip)]) - sum(Linf[which(!(perm %in% perms_which_flip))]),
+            ) %>% 
   ungroup() %>%
-  mutate(fractal_Flipping = fractal_hexagon_bi)
+  mutate(fractal_Flipping = fractal_hexagon_bi,
+         structure = factor(ifelse(fractal_hexagon_bi, "Flipping", "Cycling")),
+         isomorphic=factor(isomorphic))
  
 ```
 
 ```{r}
 
 distributional_similarity_summary = distributional_similarity_data %>%
-  group_by(isomorphic, fractal_Flipping) %>% 
+  group_by(isomorphic, structure, fractal_Flipping) %>% 
   summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
             avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1),
+            avg_avg_L2 = mean(avg_L2), sd_avg_L2=sd(avg_L2),
+            avg_min_L2 = mean(min_L2), sd_min_L2=sd(min_L2),
+            avg_avg_Linf = mean(avg_Linf), sd_avg_Linf=sd(avg_Linf),
+            avg_min_Linf = mean(min_Linf), sd_min_Linf=sd(min_Linf),
             min_L1_95ci_lower = avg_min_L1 - 1.96* sd_min_L1/sqrt(n()),
             min_L1_95ci_upper = avg_min_L1 + 1.96* sd_min_L1/sqrt(n()),
             avg_L1_95ci_lower = avg_avg_L1 - 1.96* sd_avg_L1/sqrt(n()),
             avg_L1_95ci_upper = avg_avg_L1 + 1.96* sd_avg_L1/sqrt(n()),
-            avg_psmpns = mean(perm_swaps_minus_perm_non_swaps))
+            avg_psmpns = mean(perm_swaps_minus_perm_non_swaps),
+            avg_psmpns_Linf = mean(perm_swaps_minus_perm_non_swaps_Linf))
 
 distributional_similarity_full_summary = distributional_similarity_data %>%
   group_by(isomorphic) %>% 
   summarize(avg_avg_L1 = mean(avg_L1), sd_avg_L1=sd(avg_L1),
             avg_min_L1 = mean(min_L1), sd_min_L1=sd(min_L1),
+            avg_avg_Linf = mean(avg_Linf), sd_avg_Linf=sd(avg_Linf),
+            avg_min_Linf = mean(min_Linf), sd_min_Linf=sd(min_Linf),
             min_L1_95ci_lower = avg_min_L1 - 1.96* sd_min_L1/sqrt(n()),
             min_L1_95ci_upper = avg_min_L1 + 1.96* sd_min_L1/sqrt(n()),
             avg_L1_95ci_lower = avg_avg_L1 - 1.96* sd_avg_L1/sqrt(n()),
@@ -1513,11 +1665,72 @@ summary(dist_sim_model)
 ```
 
 ```{r}
+dist_sim_model = lm(min_L1 ~ isomorphic * structure, data=distributional_similarity_data)
+summary(dist_sim_model)
+```
+```{r}
+old_struct_contrasts = contrasts(distributional_similarity_data$structure)
+contrasts(distributional_similarity_data$structure) = c(-1, 1)
+dist_sim_model = lm(min_L1 ~ isomorphic * structure, data=distributional_similarity_data)
+summary(dist_sim_model)
+contrasts(distributional_similarity_data$structure) = old_struct_contrasts
+```
+
+```{r}
+coefficient_getter = function(data, indices) {
+  dist_sim_model = lm(min_L2 ~ isomorphic * structure, data=data[indices,])
+  
+  return(c(dist_sim_model$coefficients[1], #noniso, cycling
+           dist_sim_model$coefficients[1] + dist_sim_model$coefficients[2], #iso, cycling
+           dist_sim_model$coefficients[1] + dist_sim_model$coefficients[3], #noniso, flipping
+           dist_sim_model$coefficients[1] + dist_sim_model$coefficients[2] +dist_sim_model$coefficients[3] + dist_sim_model$coefficients[4], #iso, flipping
+           dist_sim_model$coefficients[2],
+           dist_sim_model$coefficients[2] + dist_sim_model$coefficients[4]
+           ))
+}
+```
+
+```{r}
+bootstrap_results = boot(data=distributional_similarity_data, statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+ds_boot_noniso_cycling = boot.ci(bootstrap_results, type="perc", index=1) 
+ds_boot_iso_cycling = boot.ci(bootstrap_results, type="perc", index=2) 
+ds_boot_noniso_flipping = boot.ci(bootstrap_results, type="perc", index=3) 
+ds_boot_iso_flipping = boot.ci(bootstrap_results, type="perc", index=4) 
+ds_ci95_noniso_cycling =(ds_boot_noniso_cycling$percent[4:5])
+ds_ci95_iso_cycling = (ds_boot_iso_cycling$percent[4:5])
+ds_ci95_noniso_flipping = (ds_boot_noniso_flipping$percent[4:5])
+ds_ci95_iso_flipping = (ds_boot_iso_flipping$percent[4:5])
+
+ds_ci_data = data.frame(isomorphic=factor(c(F, T, F, T)), structure=factor(rep(c("Cycling", "Flipping"), each=2)),
+                        ci95_lower = c(ds_ci95_noniso_cycling[1], ds_ci95_iso_cycling[1], 
+                                       ds_ci95_noniso_flipping[1], ds_ci95_iso_flipping[1]),
+                        ci95_upper = c(ds_ci95_noniso_cycling[2], ds_ci95_iso_cycling[2], 
+                                       ds_ci95_noniso_flipping[2], ds_ci95_iso_flipping[2]))
+
+```
+
+```{r}
+boot.ci(bootstrap_results, type="perc", index=5) 
+boot.ci(bootstrap_results, type="perc", index=6) 
+
+```
+
+
+```{r}
+dist_sim_model = lm(min_L1 ~ isomorphic * correspondence_suspect, data=distributional_similarity_data %>%
+                      inner_join(., explicit_similarity_data))
+summary(dist_sim_model)
+```
+
+```{r}
 ggplot(distributional_similarity_full_summary, aes(x = isomorphic, y= avg_min_L1, fill=isomorphic)) +
   geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=min_L1_95ci_lower, ymax=min_L1_95ci_upper), width=0.25) +
   scale_fill_brewer(palette="Set2") +
-  labs(y="Minimum L1 distance between policies") 
+  labs(y="Min L1 distance between policies") 
   
 
 ```
@@ -1545,12 +1758,6 @@ ggplot(distributional_similarity_summary, aes(x = isomorphic, y= avg_min_L1, fil
   scale_fill_brewer(palette="Set2") +
   labs(y="Minimum L1 distance between policies") +
   facet_grid(~ I((isomorphic & fractal_Flipping) | (!isomorphic & !fractal_Flipping))) 
-  
-
-```
-
-```{r}
-ggsave("figures/ex3/distributional_similarities_by_group.png")
 ```
 
 ```{r}
@@ -1565,33 +1772,121 @@ ggplot(distributional_similarity_summary, aes(x = isomorphic, y= avg_avg_L1, fil
 ```{r}
 ggsave("figures/ex3/distributional_similarities_avg_by_group.png")
 ```
-# does distributional similarity predict correspondence?
 
+# joining with other data
 ```{r}
 dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_data) %>%
   mutate(psmnps_z = as.vector(scale(perm_swaps_minus_perm_non_swaps)),
-         rt=rt/1000)
+         psmnps_Linf_z = as.vector(scale(perm_swaps_minus_perm_non_swaps_Linf)),
+         psmnps_L2_z = as.vector(scale(perm_swaps_minus_perm_non_swaps_L2)),
+         rt=rt/1000) %>%
+  group_by(isomorphic, structure, fractal_hexagon_bi) %>%
+  mutate(avg_L1_z = scale(avg_L1),
+         min_L1_z = scale(min_L1)) %>%
+  ungroup()
+```
+
+# is performance predicted by distributional similarity
+
+```{r}
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) + structure, data=dist_corr_data)
+summary(dist_sim_model)
 ```
 
 ```{r}
-dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z  
+ggplot(data=dist_corr_data, aes(x=avg_num_steps_z, y=min_L1, color=isomorphic)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  facet_wrap(~structure)
+```
+
+```{r}
+ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  scale_color_brewer(palette="Set2") +
+  labs(x = "Alignment of policies (smaller = more aligned)", y = "Avg. number of steps required") 
+```
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  scale_color_brewer(palette="Set2") +
+  labs(x = "Alignment of policies (smaller = more aligned)", y = "Avg. number of steps required") + 
+  facet_wrap(~structure)
+```
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso_group.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  scale_color_brewer(palette="Set2") +
+  labs(x = "Alignment of policies (smaller = more aligned)", y = "Avg. number of steps required") + 
+  facet_wrap(~correspondence_suspect)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso_group.png", width=7, height=5)
+```
+
+# does dist sim predict explicit answers?
+## similarity likert
+
+```{r}
+sl_model = lm(response ~  isomorphic * min_L1_z + structure, data=dist_corr_data %>%
+                filter(question == "similarity_likert"))
+summary(sl_model)
+```
+
+## suspect correspondence?
+```{r}
+cs_model = lm(response == "Yes" ~  min_L1_z * isomorphic + structure, data=dist_corr_data %>%
+                filter(question == "correspondence_suspect"))
+summary(cs_model)
+```
+
+## one task helpful for other? 
+
+```{r}
+oth_model = lm(response ~  isomorphic * min_L1_z + structure, data=dist_corr_data %>%
+                filter(question == "one_task_helpful_for_other"))
+summary(oth_model)
+```
+
+
+# does distributional similarity predict correspondence?
+
+```{r}
+dist_corr_correct_model = glm(correspondence_correct ~ psmnps_z, data=dist_corr_data) 
 summary(dist_corr_correct_model)
 ```
 
 ```{r}
-dist_corr_correct_model_0 = glm(correspondence_correct ~ perm_at_min_swaps  +  avg_num_steps_z   + rt, family="binomial", data=dist_corr_data)
+dist_corr_correct_model_0 = glm(correspondence_correct ~ perm_at_min_swaps  , family="binomial", data=dist_corr_data)
 summary(dist_corr_correct_model_0)
 ```
 
 ```{r}
-dist_corr_correct_model_2 = glm(correspondence_correct ~ perm_at_min_swaps + psmnps_z +  avg_num_steps_z   + rt, family="binomial", data=dist_corr_data)
+dist_corr_correct_model_2 = glm(correspondence_correct ~  psmnps_z + rt, family="binomial", data=dist_corr_data)
 summary(dist_corr_correct_model_2)
 ```
 
 ```{r}
-ggplot(data=dist_corr_data %>% filter(!is.na(correspondence_correct)), aes(x=I(scale(perm_swaps_minus_perm_non_swaps)), y=1-correspondence_correct)) +
-  geom_point(aes(color=fractal_Flipping))  + 
+ggplot(data=dist_corr_data %>% filter(!is.na(correspondence_correct)), aes(x=psmnps_z, y=1-correspondence_correct)) +
+  geom_point(aes())  + 
   geom_smooth(method="glm", method.args=list(family="binomial"), color="black", se=T)
+```
+
+```{r}
+ggplot(data=dist_corr_data %>% filter(!is.na(correspondence_correct)), aes(x=I(scale(perm_swaps_minus_perm_non_swaps)), y=avg_num_steps_z)) +
+  geom_point(aes(color=correspondence_correct)) 
 ```
 
 ```{r}
@@ -1629,14 +1924,18 @@ summary(es_dist_corr_correct_model)
 ```{r}
 es_dist_corr_data_2 = es_dist_corr_data %>%
   filter(two_corr_Qs & question %in% c("correspondence_identify", "correspondence_drag_drop")) %>%
-  group_by(subject_id) %>%
+  group_by(subject_id, fractal_hexagon_bi) %>%
   mutate(best_dd_perm = head(best_dd_perm, 1), 
          best_dd_perms = head(best_dd_perms, 1),
          best_dd_perm_flips = mean(best_dd_perm_flips, na.rm=T),
          best_dd_equals_perm_at_min = best_dd_perm == perm_at_min,
-         perm_at_min_in_best_dd_perms = perm_at_min %in% head(best_dd_perms, 1)[[1]]) %>%
+         perm_at_min_in_best_dd_perms = perm_at_min %in% head(best_dd_perms, 1)[[1]],
+         perm_at_min_alignment_with_best_dd_perms = ifelse(fractal_hexagon_bi, 
+                                                           max_aligned_with_permutations(c(1,2,3,4,5,6), hb_perm_locs[head(best_dd_perms, 1)[[1]]], unlist(hb_perm_locs[head(perm_at_min, 1)]))[1],
+                                                           max_aligned_with_permutations(c(1,2,3,4,5,6), ht_perm_locs[head(best_dd_perms, 1)[[1]]], unlist(ht_perm_locs[head(perm_at_min, 1)]))[1])) %>%
   ungroup()
 ```
+
 
 Is there residual variance in policy projections after controlling for their explicit guess at the correspondence? 
 ```{r}
@@ -1657,7 +1956,6 @@ ggplot(data=es_dist_corr_data %>%
   facet_wrap(~ correspondence_correct)
 ```
 
-
 ```{r}
 corr_dd_prediction_model = glm(data=es_dist_corr_data_2 %>% 
                      filter(question == "correspondence_drag_drop"),
@@ -1667,7 +1965,57 @@ summary(corr_dd_prediction_model)
 ```
 
 ```{r}
-xtabs(~ perm_at_min_in_best_dd_perms +fractal_Flipping, data=es_dist_corr_data_2 %>%
+xtabs(~ perm_at_min_in_best_dd_perms +isomorphic, data=es_dist_corr_data_2 %>%
         filter(question=="correspondence_drag_drop"))
 ```
+
+
+```{r}
+corr_dd_prediction_model = lm(data=es_dist_corr_data_2 %>% 
+                     filter(question == "correspondence_drag_drop"),
+                     perm_at_min_alignment_with_best_dd_perms ~ isomorphic)
+summary(corr_dd_prediction_model)
+```
+
+```{r}
+ggplot(data=es_dist_corr_data_2 %>%
+         filter(question == "correspondence_drag_drop") %>%
+         group_by(isomorphic) %>%
+         summarize(pamawbddp_se = sd(perm_at_min_alignment_with_best_dd_perms)/sqrt(n()),
+                   perm_at_min_alignment_with_best_dd_perms=mean(perm_at_min_alignment_with_best_dd_perms),
+                   ci95_upper = perm_at_min_alignment_with_best_dd_perms + 1.96 * pamawbddp_se,
+                   ci95_lower = perm_at_min_alignment_with_best_dd_perms - 1.96 * pamawbddp_se) %>%
+         ungroup(),
+        aes(x=isomorphic, y=perm_at_min_alignment_with_best_dd_perms, fill=isomorphic)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar(aes(ymin=ci95_lower, ymax=ci95_upper), width=0.25, position=position_dodge()) +
+  scale_fill_brewer(palette="Set2") 
+```
+
+# bootstrapping null distribution
+
+```{r}
+cdd_data = es_dist_corr_data_2 %>%
+  filter(question=="correspondence_drag_drop",
+         isomorphic == "TRUE") %>%
+  select(subject_id, fractal_hexagon_bi, perm_at_min, best_dd_perms)
+```
+
+```{r}
+null_dist_avg_alignments = c()
+num_permutations = 5000
+for (i in 1:num_permutations) {
+  this_data = cdd_data %>%
+    mutate(perm_at_min = sample(perm_at_min)) %>%
+    group_by(subject_id) %>%
+    mutate(
+           perm_at_min_alignment_with_best_dd_perms=ifelse(fractal_hexagon_bi, # permute perm_at_min values
+                                                           max_aligned_with_permutations(c(1,2,3,4,5,6), hb_perm_locs[best_dd_perms[[1]]], unlist(hb_perm_locs[perm_at_min]))[1],
+                                                           max_aligned_with_permutations(c(1,2,3,4,5,6), ht_perm_locs[best_dd_perms[[1]]], unlist(ht_perm_locs[perm_at_min]))[1])) %>%
+    ungroup() %>%
+    summarize(perm_at_min_alignment_with_best_dd_perms=mean(perm_at_min_alignment_with_best_dd_perms))
+  null_dist_avg_alignments = c(null_dist_avg_alignments, this_data$perm_at_min_alignment_with_best_dd_perms)
+}
+```
+
 
