@@ -66,15 +66,12 @@
 \frame{\titlepage}
 
 \begin{frame}[standout]
-How do people learn so rapidly? \par
-\only<2->{Claim: Transfer.}
+How do humans learn so effectively and quickly? \par
 \end{frame}
 
 
 \begin{frame}{Transfer across domains}
-Not a new idea: e.g. \cite{Gick1980, Gentner2003}
-\uncover<2>{
-\only<-2>{
+\only<1-2>{
 \begin{figure}
 \centering
 \begin{subfigure}{0.4\textwidth}
@@ -83,14 +80,15 @@ Not a new idea: e.g. \cite{Gick1980, Gentner2003}
 \begin{subfigure}{0.4\textwidth}
 \includegraphics[width=\textwidth]{figures/go.jpg}
 \end{subfigure}\\
+\uncover<2>{
 \begin{subfigure}{0.4\textwidth}
 \includegraphics[width=\textwidth]{figures/math.jpg}
 \end{subfigure}%
 \begin{subfigure}{0.4\textwidth}
 \includegraphics[width=\textwidth]{figures/piano.jpg}
 \end{subfigure}%
-\end{figure}
 }
+\end{figure}
 }
 \only<3>{
 \begin{figure}
@@ -98,23 +96,21 @@ Not a new idea: e.g. \cite{Gick1980, Gentner2003}
 \includegraphics[width=0.8\textwidth]{figures/category_theory.jpg}
 \end{figure}
 }
-\uncover<2->{
 \scriptsize
 \citep{Lampinen2017a, Hansen2017}
-}
 \note{There are deep relationships among the tasks we do -- some are superficially obvious, like Go and Chess, and some are less so, like the mathematical structures underlying music or the fact that we use language to talk about all these domains.\par
 Of particular interest to me is deep isomorphisms between mathematical domains, and this is actually one of the things that inspired Gick \& Holyoak.}
 \end{frame}
 
-\begin{frame}{Criticism?}
+\begin{frame}{Background}
+\begin{itemize}
+\item Not a new idea: transfer has been called a central component of ``why we're so smart'' \citep{Gentner2003}, and an important source of new ideas \citep{Gick1980}.
+\item<2->
 However, this perspective has been criticized!\par
 \begin{itemize}
-\item<2-> ``Significant transfer is probably rare and accounts for very little human behavior.'' \citep{Detterman1993}
-\item<3-> From FriSem last year: 
-\begin{figure}
-\centering
-\includegraphics[width=0.4\textwidth]{figures/perspectives_on_transfer.png}
-\end{figure}
+\item<3-> ``Significant transfer is probably rare and accounts for very little human behavior. ... We generally do what we have learned to do and no more.'' \citep{Detterman1993}
+\end{itemize}
+\item<4-> How can we reconcile these different viewpoints?
 \end{itemize}
 \note{Detterman: ``We generally do what we have learned to do and no more.'' Experimental manipulations in transfer experiments ``have the subtlety of a baseball bat.''\par
 Observation from FriSem last year: there is a correlation between the speed of transfer being sought and how important they think it is.}
@@ -122,7 +118,7 @@ Observation from FriSem last year: there is a correlation between the speed of t
 
 \begin{frame}{Transfer speed}
 \vspace{1.5em}
-What do I mean by ``fast'' and ``slow?''\par
+I think there's a neglected variable: speed of transfer.\par
 \uncover<2->{
 \begin{center}
 \begin{table}
@@ -133,16 +129,15 @@ Fast & Slow \\
 \parbox{0.45\textwidth}{
     \begin{itemize}
     \item<2-> one (or a few) examples explicitly shown
-    \item<3-> transfer requires explicit awareness of analogy\\[5em]
+    \item<3-> transfer requires explicit awareness of analogy
     \end{itemize}
 }
 &
 \parbox{0.45\textwidth}{
     \begin{itemize}
-    \item<2-> learning through many interactions
+    \item<2-> learning gradually through many interactions
     \item<3-> {transfer may or may not be explicit}%
                %%\only<4>{\color{red}transfer may or may not be explicit}}
-    \item<4-> may take developmental time, or at least a long experiment!
     \end{itemize}
 }\\ \hline
 \end{tabular}
@@ -157,66 +152,121 @@ Fast & Slow \\
 }
 \end{frame}
 
+\begin{frame}{Transfer speed and outcomes}
+For example, imagine you are about to teach someone to play guitar. Who do you think would likely perform better:
+\begin{itemize}
+\item a person who has just taken their first piano lesson 
+\item a person who has been playing piano for years
+\end{itemize}
+\begin{figure}
+\centering
+\begin{subfigure}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/piano.jpg}
+\end{subfigure}~%
+\begin{subfigure}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/guitar.jpg}
+\end{subfigure}%
+\end{figure}
+\note{So transfer may require slow learning in the original domain to set up sufficiently high-quality representations to see an effect}
+\end{frame}
+
+\begin{frame}{Transfer speed and opinions}
+Transfer speed helps reconcile why some people think transfer is important. 
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{figures/perspectives_on_transfer.png}
+\end{figure}
+\end{frame}
+
+
 \begin{frame}[standout]
 Slow transfer between tasks is important.
 \end{frame}
 
-\begin{frame}{Abstraction as a kind of transfer}
-We often progress from procedural to more formal knowledge, e.g. in mathematics:
+\begin{frame}{Is abstraction transfer?}
+We often progress from procedural to more explicit, abstract, or formal knowledge: \vspace{-0.2em}
 \begin{figure}
 \centering
 \begin{tikzpicture}
 \node (img1) {\includegraphics[width=0.33\textwidth]{figures/multiplication_procedural_smaller.png}};
-\only<2->{
+\uncover<2->{
 \node (img2) at ([yshift=-2em]img1.east) {\includegraphics[width=0.33\textwidth]{figures/factoring_polynomial_worksheet.png}};
 }
-\only<3->{
+\uncover<3->{
 \node (img3) at ([yshift=-3em]img2.east) {\includegraphics[width=0.5\textwidth]{figures/prime_ideals.png}};
 }
 \end{tikzpicture}
-\end{figure}
-\uncover<4>{This can be seen as a kind of transfer!}
+\end{figure}\vspace{-0.2em}
+\uncover<4>{These are related tasks that share some structure! Is it useful to think about this from the perspective of transfer?}
 \note{worksheetfun.com\par
 Less abstract and more abstract reasoning can be seen as partially distinct tasks that share some common structure. There are different ways that procedural knowledge could support more formal, setting up representations and intuitions, having examples to reason over, ...}
 \end{frame}
 
-\begin{frame}[standout]
-Abstraction is one type of task where we might look for transfer.
+\begin{frame}{Is abstraction transfer?}
+Yet there are also times when procedural and formal knowledge seem partially dissociable:
+\begin{figure}
+\centering
+\begin{subfigure}{0.4\textwidth}
+\includegraphics[width=\textwidth]{figures/piano.jpg}
+\end{subfigure}~%
+\begin{subfigure}{0.5\textwidth}
+\includegraphics[width=\textwidth]{figures/mixolydian.png}
+\end{subfigure}%
+\end{figure}
+\note{}
 \end{frame}
 
-\begin{frame}<-8>[label=phenomena]
-\frametitle<-8>{A diagram of potential phenomena of interest}
-\frametitle<9>{Abstractions?}
+\begin{frame}[standout]
+When and how does procedural knowledge transfer to more explicit, abstract, or formal knowledge?
+\end{frame}
+
+\begin{frame}<-9>[label=phenomena]
+\frametitle<-9>{A diagram of potential phenomena of interest}
+\frametitle<10>{What explicit knowledge?}
+\vspace{-1em}
 \begin{figure}
 \centering
 \begin{tikzpicture}[auto] %% TODO? highlighting
-\node [rectangle, draw, thick, text width=2cm, align=center, onslide={<9>,{opacity=0.2}}] (A) at (-3, 0) {Task A}; 
-\node [rectangle, draw, thick, text width=2cm, align=center, onslide={<9>,{opacity=0.2}}] (B) at (3, 0) {Task B}; 
+\node [rectangle, draw, thick, text width=2cm, align=center, onslide={<10>,{opacity=0.2}}] (A) at (-4, 0) {Task A}; 
+\node [rectangle, draw, thick, text width=2cm, align=center, onslide={<10>,{opacity=0.2}}] (B) at (4, 0) {Task B}; 
+\path [line, dashed, <->, onslide={<10>,{opacity=0.2}}] (A.east) to node[text width=2cm] (underlying) {Underlying relationship} (B.west); 
+
 \uncover<2->{
-\path [line, <->, onslide={<9>,{opacity=0.2}}] (A.east) to node (proctrans) {} (B.west); 
+\node [rectangle, draw, thick, text width=2cm, align=center, onslide={<10>,{opacity=0.2}}] (Aproc) at (-4, 2) {Ability to perform  A}; 
+\node [rectangle, draw, thick, text width=2cm, align=center, onslide={<10>,{opacity=0.2}}] (Bproc) at (4, 2) {Ability to perform B}; 
+\path [line, ->, dashed, onslide={<10>,{opacity=0.2}}] (A.north) to  node (Atrans) {}(Aproc.south); 
+\path [line, ->, dashed, onslide={<10>,{opacity=0.2}}] (B.north) to node (Btrans) {} (Bproc.south); 
 }
+
 \uncover<3->{
-\node [rectangle, draw, thick, text width=2cm, align=center] (Aabs) at (-3, 2.5) {Abstractions on A}; 
-\node [rectangle, draw, thick, text width=2cm, align=center] (Babs) at (3, 2.5) {Abstractions on B}; 
-\path [line, <->, onslide={<9>,{opacity=0.2}}] (A.north) to  node (Atrans) {}(Aabs.south); 
-\path [line, <->, onslide={<9>,{opacity=0.2}}] (B.north) to node (Btrans) {} (Babs.south); 
+\path [line, ->, onslide={<10>,{opacity=0.2}}] (Aproc.east) to node (proctrans) {transfer?} (Bproc.west); 
 }
+
 \uncover<4->{
-\path [line, <->, onslide={<9>,{opacity=0.2}}] (Aabs.east) to node (abstrans) {} (Babs.west); 
+\node [rectangle, draw, thick, text width=2cm, align=center] (Aabs) at (-4, 4.5) {Explicit knowledge about A}; 
+\node [rectangle, draw, thick, text width=2cm, align=center] (Babs) at (4, 4.5) {Explicit knowledge about B}; 
+\path [line, <->, onslide={<10>,{opacity=0.2}}] (Aproc.north) to  node (Atrans) {}(Aabs.south); 
+\path [line, <->, onslide={<10>,{opacity=0.2}}] (Bproc.north) to node (Btrans) {} (Babs.south); 
 }
 \uncover<5->{
-\path [line, <->, onslide={<9>,{opacity=0.2}}] ([yshift=-0.75em]proctrans.north) to node (procabstrans) {} (abstrans.south); 
+\path [line, ->, onslide={<10>,{opacity=0.2}}] (Aabs.east) to node (abstrans) {transfer?} (Babs.west); 
 }
 \uncover<6->{
-\node [rectangle, draw, thick, text width=3cm, align=center] (ABabs) at (0, 5.5) {Abstractions about relationship between A and B}; 
+%\path [line, <->, onslide={<10>,{opacity=0.2}}] ([yshift=-0.75em]proctrans.north) to node (procabstrans) {} (abstrans.south); 
 }
 \uncover<7->{
-\path [line, <->, onslide={<9>,{opacity=0.2}}] (Aabs.north) to  (ABabs.south west); 
-\path [line, <->, onslide={<9>,{opacity=0.2}}] (Babs.north) to  (ABabs.south east); 
+\node [rectangle, draw, thick, text width=3.5cm, align=center] (ABabs) at (0, 6.5) {Explicit knowledege about relationship between A and B}; 
 }
 \uncover<8->{
-\path [line, <->, onslide={<9>,{opacity=0.2}}] ([yshift=-0.75em]abstrans.north) to(ABabs.south); 
-\path [line, <->, bend right, onslide={<9>,{opacity=0.2}}] ([xshift=0.5em, yshift=-0.75em]proctrans.north) to([xshift=0.5em]ABabs.south); 
+\path [line, <->, onslide={<10>,{opacity=0.2}}] (Aabs.north) to  (ABabs.west); 
+\path [line, <->, onslide={<10>,{opacity=0.2}}] (Babs.north) to  (ABabs.east); 
+\path [line, ->, onslide={<10>,{opacity=0.2}}] ([yshift=-0.5em]abstrans.north) to(ABabs.south); 
+\path [line, ->, bend right=40, onslide={<10>,{opacity=0.2}}] ([xshift=-0.5em, yshift=-0.25em]proctrans.north east) to([xshift=0.5em]ABabs.south); 
+}
+\uncover<9->{
+\node (abs0) at (6, 1.5) {};
+\node (abs1) at (6, 7) {};
+\path [line, ->, opacity=0.5] (abs0) to node [xshift=0.5em, yshift=3em, opacity=0.5, rotate=90] {abstraction} (abs1); 
 }
 
 \end{tikzpicture}
@@ -226,8 +276,8 @@ Abstraction is one type of task where we might look for transfer.
 
 \section{Experiment design}
 
-\begin{frame}[label=exp_des]{Experiment design}
-\only<3->{
+\begin{frame}<-2>[label=exp_des]{Experiment design}
+\only<4->{
 \vspace{-1em}
 }
 \begin{figure}
@@ -235,8 +285,13 @@ Abstraction is one type of task where we might look for transfer.
 \begin{tikzpicture}[auto] 
 \node (time00) at (-2, -1) {};
 \node (time01) at (5, -1) {};
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center ] (A) at (0, 0) {Task A}; 
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B) at (3, 0) {Task B}; 
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center ] (A) at (0, 0) {
+    \only<-2>{Task A}
+    \only<3->{\includegraphics[width=2cm]{figures/door_example.png}}}; 
+
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B) at (3, 0) {
+    \only<-2>{Task B}
+    \only<3->{\includegraphics[width=2cm]{figures/fractal_example.png}}};
 \path [line, ->] (time00) to (time01); 
 
 \only<2->{
@@ -245,24 +300,32 @@ Abstraction is one type of task where we might look for transfer.
 \node (sess2) at (-2.5, -2.5) {\bf Day 2};
 \node (time10) at (-2, -3.5) {};
 \node (time11) at (5, -3.5) {};
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center ] (A1) at (0, -2.5) {Task A}; 
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B1) at (3, -2.5) {Task B}; 
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center ] (A1) at (0, -2.5) {
+    \only<-2>{Task A}
+    \only<3->{\includegraphics[width=2cm]{figures/door_example.png}}};
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B1) at (3, -2.5) {
+    \only<-2>{Task B}
+    \only<3->{\includegraphics[width=2cm]{figures/fractal_example.png}}};
 \path [line, ->] (time10) to (time11); 
 
 \node (sess1) at (-2.5, -5) {\bf Day 3};
 \node (time20) at (-2, -6) {};
 \node (time21) at (5, -6) {};
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center ] (A2) at (0, -5) {Task A}; 
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B2) at (3, -5) {Task B}; 
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center ] (A2) at (0, -5) {
+    \only<-2>{Task A}
+    \only<3->{\includegraphics[width=2cm]{figures/door_example.png}}};
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B2) at (3, -5) {
+    \only<-2>{Task B}
+    \only<3->{\includegraphics[width=2cm]{figures/fractal_example.png}}}; 
 }
 
-\only<2>{
+\only<2-3>{
 \path [line, ->] (time20) to (time21); 
 }
 
-\only<3->{
+\only<4->{
 \node (time22) at (8, -6) {};
-\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B2) at (6, -5) {Evaluate Abstractions}; 
+\node [rectangle, draw, thick, text width=2cm, minimum height=1.5cm, align=center] (B2) at (6, -5) {Explicit knowledge?}; 
 \path [line, ->] (time20) to (time22); 
 }
 \end{tikzpicture}
@@ -296,9 +359,89 @@ Abstraction is one type of task where we might look for transfer.
 \note{experimental manipulation will be which structure they have in the fractal condition, whether it's the same as door, and outcomes will be performance in fractal condition and abstractions.}
 \end{frame}
 
-\againframe<9>{phenomena}
+\begin{frame}{Structures}
+\begin{center}
+\begin{table}
+\begin{tabular}{|c|c|}
+\hline
+Flipping & Cycling \\
+\hline
+\parbox{0.45\textwidth}{
+\begin{figure}
+\includegraphics[width=0.35\textwidth]{../../diagrams/hexagon_bi.png}
+\end{figure}
+}
+&
+\parbox{0.45\textwidth}{
+\begin{figure}
+\includegraphics[width=0.35\textwidth]{../../diagrams/hexagon_tri.png}
+\end{figure}
+}\\ \hline
+\end{tabular}
+\end{table}
+\end{center}
+\begin{itemize}
+\item<2> Balanced for average path length, number of actions entering/exiting a room, etc.
+\end{itemize}
+\end{frame}
 
-\begin{frame}{Abstractions within task}
+\begin{frame}{\(2 \times 2\)}
+\begin{center}
+\begin{table}
+\begin{tabular}{|r|c|c|}
+\hline
+& \multicolumn{2}{|c|}{Fractal structure} \\
+& \multicolumn{1}{|c}{Flipping} & \multicolumn{1}{c|}{Cycling} \\
+\hline
+Isomorphic
+&
+\parbox{0.3\textwidth}{
+\vspace{0.1em}
+\includegraphics[width=0.15\textwidth]{figures/door_example.png}~%
+\includegraphics[width=0.15\textwidth]{figures/fractal_example.png}\\
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_bi.png}~%
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_bi.png}
+\vspace{0.1em}
+}
+&
+\parbox{0.3\textwidth}{
+\vspace{0.1em}
+\includegraphics[width=0.15\textwidth]{figures/door_example.png}~%
+\includegraphics[width=0.15\textwidth]{figures/fractal_example.png}\\
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_tri.png}~%
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_tri.png}
+\vspace{0.1em}
+}
+\\\hline
+Non-isomorphic
+&
+\parbox{0.3\textwidth}{
+\vspace{0.1em}
+\includegraphics[width=0.15\textwidth]{figures/door_example.png}~%
+\includegraphics[width=0.15\textwidth]{figures/fractal_example.png}\\
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_tri.png}~%
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_bi.png}
+\vspace{0.1em}
+}
+&
+\parbox{0.3\textwidth}{
+\vspace{0.1em}
+\includegraphics[width=0.15\textwidth]{figures/door_example.png}~%
+\includegraphics[width=0.15\textwidth]{figures/fractal_example.png}\\
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_bi.png}~%
+\includegraphics[width=0.15\textwidth]{../../diagrams/hexagon_tri.png}
+\vspace{0.1em}
+}
+\\  \hline
+\end{tabular}
+\end{table}
+\end{center}
+\end{frame}
+
+\againframe<3-4>{exp_des}
+\againframe<10>{phenomena}
+
+\begin{frame}{Explicit knowledge about a single task}
 Within fractals:
 \begin{figure}
 \centering
@@ -311,12 +454,11 @@ Within fractals:
 \end{figure}
 \end{frame}
 
-\begin{frame}{Abstractions between tasks}
+\begin{frame}{Explicit knowledge about the relationship between tasks}
 Between tasks:
 \begin{figure}
 \centering
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{figures/correspondence_suspect.png}\\
 \includegraphics[width=\textwidth]{figures/corr_ident.png}
 \end{subfigure}~
 \begin{subfigure}{0.45\textwidth}
@@ -326,7 +468,7 @@ Between tasks:
 \end{frame}
 
 \section{Results}
-\begin{frame}{Subjects in isomorphic condition perform better at task B}
+\begin{frame}{Subjects in isomorphic condition perform better at fractals}
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_more_basic_plot_fractal.png}
@@ -334,7 +476,7 @@ Between tasks:
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\begin{frame}{Subjects in isomorphic condition perform better at task B}
+\begin{frame}{Subjects in isomorphic condition perform better at fractals}
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_basic_plot_fractal.png}
@@ -342,7 +484,7 @@ Between tasks:
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\begin{frame}{Subjects in isomorphic condition perform better at task B}
+\begin{frame}{Subjects in isomorphic condition perform better at fractals}
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{figures/ex3/ns_stats.png}
@@ -360,7 +502,7 @@ Between tasks:
 \begin{frame}{This may not be conscious}
 \begin{figure}
 \centering
-\includegraphics[width=0.66\textwidth]{figures/ex3/ns_by_correspondence_suspect.png}
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_correspondence_suspect.png}
 \end{figure}
 \vspace{-5pt}
 {\scriptsize Error bars represent 95\%-confidence intervals}
@@ -394,7 +536,7 @@ Evidence of transfer to second task. \par
 May not require consciousness.
 }
 \end{frame}
-\section{Results: Abstractions}
+\section{Results: Explicit knowledge}
 
 \againframe<3>{exp_des}
 
@@ -423,7 +565,10 @@ Note: we have much less power to detect these effects, because they're generally
     \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso.png}
 }\only<3>{
     \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_group.png}
+}\only<4>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_cs.png}
 }
+
 \end{figure}
 \uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
 \end{frame}
