@@ -66,7 +66,7 @@
 \frame{\titlepage}
 
 \begin{frame}[standout]
-How do humans learn so effectively and quickly? \par
+How do humans learn so quickly and effectively? \par
 \end{frame}
 
 
@@ -171,7 +171,7 @@ For example, imagine you are about to teach someone to play guitar. Who do you t
 \end{frame}
 
 \begin{frame}{Transfer speed and opinions}
-Transfer speed helps reconcile why some people think transfer is important. 
+Transfer speed helps reconcile why some people think transfer is important, while others don't. 
 \begin{figure}
 \centering
 \includegraphics[width=0.5\textwidth]{figures/perspectives_on_transfer.png}
@@ -536,6 +536,98 @@ Evidence of transfer to second task. \par
 May not require consciousness.
 }
 \end{frame}
+
+\section{Results: Policies}
+
+\begin{frame}{Policies}
+\begin{itemize}
+\item A number of my remaining analyses rely on the idea of a \emph{policy} from reinforcement learning.
+\item<2-> A policy is a function that maps states to action probabilities:
+\begin{center}
+\begin{table}
+
+\begin{tabular}{|c|c|c|}
+\hline 
+& \(P\)(Acid) & \(P\)(Ray) \\
+\hline
+\includegraphics[width=0.25\textwidth]{figures/fractal_example.png} & 0.75 & 0.25\\ \hline
+\includegraphics[width=0.25\textwidth]{figures/fractal_example_2.png} & 0.5 & 0.5 \\ \hline
+\end{tabular}
+\end{table}
+\end{center}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Policy alignment}
+\begin{itemize}
+\item How similar is participants behavior between the tasks? 
+\item<2-> We'll quantify this by looking at similarity between their policies.
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline 
+& \(P\)(Acid) & \(P\)(Ray) \\
+\hline
+\includegraphics[width=0.25\textwidth]{figures/fractal_example.png} & 0.75 & 0.25\\ \hline
+\includegraphics[width=0.25\textwidth]{figures/fractal_example_2.png} & 0.5 & 0.5 \\ \hline
+ \vdots & \vdots & \vdots \\ \hline
+\end{tabular}
+\end{center}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline 
+& \(P\)(Right) & \(P\)(Left) \\
+\hline
+\includegraphics[width=0.25\textwidth]{figures/door_example_3.png} & 0.5 & 0.5\\ \hline
+\includegraphics[width=0.25\textwidth]{figures/door_example_2.png} & 0.75 & 0.25 \\ \hline
+ \vdots & \vdots & \vdots \\ \hline
+\end{tabular}
+\end{center}
+\end{column}
+\end{columns}
+\item<3-> We'll consider all the structure-preserving mappings between the doors and fractal policies, and see how well the participants' policies align across tasks.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Policy alignment is greater in isomorphic condition}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/ex3/distributional_similarities_by_isomorphic.png}
+\note{Not too surprising, would be true if people were learning the tasks sufficiently well even if they treated them completely independently}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Policy alignment is related to performance}
+\begin{figure}
+\centering
+\only<1>{
+\includegraphics[width=0.8\textwidth]{figures/ex3/ns_by_minl1_iso.png}
+}
+\only<2>{
+\includegraphics[width=0.8\textwidth]{figures/ex3/ns_by_minl1_iso_group.png}
+}
+\end{figure}
+\note{Some subjects in the *non*-isomorphic condition appear to be trying to transfer, and doing worse because of it!}
+\end{frame}
+
+\begin{frame}{Not a consciousness effect?}
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/ex3/ns_by_minl1_iso_cs.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}[standout]
+Policy alignment strongly affects performance. \par
+\uncover<2->{
+\vspace{1em}
+Some subjects may be ``trying'' to transfer in the non-isomorphic condition, and actually be harmed by it!
+}
+\end{frame}
+
 \section{Results: Explicit knowledge}
 
 \againframe<3>{exp_des}

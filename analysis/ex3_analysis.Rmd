@@ -1095,8 +1095,10 @@ ggplot(data=s2_joined_question_data %>%
   annotate("segment", x=1.5, xend=2.5, y=2.9, yend=2.9, alpha=0.5, linetype=2) +
   annotate("segment", x=1, xend=2, y=6.2,alpha=0.5, yend=6.2) +
   annotate("text", x=1.5, y= 6.4, size=10, alpha=0.5,label="*") +
-  annotate("segment", x=0.5, xend=1.5, y=6.2,alpha=0.5, yend=6.2) +
-  annotate("text", x=1, y= 6.4, size=10, alpha=0.5,label="*") +
+  annotate("segment", x=0.75, xend=1.25, y=6.4,alpha=0.5, yend=6.4) +
+  annotate("text", x=1, y= 6.6, size=10, alpha=0.5,label="*") +
+  annotate("segment", x=1.75, xend=2.25, y=6.4,alpha=0.5, yend=6.4) +
+  annotate("text", x=2, y= 6.7, size=6, alpha=0.5,label="ns") +
   scale_fill_brewer(palette="Set2")
 ```
 
@@ -1730,13 +1732,14 @@ ggplot(distributional_similarity_full_summary, aes(x = isomorphic, y= avg_min_L1
   geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=min_L1_95ci_lower, ymax=min_L1_95ci_upper), width=0.25) +
   scale_fill_brewer(palette="Set2") +
-  labs(y="Min L1 distance between policies") 
+  labs(y="Minimum dissimilarity between policies") 
   
 
 ```
 
 ```{r}
 ggsave("figures/ex3/distributional_similarities_by_isomorphic.png")
+ggsave("../writing/talks/figures/ex3/distributional_similarities_by_isomorphic.png", width=7, height=5)
 ```
 
 ```{r}
@@ -1775,12 +1778,15 @@ ggsave("figures/ex3/distributional_similarities_avg_by_group.png")
 
 # joining with other data
 ```{r}
-dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_data) %>%
+dist_corr_data = inner_join(s2_joined_question_data %>% 
+                              mutate(isomorphic=factor(isomorphic)), 
+                            distributional_similarity_data %>% 
+                              mutate(isomorphic=factor(isomorphic))) %>%
   mutate(psmnps_z = as.vector(scale(perm_swaps_minus_perm_non_swaps)),
          psmnps_Linf_z = as.vector(scale(perm_swaps_minus_perm_non_swaps_Linf)),
          psmnps_L2_z = as.vector(scale(perm_swaps_minus_perm_non_swaps_L2)),
          rt=rt/1000) %>%
-  group_by(isomorphic, structure, fractal_hexagon_bi) %>%
+  group_by(isomorphic, fractal_hexagon_bi) %>%
   mutate(avg_L1_z = scale(avg_L1),
          min_L1_z = scale(min_L1)) %>%
   ungroup()
@@ -1789,7 +1795,7 @@ dist_corr_data = inner_join(s2_joined_question_data, distributional_similarity_d
 # is performance predicted by distributional similarity
 
 ```{r}
-dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) + structure, data=dist_corr_data)
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) +  structure, data=dist_corr_data)
 summary(dist_sim_model)
 ```
 
@@ -1805,7 +1811,7 @@ ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
   geom_point() +
   geom_smooth(method="lm") +
   scale_color_brewer(palette="Set2") +
-  labs(x = "Alignment of policies (smaller = more aligned)", y = "Avg. number of steps required") 
+  labs(x = "Dissimilarity of policies (smaller = more similar)", y = "Avg. number of steps required") 
 ```
 ```{r}
 ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso.png", width=7, height=5)
@@ -1816,7 +1822,7 @@ ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
   geom_point() +
   geom_smooth(method="lm") +
   scale_color_brewer(palette="Set2") +
-  labs(x = "Alignment of policies (smaller = more aligned)", y = "Avg. number of steps required") + 
+  labs(x = "Dissimilarity of policies (smaller = more similar)", y = "Avg. number of steps required") + 
   facet_wrap(~structure)
 ```
 ```{r}
@@ -1824,7 +1830,11 @@ ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso_group.png", width=7, height
 ```
 
 ```{r}
-ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
+ggplot(data=dist_corr_data %>%
+         mutate(correspondence_suspect = factor(correspondence_suspect,
+                                                levels=c("Yes", "No"),
+                                                labels=c("Suspected", "Did not suspect"))),
+       aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
   geom_point() +
   geom_smooth(method="lm") +
   scale_color_brewer(palette="Set2") +
@@ -1833,8 +1843,42 @@ ggplot(data=dist_corr_data, aes(x=min_L1, y=avg_num_steps, color=isomorphic)) +
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso_group.png", width=7, height=5)
+ggsave("../writing/talks/figures/ex3/ns_by_minl1_iso_cs.png", width=7, height=5)
 ```
+
+## how about explicit measures?
+```{r}
+dist_corr_data = inner_join(dist_corr_data, explicit_similarity_data %>%
+                              select(subject_id, correspondence_suspect, one_task_helpful_for_other, similarity_likert, which_condition, ever_noticed)) %>%
+  mutate(one_task_helpful_for_other = as.numeric(one_task_helpful_for_other))
+```
+
+
+```{r}
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) * correspondence_suspect + structure, data=dist_corr_data)
+summary(dist_sim_model)
+```
+
+```{r}
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) * one_task_helpful_for_other+ structure, data=dist_corr_data)
+summary(dist_sim_model)
+```
+
+```{r}
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) + one_task_helpful_for_other+ structure, data=dist_corr_data)
+summary(dist_sim_model)
+```
+
+```{r}
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) * ever_noticed + structure, data=dist_corr_data)
+summary(dist_sim_model)
+```
+
+```{r}
+dist_sim_model = lm(avg_num_steps ~ isomorphic  *  (min_L1) * as.numeric(similarity_likert) + structure, data=dist_corr_data)
+summary(dist_sim_model)
+```
+
 
 # does dist sim predict explicit answers?
 ## similarity likert
@@ -2017,5 +2061,7 @@ for (i in 1:num_permutations) {
   null_dist_avg_alignments = c(null_dist_avg_alignments, this_data$perm_at_min_alignment_with_best_dd_perms)
 }
 ```
+
+
 
 
