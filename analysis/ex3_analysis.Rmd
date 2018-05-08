@@ -1727,10 +1727,38 @@ dist_sim_model = lm(min_L1 ~ isomorphic * correspondence_suspect, data=distribut
 summary(dist_sim_model)
 ```
 
+
 ```{r}
-ggplot(distributional_similarity_full_summary, aes(x = isomorphic, y= avg_min_L1, fill=isomorphic)) +
+coefficient_getter = function(data, indices) {
+  dist_sim_model = lm(min_L1 ~ isomorphic, data=data[indices,])
+  
+  return(c(dist_sim_model$coefficients[1], #noniso
+           dist_sim_model$coefficients[1] + dist_sim_model$coefficients[2] #iso
+           ))
+}
+```
+
+```{r}
+bootstrap_results = boot(data=distributional_similarity_data, statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+ds_boot_noniso = boot.ci(bootstrap_results, type="perc", index=1) 
+ds_boot_iso = boot.ci(bootstrap_results, type="perc", index=2) 
+ds_ci95_noniso =(ds_boot_noniso$percent[4:5])
+ds_ci95_iso = (ds_boot_iso$percent[4:5])
+
+ds_ci_data = data.frame(isomorphic=factor(c(F, T)),
+                        ci95_lower = c(ds_ci95_noniso[1], ds_ci95_iso[1]),
+                        ci95_upper = c(ds_ci95_noniso[2], ds_ci95_iso[2])) 
+
+```
+
+
+```{r}
+ggplot(inner_join(distributional_similarity_full_summary, ds_ci_data), aes(x = isomorphic, y= avg_min_L1, fill=isomorphic)) +
   geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=min_L1_95ci_lower, ymax=min_L1_95ci_upper), width=0.25) +
+  geom_errorbar(aes(ymin=ci95_lower, ymax=ci95_upper), width=0.25) +
   scale_fill_brewer(palette="Set2") +
   labs(y="Minimum dissimilarity between policies") 
   
