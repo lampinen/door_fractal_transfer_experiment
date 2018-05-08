@@ -260,13 +260,13 @@ When and how does procedural knowledge transfer to more explicit, abstract, or f
 \uncover<8->{
 \path [line, <->, onslide={<10>,{opacity=0.2}}] (Aabs.north) to  (ABabs.west); 
 \path [line, <->, onslide={<10>,{opacity=0.2}}] (Babs.north) to  (ABabs.east); 
-\path [line, ->, onslide={<10>,{opacity=0.2}}] ([yshift=-0.5em]abstrans.north) to(ABabs.south); 
-\path [line, ->, bend right=40, onslide={<10>,{opacity=0.2}}] ([xshift=-0.5em, yshift=-0.25em]proctrans.north east) to([xshift=0.5em]ABabs.south); 
+\path [line, <->, onslide={<10>,{opacity=0.2}}] ([yshift=-0.5em]abstrans.north) to(ABabs.south); 
+\path [line, <->, bend right=40, onslide={<10>,{opacity=0.2}}] ([xshift=-0.5em, yshift=-0.25em]proctrans.north east) to([xshift=0.5em]ABabs.south); 
 }
 \uncover<9->{
 \node (abs0) at (6, 1.5) {};
 \node (abs1) at (6, 7) {};
-\path [line, ->, opacity=0.5] (abs0) to node [xshift=0.5em, yshift=3em, opacity=0.5, rotate=90] {abstraction} (abs1); 
+\path [line, ->, opacity=0.5] (abs0) to node [xshift=0.5em, yshift=3em, opacity=0.5, rotate=90] {abstractness} (abs1); 
 }
 
 \end{tikzpicture}
@@ -454,6 +454,19 @@ Within fractals:
 \end{figure}
 \end{frame}
 
+\begin{frame}{Explicit awareness of a relationship between tasks}
+Between tasks:
+\begin{figure}
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{figures/correspondence_suspect.png}
+\end{subfigure}~
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{figures/one_task_helpful.png}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
 \begin{frame}{Explicit knowledge about the relationship between tasks}
 Between tasks:
 \begin{figure}
@@ -465,6 +478,14 @@ Between tasks:
 \includegraphics[width=\textwidth]{figures/corr_drag_drop.png}
 \end{subfigure}
 \end{figure}
+\end{frame}
+
+\begin{frame}{Arrangement of questions}
+We carefully developed the protocol for when the questions were answered to reduce contamination, e.g.:
+\begin{itemize}
+\item<2-> Ask within-task explicit knowledge questions only on one task, and before any between-task questions.
+\item<3-> Organize questions in order of increasing specificity, for example ask if participants thought there was a relationship between the tasks before asking them to identify such a relationship. 
+\end{itemize}
 \end{frame}
 
 \section{Results}
@@ -502,10 +523,15 @@ Between tasks:
 \begin{frame}{This may not be conscious}
 \begin{figure}
 \centering
+\only<1>{
+\includegraphics[width=0.9\textwidth]{figures/correspondence_suspect.png}
+}
+\only<2->{
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_correspondence_suspect.png}
+}
 \end{figure}
 \vspace{-5pt}
-{\scriptsize Error bars represent 95\%-confidence intervals}
+\uncover<2>{\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
 \begin{frame}{This may not be conscious}
@@ -663,9 +689,74 @@ Note: we have much less power to detect these effects, because they're generally
 }\only<4>{
     \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_cs.png}
 }
-
 \end{figure}
 \uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{Isomorphism may influence within-task abstraction}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[height=0.9\textheight]{figures/drag_drop_example.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/nac_by_iso_by_group.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
+\end{frame}
+
+\section{Results: Explicit knowledge about relationship}
+
+\begin{frame}{Subjects can explicitly identify analogy better than chance}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[height=0.9\textheight]{figures/corr_drag_drop.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso.png}
+}\only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso_by_group.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent parametric 95\%-confidence intervals}
+\note{< 40 subjects in this, < 20 s in isomorphic condition...}
+\end{frame}
+
+\begin{frame}{Only weakly related to performance and policy alignment}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso_by_ns.png}
+}\only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso_minl1.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent parametric 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{Similarity ratings}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/sl_by_iso_ns.png}
+}\only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/sl_by_iso_minl1.png}
+}
+\end{figure}
+{\scriptsize Error bars represent parametric 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}
+Slides TODO: but policy alignment does not seem to predict anything explicit very strongly. 
+\end{frame}
+
+\begin{frame}{Conclusions}
+\begin{itemize}
+\item We see evidence of slow transfer between tasks.
+\item<2-> This slow transfer may be independent of consciousness.
+\item<3-> This slow transfer of knowledge affects within-task explicit knowledge. 
+\item<4-> However, the processes for implicit and explicit mapping between tasks may be at least partially dissociable. 
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Next steps \& possible future directions}
@@ -676,6 +767,32 @@ Note: we have much less power to detect these effects, because they're generally
 \item<4-> Integrating abstractions (either taught or interrogated) earlier on one or both tasks
 \item<5-> Role of sleep in abstraction
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\begin{figure}
+\centering
+\begin{tikzpicture}[auto] 
+\node at (0, 0) {\includegraphics[width=2cm]{figures/people/jay.jpg}};
+\node at (2, 0) {\includegraphics[width=2cm]{figures/people/arianna.jpg}};
+\node at (4, 0) {\includegraphics[width=2cm]{figures/people/katherine.jpg}};
+\node at (7, 0) {\includegraphics[width=2cm]{figures/people/erin.jpg}};
+\node at (9, 0) {\includegraphics[width=2cm]{figures/people/yochai.jpg}};
+\node at (7, -2) {\includegraphics[width=2cm]{figures/people/jesse.jpg}};
+\node at (9, -2) {\includegraphics[width=2cm]{figures/people/pam.jpg}};
+\node at (8, -5) {\includegraphics[width=2cm]{figures/nsf.jpeg}};
+
+\node at (0, -3) {\includegraphics[width=1.5cm]{figures/people/dan.jpg}};
+\node at (1.5, -3) {\includegraphics[width=1.5cm]{figures/people/mona.jpg}};
+\node at (3, -3) {\includegraphics[width=1.5cm]{figures/people/corey.jpg}};
+\node at (4.5, -3) {\includegraphics[width=1.5cm]{figures/people/robert.jpg}};
+\node at (0, -4.5) {\includegraphics[width=1.5cm]{figures/people/dawn.jpg}};
+\node at (1.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/daniel.jpg}};
+\node at (3, -4.5) {\includegraphics[width=1.5cm]{figures/people/tyler.png}};
+\node at (4.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/pam.jpg}};
+
+\end{tikzpicture}
+\end{figure}
 \end{frame}
 
 \begin{frame}[allowframebreaks]
