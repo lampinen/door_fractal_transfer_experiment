@@ -931,7 +931,115 @@ number of people in each condition
 xtabs( ~  isomorphic + correspondence_suspect + group, data = es_ns_summarized_data %>% filter(session_c == 1, trial_type == "fractal"))
 ```
 
+# alternation_analyses
+
+```{r}
+alternation_data = main_data %>%
+  group_by(subject_id, isomorphic, group, fractal_hexagon_bi, structure, session, session_c, structure, trial_type, trial_index_by_type_z) %>%
+  mutate(next_action=lead(action, n=1),
+         alternates=next_action != action,
+         next_next_action=lead(action, n=2),
+         cycles=(next_action==action) & (next_next_action != action)) %>%
+  ungroup() %>%
+  group_by(subject_id, isomorphic, group, fractal_hexagon_bi, structure, session, session_c, structure, trial_type) %>%
+  summarize(pct_alternates=mean(alternates, na.rm=T), pct_cycles=mean(cycles, na.rm=T),
+            pct_alternates_sd=sd(alternates, na.rm=T), pct_cycles_sd=sd(cycles, na.rm=T))
+  
+```
+
+```{r}
+alt_model = lmer(data=alternation_data, pct_alternates ~ (isomorphic + session_c + I(session_c**2)) * structure  + (1 + session_c|subject_id))
+summary(alt_model)
+```
+
+```{r}
+cyc_model = lmer(data=alternation_data %>% filter(trial_type=="fractal"), pct_cycles ~ (isomorphic + session_c) * structure   + (1 + session_c|subject_id))
+summary(cyc_model)
+```
+```{r}
+cyc_model = lmer(data=alternation_data %>% filter(trial_type=="door"), pct_cycles ~ (isomorphic + session_c) * structure   + (1 + session_c|subject_id))
+summary(cyc_model)
+```
+
+```{r}
+ggplot(data=alternation_data %>%
+         filter(trial_type=="fractal") %>%
+         group_by(session, structure, isomorphic) %>%
+         summarize(pa_se =sd(100*pct_alternates)/sqrt(n()), pct_alternates=mean(100*pct_alternates),
+                   ci_upper=pct_alternates + 1.96*pa_se,ci_lower=pct_alternates - 1.96*pa_se), aes(x=session+1, y= pct_alternates, color=isomorphic)) +
+  geom_line(size=1.2) +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), size=1.2, width=0.25) +
+  scale_color_brewer(palette="Set2") +
+  labs(x="Session", y="% alternating actions (fractal_trials)") +
+  scale_x_continuous(breaks=1:3) +
+  ylim(0,105)+
+  facet_wrap(~structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/alt_fractal_by_group.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=alternation_data %>%
+         filter(trial_type=="door") %>%
+         group_by(session, structure, isomorphic) %>%
+         summarize(pa_se =sd(100*pct_alternates)/sqrt(n()), pct_alternates=mean(100*pct_alternates),
+                   ci_upper=pct_alternates + 1.96*pa_se,ci_lower=pct_alternates - 1.96*pa_se), aes(x=session+1, y= pct_alternates, color=isomorphic)) +
+  geom_line(size=1.2) +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), size=1.2, width=0.25) +
+  scale_color_brewer(palette="Set2") +
+  labs(x="Session", y="% alternating actions (door trials)") +
+  scale_x_continuous(breaks=1:3) +
+  ylim(0,105)+
+  facet_wrap(~structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/alt_door_by_group.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=alternation_data %>%
+         filter(trial_type=="fractal") %>%
+         group_by(session, structure, isomorphic) %>%
+         summarize(pa_se =sd(100*pct_cycles)/sqrt(n()), pct_cycles=mean(100*pct_cycles),
+                   ci_upper=pct_cycles + 1.96*pa_se,ci_lower=pct_cycles - 1.96*pa_se), aes(x=session+1, y= pct_cycles, color=isomorphic)) +
+  geom_line(size=1.2) +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), size=1.2, width=0.25) +
+  scale_color_brewer(palette="Set2") +
+  labs(x="Session", y="% alternating actions (fractal_trials)") +
+  scale_x_continuous(breaks=1:3) +
+  ylim(0,50)+
+  facet_wrap(~structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cyc_fractal_by_group.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=alternation_data %>%
+         filter(trial_type=="door") %>%
+         group_by(session, structure, isomorphic) %>%
+         summarize(pa_se =sd(100*pct_cycles)/sqrt(n()), pct_cycles=mean(100*pct_cycles),
+                   ci_upper=pct_cycles + 1.96*pa_se,ci_lower=pct_cycles - 1.96*pa_se), aes(x=session+1, y= pct_cycles, color=isomorphic)) +
+  geom_line(size=1.2) +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), size=1.2, width=0.25) +
+  scale_color_brewer(palette="Set2") +
+  labs(x="Session", y="% alternating actions (door trials)") +
+  scale_x_continuous(breaks=1:3) +
+  ylim(0,50)+
+  facet_wrap(~structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cyc_door_by_group.png", width=7, height=5)
+```
+
+
 # dumping perf for encouragement
+
 
 ```{r}
 perf_data = num_steps_per_trial_data %>%
