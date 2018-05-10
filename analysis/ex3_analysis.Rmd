@@ -1328,8 +1328,8 @@ ggsave("../writing/talks/figures/ex3/nac_by_iso.png", width=7, height=5)
 ```
 
 ```{r}
-num_dd_assignments_correct_es_model = lm(corrected_nac ~ isomorphic  * (correspondence_suspect + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
-summary(num_dd_assignments_correct_es_model)
+num_dd_assignments_correct_cs_model = lm(corrected_nac ~ isomorphic  * (correspondence_suspect + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_cs_model)
 ```
 
 ```{r}
@@ -1353,8 +1353,13 @@ ggsave("../writing/talks/figures/ex3/nac_by_iso_group_cs.png", width=7, height=5
 ```
 
 ```{r}
-num_dd_assignments_correct_es_model = lm(corrected_nac ~ isomorphic  * (scale(as.numeric(one_task_helpful_for_other), scale=F) + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
-summary(num_dd_assignments_correct_es_model)
+num_dd_assignments_correct_sl_model = lm(corrected_nac ~ isomorphic  * (scale(as.numeric(similarity_likert), scale=F) + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_sl_model)
+```
+
+```{r}
+num_dd_assignments_correct_oth_model = lm(corrected_nac ~ isomorphic  * (scale(as.numeric(one_task_helpful_for_other), scale=F) + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_oth_model)
 ```
 ```{r}
 ggplot(data=s2_joined_question_data %>%
@@ -1364,11 +1369,11 @@ ggplot(data=s2_joined_question_data %>%
   geom_smooth(method="lm") +
   labs(x="One task helpful for other rating", y="% of fractals correctly assigned") +
   scale_color_brewer(palette="Set2") + 
-  facet_wrap(~structure)
+  facet_grid(~isomorphic)
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex3/nac_by_iso_group_oth.png", width=7, height=5)
+ggsave("../writing/talks/figures/ex3/nac_by_iso_oth.png", width=7, height=5)
 ```
 
 
@@ -1449,6 +1454,10 @@ boot.ci(bootstrap_results, type="perc", index=4) #avg_num_steps_z
 boot.ci(bootstrap_results, type="perc", index=5) #isomorphic:flipping
 ```
 
+
+```{r}
+stargazer(num_dd_assignments_correct_model, num_dd_assignments_correct_sl_model, num_dd_assignments_correct_cs_model, num_dd_assignments_correct_oth_model, report="vc*stp", float=F, single.row=T)
+```
 
 
 ## diagram selection
@@ -1584,8 +1593,8 @@ ggsave("../writing/talks/figures/ex3/ds_by_iso_by_group.png", width=7, height=5)
 ```
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ isomorphic * as.numeric(similarity_likert), family="binomial", data=s2_joined_question_data)
-summary(ds_correct_model)
+ds_correct_sl_model = glm(ds_correct ~ isomorphic * as.numeric(similarity_likert), family="binomial", data=s2_joined_question_data)
+summary(ds_correct_sl_model)
 ```
 
 ```{r}
@@ -1735,8 +1744,20 @@ ggsave("../writing/talks/figures/ex3/ds_by_iso_by_oth.png", width=7, height=5)
 ```
 
 ```{r}
-ds_correct_model = glm(ds_correct ~ isomorphic * scale(as.numeric(one_task_helpful_for_other)), family="binomial", data=s2_joined_question_data)
+ds_correct_oth_model = glm(ds_correct ~ isomorphic * scale(as.numeric(one_task_helpful_for_other)), family="binomial", data=s2_joined_question_data)
+summary(ds_correct_oth_model)
+```
+
+```{r}
+ds_correct_cs_model = glm(ds_correct ~ isomorphic * correspondence_suspect, family="binomial", data=s2_joined_question_data)
+summary(ds_correct_cs_model)
+```
+```{r}
+ds_correct_model = glm(ds_correct ~ isomorphic, family="binomial", data=s2_joined_question_data)
 summary(ds_correct_model)
+```
+```{r}
+stargazer(ds_correct_model, ds_correct_sl_model, ds_correct_cs_model, ds_correct_oth_model, report="vc*stp", float=F, single.row=T)
 ```
 
 # aggregating
@@ -1923,6 +1944,23 @@ ggplot(s2_joined_question_data %>%
 ggsave("../writing/talks/figures/ex3/oth_by_iso_ns.png", width=7, height=5)
 ```
 
+```{r}
+xtabs(data=s2_joined_question_data %>% filter(question == "when_noticed"), ~ (one_task_helpful_for_other >= 2) + (ever_noticed))
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>% filter(question == "when_noticed"), 
+       aes(x=as.numeric(one_task_helpful_for_other), y= response, color=isomorphic)) +
+  geom_point(position="jitter")
+```
+
+
+```{r}
+oth_noticed_model = lm(grepl("During these questions", response) ~  I(as.numeric(one_task_helpful_for_other) >= 2), data=s2_joined_question_data %>%
+                filter(question == "when_noticed"))
+summary(oth_noticed_model)
+```
+
 # correspondence correct
 ```{r}
 correspondence_correct_model = glm(correspondence_correct ~ avg_num_steps_z, family="binomial", data=s2_joined_question_data)
@@ -2082,6 +2120,20 @@ corr_dd_model = lm(data=s2_joined_question_data %>%
                             isomorphic == "TRUE"),
                    corrected_nac ~ correspondence_suspect * structure)
 summary(corr_dd_model)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>% 
+         filter(question == "correspondence_drag_drop",
+                isomorphic=="TRUE"),
+       aes(x=as.numeric(one_task_helpful_for_other), y=num_assignments_correct)) +
+  labs(y = "Number of correct room-fractal matches", x="One task helpful for other rating") +
+  geom_point(color="#FC8D62", position=position_jitter(width=0.25, height=0.25))+ 
+  geom_smooth(method="lm", color="#FC8D62") 
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cddnac_isoonly_by_oth.png", width=7, height=5)
 ```
 
 ```{r}
@@ -2858,3 +2910,102 @@ summary(cc_prediction_model)
 ```{r}
 stargazer(cc_prediction_model, report="vc*stp", single.row=T)
 ```
+
+# policy clustering
+```{r}
+library(tsne)
+```
+
+```{r}
+distributional_distance_data = distributional_data %>%
+  filter(trial_type=="fractal", session==2, action==1) %>%  # other action is redundant since probs sum to 1
+  mutate(state=sprintf("l%ig%i",location, goal)) %>%
+  select(subject_id, group, state, action_probability) %>%
+  spread(state, action_probability)
+```
+
+isomorphisms presented as permutations of the columns of the above data frame
+```{r}
+hb_column_perms = list(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38), c(1, 2, 10, 11, 12, 13, 14, 9, 16, 17, 18, 19, 20, 15, 22, 23, 24, 25, 26, 21, 28, 29, 30, 31, 32, 27, 34, 35, 36, 37, 38, 33, 4, 5, 6, 7, 8, 3), c(1, 2, 17, 18, 19, 20, 15, 16, 23, 24, 25, 26, 21, 22, 29, 30, 31, 32, 27, 28, 35, 36, 37, 38, 33, 34, 5, 6, 7, 8, 3, 4, 11, 12, 13, 14, 9, 10), c(1, 2, 24, 25, 26, 21, 22, 23, 30, 31, 32, 27, 28, 29, 36, 37, 38, 33, 34, 35, 6, 7, 8, 3, 4, 5, 12, 13, 14, 9, 10, 11, 18, 19, 20, 15, 16, 17), c(1, 2, 31, 32, 27, 28, 29, 30, 37, 38, 33, 34, 35, 36, 7, 8, 3, 4, 5, 6, 13, 14, 9, 10, 11, 12, 19, 20, 15, 16, 17, 18, 25, 26, 21, 22, 23, 24), c(1, 2, 38, 33, 34, 35, 36, 37, 8, 3, 4, 5, 6, 7, 14, 9, 10, 11, 12, 13, 20, 15, 16, 17, 18, 19, 26, 21, 22, 23, 24, 25, 32, 27, 28, 29, 30, 31), c(1, 2, 10, 9, 14, 13, 12, 11, 4, 3, 8, 7, 6, 5, 34, 33, 38, 37, 36, 35, 28, 27, 32, 31, 30, 29, 22, 21, 26, 25, 24, 23, 16, 15, 20, 19, 18, 17), c(1, 2, 17, 16, 15, 20, 19, 18, 11, 10, 9, 14, 13, 12, 5, 4, 3, 8, 7, 6, 35, 34, 33, 38, 37, 36, 29, 28, 27, 32, 31, 30, 23, 22, 21, 26, 25, 24), c(1, 2, 24, 23, 22, 21, 26, 25, 18, 17, 16, 15, 20, 19, 12, 11, 10, 9, 14, 13, 6, 5, 4, 3, 8, 7, 36, 35, 34, 33, 38, 37, 30, 29, 28, 27, 32, 31), c(1, 2, 31, 30, 29, 28, 27, 32, 25, 24, 23, 22, 21, 26, 19, 18, 17, 16, 15, 20, 13, 12, 11, 10, 9, 14, 7, 6, 5, 4, 3, 8, 37, 36, 35, 34, 33, 38), c(1, 2, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3), c(1, 2, 3, 8, 7, 6, 5, 4, 33, 38, 37, 36, 35, 34, 27, 32, 31, 30, 29, 28, 21, 26, 25, 24, 23, 22, 15, 20, 19, 18, 17, 16, 9, 14, 13, 12, 11, 10))
+ht_column_perms = list(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38), c(1, 2, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3), c(1, 2, 24, 25, 26, 21, 22, 23, 30, 31, 32, 27, 28, 29, 36, 37, 38, 33, 34, 35, 6, 7, 8, 3, 4, 5, 12, 13, 14, 9, 10, 11, 18, 19, 20, 15, 16, 17), c(1, 2, 17, 16, 15, 20, 19, 18, 11, 10, 9, 14, 13, 12, 5, 4, 3, 8, 7, 6, 35, 34, 33, 38, 37, 36, 29, 28, 27, 32, 31, 30, 23, 22, 21, 26, 25, 24))
+
+```
+
+```{r}
+permute_columns = function(data, perm) {
+  return(data[, perm])
+}
+
+permute_ddd = function(perm) {
+  return(permute_columns(distributional_distance_data, perm))
+}
+```
+
+```{r}
+hb_permuted_data = lapply(hb_column_perms, permute_ddd)
+ht_permuted_data = lapply(hb_column_perms, permute_ddd)
+```
+
+```{r}
+n_hb_perms = length(hb_column_perms)
+n_ht_perms = length(ht_column_perms)
+```
+
+```{r}
+nsubjs = nrow(distributional_distance_data)
+subj_policy_distances =matrix(nrow=nsubjs, ncol=nsubjs)
+
+
+for (i in 1:(nsubjs-1)) {
+  if (distributional_distance_data[i, c("group")] == "hexagon_bi") {
+    subj_i_pol_perms = matrix(nrow=n_hb_perms, ncol=36) 
+    for (perm_k in 1:n_hb_perms) {
+      subj_i_pol_perms[perm_k,] = as.numeric(hb_permuted_data[[perm_k]][i,3:38])
+    }
+  } else {
+    subj_i_pol_perms = matrix(nrow=n_ht_perms, ncol=36) 
+    for (perm_k in 1:n_ht_perms) {
+      subj_i_pol_perms[perm_k,] = as.numeric(ht_permuted_data[[perm_k]][i,3:38])
+    }
+  }
+  for (j in (i+1):nsubjs) {
+    if (distributional_distance_data[j, c("group")] == "hexagon_bi") {
+      subj_j_pol_perms = matrix(nrow=n_hb_perms, ncol=36) 
+      for (perm_k in 1:n_hb_perms) {
+        subj_j_pol_perms[perm_k,] = as.numeric(hb_permuted_data[[perm_k]][j,3:38])
+      }
+    } else {
+      subj_j_pol_perms = matrix(nrow=n_ht_perms, ncol=36) 
+      for (perm_k in 1:n_ht_perms) {
+        subj_j_pol_perms[perm_k,] = as.numeric(ht_permuted_data[[perm_k]][j,3:38])
+      }
+    }
+    subj_policy_distances[i, j] = min(as.matrix(dist(rbind(subj_i_pol_perms, subj_j_pol_perms)))[(nrow(subj_i_pol_perms)+1):(nrow(subj_i_pol_perms)+nrow(subj_j_pol_perms)),1:nrow(subj_i_pol_perms)])
+    subj_policy_distances[j, i] = subj_policy_distances[i,j] 
+  }
+}
+
+subj_policy_distances = dist(subj_policy_distances)
+```
+
+```{r}
+set.seed(0)
+res = tsne(subj_policy_distances, max_iter=3000)
+```
+
+```{r}
+tsne_data = data.frame(subject_id=factor(1:nsubjs), dimension_1=res[,1], dimension_2=res[,2]) %>%
+  inner_join(., num_steps_summarized_data %>%
+               filter(trial_type=="fractal", session==2) %>%
+               select(subject_id, isomorphic, structure, num_steps_needed)) %>%
+  mutate(condition=factor(sprintf("Isomorphic: %s, Structure: %s", isomorphic, structure)))
+```
+
+```{r}
+ggplot(tsne_data, aes(x=dimension_1, y= dimension_2, color=condition)) +
+  geom_point() +
+  scale_color_brewer(palette="Dark2") + 
+  geom_density_2d() +
+  facet_grid(isomorphic ~ structure)
+```
+
