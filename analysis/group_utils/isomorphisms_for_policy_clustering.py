@@ -14,18 +14,19 @@ for hb_perm in hb_targets:
     this_order = range(36)
     for k, (i, j) in enumerate(original_order):
         this_order[k] = original_order.index((hb_perm[i]-1, hb_perm[j]-1))
-    this_order = tuple([x + 3 for x in this_order]) # For permuting 1-indexed columns shifted over by 2
+    this_order = [-2, -1] + this_order # other columns
+    this_order = "c" + str(tuple([x + 3 for x in this_order])) # For permuting 1-indexed columns shifted over by 2
     hb_orders.append(this_order)
 
-print hb_orders 
-
+print 'list(' + ', '.join(hb_orders) + ')' 
 
 ht_orders = []
 for ht_perm in ht_targets:
     this_order = range(36)
     for k, (i, j) in enumerate(original_order):
         this_order[k] = original_order.index((ht_perm[i]-1, ht_perm[j]-1))
-    this_order = tuple([x + 3 for x in this_order])
+    this_order = [-2, -1] + this_order # other columns
+    this_order = "c" + str(tuple([x + 3 for x in this_order])) # For permuting 1-indexed columns shifted over by 2
     ht_orders.append(this_order)
 
-print ht_orders 
+print 'list(' + ', '.join(ht_orders) + ')' 
