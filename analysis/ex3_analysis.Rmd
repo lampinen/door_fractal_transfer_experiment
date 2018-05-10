@@ -11,6 +11,7 @@ library(ggplot2)
 library(lme4)
 library(lmerTest)
 library(boot)
+library(stargazer)
 ```
 # stuff
 All possible isomorphism, presented as 1) a permutation of hte locations, and 2) a permutation of the actions. (Such that hb_p2_locs[5] will get where the 5th (1-indexed) location maps to, etc.) 
@@ -854,6 +855,7 @@ contrasts(es_joined_ns_data$correspondence_suspect) = cbind(Yes=c(-1, 1)) # effe
 ns_es_time_dependent_model_1_fractal = lmer(num_steps_needed~ isomorphic * ( correspondence_suspect) + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
 summary(ns_es_time_dependent_model_1_fractal)
 contrasts(es_joined_ns_data$correspondence_suspect) = cbind(Yes=c(0, 1))
+stargazer(ns_es_time_dependent_model_1_fractal, report="vc*stp", single.row=T)
 ```
 
 ```{r}
@@ -1531,6 +1533,67 @@ ggplot(s2_joined_question_data %>%
 ggsave("../writing/talks/figures/ex3/sl_by_iso_ns.png", width=7, height=5)
 ```
 
+# correspondence suspect
+```{r}
+cs_model = glm(data=s2_joined_question_data %>% filter(question=="correspondence_suspect"),
+               response=="Yes" ~ isomorphic + structure,
+               family="binomial")
+summary(cs_model)
+```
+
+```{r}
+ggplot(s2_joined_question_data %>%
+         filter(question == "correspondence_suspect") %>%
+         group_by(isomorphic) %>%
+         summarize(res = mean(response=="Yes"), sd_res = sd(response=="Yes"),
+                   ci_lower = res - 1.96*sd_res/sqrt(n()), ci_upper = res + 1.96*sd_res/sqrt(n())),
+      aes(x=isomorphic, y=res, fill=isomorphic)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), position=position_dodge(width=0.9), width=0.25) +
+  labs(x="Structure", y= "Suspected a correspondence?") +
+  annotate("text", x=1.5, y= 1.15, size=6, alpha=0.5,label="p < 0.1") +
+  scale_y_continuous(breaks=0:1, labels=c("No", "Yes")) +
+  scale_fill_brewer(palette="Set2") 
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cs_by_iso.png", width=7, height=5)
+```
+```{r}
+ggplot(s2_joined_question_data %>%
+         filter(question == "correspondence_suspect") %>%
+         group_by(isomorphic, structure) %>%
+         summarize(res = mean(response=="Yes"), sd_res = sd(response=="Yes"),
+                   ci_lower = res - 1.96*sd_res/sqrt(n()), ci_upper = res + 1.96*sd_res/sqrt(n())),
+      aes(x=structure, y=res, fill=isomorphic)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), position=position_dodge(width=0.9), width=0.25) +
+  labs(x="Structure", y= "Suspected a correspondence?") +
+  annotate("text", x=1.5, y= 1.15, size=6, alpha=0.5,label="Both main effects *") +
+  scale_y_continuous(breaks=0:1, labels=c("No", "Yes")) +
+  scale_fill_brewer(palette="Set2") 
+```
+```{r}
+ggsave("../writing/talks/figures/ex3/cs_by_iso_group.png", width=7, height=5)
+```
+
+```{r}
+ggplot(s2_joined_question_data %>%
+         filter(question == "correspondence_suspect"),
+      aes(x=avg_num_steps, y=1*(response == "Yes"), color=isomorphic)) +
+  geom_point() +
+  labs(x="Average number of steps (door + fractal)", y= "Suspected a correspondence?") +
+  geom_smooth(method="glm", method.args=list(family="binomial")) +
+  scale_color_brewer(palette="Set2") + 
+  facet_grid(~structure) + 
+  theme(strip.text.x = element_blank(),
+	strip.text.y = element_blank())
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cs_by_iso_group_ns.png", width=7, height=5)
+```
+
 # one task helpful for other? 
 
 ```{r}
@@ -1573,7 +1636,7 @@ ggplot(s2_joined_question_data %>%
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex3/oth_by_iso_group_ns.png", width=7, height=5)
+ggsave("../writing/talks/figures/ex3/oth_by_iso_ns.png", width=7, height=5)
 ```
 
 # correspondence correct
@@ -1586,11 +1649,11 @@ summary(correspondence_correct_model)
 ```{r}
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(which_condition_correct = ifelse(question != "which_condition", NA, 
-                                          ifelse(grepl("Same", response), isomorphic, !isomorphic)))
+                                          ifelse(grepl("Same", response), isomorphic == "TRUE", !(isomorphic=="TRUE"))))
 ```
 
 ```{r}
-wc_model = glm(which_condition_correct ~ avg_num_steps_z + isomorphic, family="binomial", data=s2_joined_question_data)
+wc_model = glm(which_condition_correct ~ avg_num_steps_z, family="binomial", data=s2_joined_question_data)
 summary(wc_model)
 ```
 
@@ -1676,8 +1739,24 @@ ggsave("../writing/talks/figures/ex3/cddnac_iso_by_group.png", width=7, height=5
 ```
 
 ```{r}
+ggplot(data=s2_joined_question_data %>% 
+         filter(question == "correspondence_drag_drop",
+                isomorphic=="TRUE"),
+       aes(x=avg_num_steps, y=num_assignments_correct)) +
+  labs(x = "Average number of steps (door & fractal", y = "Number of correct room-fractal matches") +
+  geom_point(position="dodge", color="#FC8D62")+ 
+  geom_smooth(method="lm", color="#FC8D62") +
+  geom_hline(aes(yintercept=2.505), alpha=0.5, linetype=2)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cddnac_only_iso_by_ns.png", width=7, height=5)
+```
+
+```{r}
 corr_dd_model = lm(data=s2_joined_question_data %>% 
-                     filter(question == "correspondence_drag_drop"),
+                     filter(question == "correspondence_drag_drop",
+                            isomorphic),
                    corrected_nac ~ isomorphic * avg_num_steps_z)
 summary(corr_dd_model)
 
@@ -1693,6 +1772,35 @@ summary(corr_dd_model)
 ```
 
 ```{r}
+ggplot(data=s2_joined_question_data %>% 
+         filter(question == "correspondence_drag_drop",
+                isomorphic=="TRUE") %>%
+         group_by(isomorphic, structure, correspondence_suspect) %>%
+         summarize(se_nac = sd(num_assignments_correct)/sqrt(n()), num_assignments_correct = mean(num_assignments_correct),
+                   ci_upper = num_assignments_correct + 1.96 * se_nac,
+                   ci_lower = num_assignments_correct - 1.96 * se_nac),
+       aes(x=structure, y=num_assignments_correct, fill=correspondence_suspect)) +
+  labs(y = "Number of correct room-fractal matches") +
+  geom_bar(stat="identity", position="dodge")+ 
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0.25, position = position_dodge(width=0.9))+ 
+  scale_fill_brewer(palette="Set1") +
+  annotate("segment", x=0.5, xend=1.5, y=2.111, yend=2.111, alpha=0.5, linetype=2) +
+  annotate("segment", x=1.5, xend=2.5, y=2.9, yend=2.9, alpha=0.5, linetype=2) 
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/cddnac_by_group_cs.png", width=7, height=5)
+```
+
+```{r}
+corr_dd_model = lm(data=s2_joined_question_data %>% 
+                     filter(question == "correspondence_drag_drop",
+                            isomorphic == "TRUE"),
+                   corrected_nac ~ correspondence_suspect * structure)
+summary(corr_dd_model)
+```
+
+```{r}
 ggplot(data=s2_joined_question_data %>% filter(question=="correspondence_drag_drop"), aes(x=avg_num_steps, y=num_assignments_correct, color=isomorphic)) +
   geom_point() +
   geom_smooth(method="lm") +
@@ -1703,6 +1811,20 @@ ggplot(data=s2_joined_question_data %>% filter(question=="correspondence_drag_dr
 
 ```{r}
 ggsave("../writing/talks/figures/ex3/cddnac_by_iso_by_ns.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>% 
+         filter(question == "correspondence_drag_drop",
+                isomorphic=="TRUE") %>%
+         inner_join(., explicit_similarity_data %>% select(subject_id, one_task_helpful_for_other)),
+       aes(x=one_task_helpful_for_other, y=num_assignments_correct, color=correspondence_suspect)) +
+  labs(y = "Number of correct room-fractal matches", x="One task helpful for other ratings") +
+  geom_point(position=position_jitter()) +
+  geom_smooth(method="lm") +
+  scale_color_brewer(palette="Set1") +
+  annotate("segment", x=0.5, xend=1.5, y=2.111, yend=2.111, alpha=0.5, linetype=2) +
+  annotate("segment", x=1.5, xend=2.5, y=2.9, yend=2.9, alpha=0.5, linetype=2) 
 ```
 
 
@@ -2436,4 +2558,19 @@ corr_dd_prediction_model = lm(data=es_dist_corr_data_2 %>%
                             isomorphic=="TRUE"),
                      perm_at_min_alignment_with_best_dd_perms ~ min_L1 + avg_L1)
 summary(corr_dd_prediction_model)
+```
+
+```{r}
+cc_prediction_model = glm(data=es_dist_corr_data_2 %>% 
+                     filter(question == "correspondence_identify",
+                            isomorphic=="TRUE") %>%
+                       mutate(correspondence_swaps = correspondence_correct,
+                              best_explicit_mapping_swaps = best_dd_perm_flips,
+                              best_implicit_mapping_swaps = perm_at_min_swaps),
+                     correspondence_swaps ~ best_explicit_mapping_swaps + best_implicit_mapping_swaps,
+                     family="binomial")
+summary(cc_prediction_model)
+```
+```{r}
+stargazer(cc_prediction_model, report="vc*stp", single.row=T)
 ```

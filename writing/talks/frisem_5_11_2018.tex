@@ -42,6 +42,7 @@
 \pgfsetlayers{myback,background,main}
 
 \usetheme[numbering=fraction]{metropolis}
+\newcommand{\semitransp}[2][35]{\color{fg!#1}#2}
 
 \newcommand\blfootnote[1]{%
   \begingroup
@@ -455,20 +456,18 @@ Within fractals:
 \end{frame}
 
 \begin{frame}{Explicit awareness of a relationship between tasks}
-Between tasks:
 \begin{figure}
 \centering
-\begin{subfigure}{0.45\textwidth}
+\begin{subfigure}{0.9\textwidth}
 \includegraphics[width=\textwidth]{figures/correspondence_suspect.png}
-\end{subfigure}~
-\begin{subfigure}{0.45\textwidth}
+\end{subfigure}\\
+\begin{subfigure}{0.9\textwidth}
 \includegraphics[width=\textwidth]{figures/one_task_helpful.png}
 \end{subfigure}
 \end{figure}
 \end{frame}
 
 \begin{frame}{Explicit knowledge about the relationship between tasks}
-Between tasks:
 \begin{figure}
 \centering
 \begin{subfigure}{0.45\textwidth}
@@ -480,16 +479,54 @@ Between tasks:
 \end{figure}
 \end{frame}
 
-\begin{frame}{Arrangement of questions}
-We carefully developed the protocol for when the questions were answered to reduce contamination, e.g.:
+\begin{frame}{Interrogating explicit knowledge}
 \begin{itemize}
-\item<2-> Ask within-task explicit knowledge questions only on one task, and before any between-task questions.
-\item<3-> Organize questions in order of increasing specificity, for example ask if participants thought there was a relationship between the tasks before asking them to identify such a relationship. 
+\item It's difficult to assess whether knowledge is explicit or implicit \citep{Newell2014} -- results can be altered by the details of the probe. 
+\item<2-> We carefully developed our protocol: 
+\begin{itemize}
+\item<3-> We asked within-task explicit knowledge questions only on one task, and before any between-task questions.
+\item<4-> We organized questions in order of increasing specificity, for example we asked if participants thought there was a relationship between the tasks before asking them to identify such a relationship. 
+\end{itemize}
+\item <4-> However, likely needs more work, input is welcome.
+\end{itemize}
+\end{frame}
+
+\begin{frame}<1-5>[label=res_ques]{Research questions}
+\begin{itemize}
+\item Does isomorphism affect task performance? 
+    \only<7->{
+    \begin{itemize}
+    \item[] {\bf Yes.}
+    \end{itemize}}
+\item<2->
+    \only<6>{\semitransp[20]{What affects within-task explicit knowledge?}}%
+    \only<2-5,7->{What affects within-task explicit knowledge?}%
+    \only<8->{
+    \begin{itemize}
+    \item[] {\bf Performance, isomorphism(?)} 
+    \end{itemize}}
+\item<3->
+    \only<6-7>{\semitransp[20]{What affects awareness of the relationship?}}%
+    \only<3-5,8->{What affects awareness of the relationship?}%
+    \only<9->{
+    \begin{itemize}
+    \item[] {\bf Condition, performance} 
+    \end{itemize}}
+\item<4->
+    \only<6-8>{\semitransp[20]{What affects explicit knowledge about the relationship?}}%
+    \only<4-5,9->{What affects explicit knowledge about the relationship?}%
+    \only<10->{}
+\item<5->
+    \only<6-9>{\semitransp[20]{What does awareness affect?}}%
+    \only<5,10->{What does awareness affect?}%
+    \only<11->{}
 \end{itemize}
 \end{frame}
 
 \section{Results}
-\begin{frame}{Subjects in isomorphic condition perform better at fractals}
+
+\againframe<6>{res_ques}
+\begin{frame}[label=iso_bet_B]{Subjects in isomorphic condition perform better at fractals}
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_more_basic_plot_fractal.png}
@@ -520,7 +557,139 @@ We carefully developed the protocol for when the questions were answered to redu
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
+\begin{frame}[standout]
+Isomorphism improves performance on fractals.
+\end{frame}
+
+\againframe<7>{res_ques}
+
+\begin{frame}
+Note: we have much less power to detect these effects, because they're generally based off of one answer per question per subject in only the final session.
+\end{frame}
+
+\begin{frame}{Better performance on task predicts better explicit answers}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.8\textwidth]{figures/drag_drop_example.png}
+} \only<2>{
+    \includegraphics[width=\textwidth]{figures/ex3/nac_by_ns.png}
+}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Isomorphism may influence within-task abstraction}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[height=0.9\textheight]{figures/diagram_selection_example.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso.png}
+}\only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_group.png}
+}\only<4>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_cs.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{Isomorphism may influence within-task abstraction}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[height=0.9\textheight]{figures/drag_drop_example.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/nac_by_iso_by_group.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}[standout]
+Isomorphism may improve explicit knowledge about fractals.
+\end{frame}
+
+\againframe<8>{res_ques} % Awareness
+
+\begin{frame}{Similarity ratings}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/similarity_likert.png}
+}
+\only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/sl_by_iso.png}
+}
+\only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/sl_by_iso_ns.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{Suspect correspondence?}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/correspondence_suspect.png}
+}
+\only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cs_by_iso.png}
+}
+\only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cs_by_iso_group.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{One task helpful for other?}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/one_task_helpful.png}
+}
+\only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/oth_by_iso.png}
+}
+\only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/oth_by_iso_ns.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\againframe<8>{res_ques} % identification 
+
+\begin{frame}{Subjects can explicitly identify analogy better than chance}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[height=0.9\textheight]{figures/corr_drag_drop.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_only_iso.png}
+}
+\end{figure}
+\uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
+\note{< 40 subjects in this, < 20 s in isomorphic condition...}
+\end{frame}
+
+\begin{frame}{Only weakly related to performance}
+\begin{figure}
+\centering
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_only_iso_by_ns.png}
+\end{figure}
+{\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\againframe<9>{res_ques} % Awareness -> ?
+
+\againframe{iso_bet_B}
+
 \begin{frame}{This may not be conscious}
+\only<1-2>{
 \begin{figure}
 \centering
 \only<1>{
@@ -531,6 +700,7 @@ We carefully developed the protocol for when the questions were answered to redu
 }
 \end{figure}
 \vspace{-5pt}
+}
 \uncover<2>{\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
@@ -543,7 +713,7 @@ We carefully developed the protocol for when the questions were answered to redu
 
 \begin{frame}{This may not be conscious}
 \begin{itemize}
-\item Consciousness is tricky to assess \citep{Newell2014}.
+\item Consciousness is tricky to assess.
     \begin{itemize}
     \item<2-> Can be altered by the exact wording of question or type of probe.
     \end{itemize}
@@ -659,95 +829,42 @@ Some subjects may be ``trying'' to transfer in the non-isomorphic condition, and
 
 \section{Results: Explicit knowledge}
 
-\againframe<3>{exp_des}
-
-\begin{frame}
-Note: we have much less power to detect these effects, because they're generally based off of one answer per question per subject in only the final session.
-\end{frame}
-
-\begin{frame}{Better performance on task predicts better explicit answers}
-\begin{figure}
-\centering
-\only<1>{
-    \includegraphics[width=0.8\textwidth]{figures/drag_drop_example.png}
-} \only<2>{
-    \includegraphics[width=\textwidth]{figures/ex3/nac_by_ns.png}
-}
-\end{figure}
-\end{frame}
-
-
-\begin{frame}{Isomorphism may influence within-task abstraction}
-\begin{figure}
-\centering
-\only<1>{
-    \includegraphics[height=0.9\textheight]{figures/diagram_selection_example.png}
-} \only<2>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso.png}
-}\only<3>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_group.png}
-}\only<4>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_cs.png}
-}
-\end{figure}
-\uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
-\end{frame}
-
-\begin{frame}{Isomorphism may influence within-task abstraction}
-\begin{figure}
-\centering
-\only<1>{
-    \includegraphics[height=0.9\textheight]{figures/drag_drop_example.png}
-} \only<2>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/nac_by_iso_by_group.png}
-}
-\end{figure}
-\uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
-\end{frame}
 
 \section{Results: Explicit knowledge about relationship}
 
-\begin{frame}{Subjects can explicitly identify analogy better than chance}
-\begin{figure}
-\centering
+\begin{frame}{Not even trending but interesting}
 \only<1>{
-    \includegraphics[height=0.9\textheight]{figures/corr_drag_drop.png}
-} \only<2>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso.png}
-}\only<3>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso_by_group.png}
-}
-\end{figure}
-\uncover<2->{\scriptsize Error bars represent parametric 95\%-confidence intervals}
-\note{< 40 subjects in this, < 20 s in isomorphic condition...}
-\end{frame}
-
-\begin{frame}{Only weakly related to performance and policy alignment}
-\begin{figure}
+\includegraphics[width=0.9\textwidth]{figures/corr_ident.png}
+} \only<2> {
 \centering
-\only<1>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso_by_ns.png}
-}\only<2>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_iso_minl1.png}
-}
-\end{figure}
-\uncover<2->{\scriptsize Error bars represent parametric 95\%-confidence intervals}
-\end{frame}
-
-\begin{frame}{Similarity ratings}
-\begin{figure}
+\resizebox{0.66\textwidth}{!}{%
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Wed, May 09, 2018 - 06:05:19 PM
 \centering
-\only<1>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/sl_by_iso_ns.png}
-}\only<2>{
-    \includegraphics[width=0.9\textwidth]{figures/ex3/sl_by_iso_minl1.png}
-}
-\end{figure}
-{\scriptsize Error bars represent parametric 95\%-confidence intervals}
-\end{frame}
-
-\begin{frame}
-Slides TODO: but policy alignment does not seem to predict anything explicit very strongly. 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & Correspondence swaps actions \\ 
+\hline \\[-1.8ex] 
+ Best explicit mapping swaps actions & $-$0.032 (1.172) \\ 
+  & t = $-$0.027 \\ 
+  & p = 0.979 \\ 
+ Best implicit mapping swaps actions & 1.994 (1.386) \\ 
+  & t = 1.438 \\ 
+  & p = 0.151 \\ 
+ Intercept & 0.135 (0.827) \\ 
+  & t = 0.164 \\ 
+  & p = 0.870 \\ 
+ \hline \\[-1.8ex] 
+Observations & 17 \\ 
+Log Likelihood & $-$9.037 \\ 
+Akaike Inf. Crit. & 24.075 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular}}}
 \end{frame}
 
 \begin{frame}{Conclusions}
@@ -816,5 +933,49 @@ Slides TODO: but policy alignment does not seem to predict anything explicit ver
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_individual_curve_plot.png}
 \end{figure}
 {\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{Number of steps needed on fractal trials}
+\begin{center}
+\resizebox{!}{0.45\textheight}{%
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Wed, May 09, 2018 - 06:48:49 PM
+\begin{tabular}{@{\extracolsep{5pt}}lcc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\\[-1.8ex] & (1) & (2)\\ 
+\hline \\[-1.8ex] 
+ isomorphic & $-$0.871$^{***}$ (0.321) & $-$0.872$^{**}$ (0.341) \\ 
+  & t = $-$2.718 & t = $-$2.556 \\ 
+  correspondence\_suspectYes &  & 0.013 (0.237) \\ 
+  &  & t = 0.054 \\ 
+  session\_c & $-$0.559$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) \\ 
+  & t = $-$6.744 & t = $-$6.744 \\ 
+  I(session\_c$\hat{\mkern6mu}$2) & 0.211$^{**}$ (0.092) & 0.211$^{**}$ (0.092) \\ 
+  & t = 2.301 & t = 2.301 \\ 
+  structureCycling & 0.364 (0.321) & 0.367 (0.347) \\ 
+  & t = 1.137 & t = 1.056 \\ 
+  trial\_index\_by\_type\_z & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) \\ 
+  & t = $-$8.033 & t = $-$8.032 \\ 
+  I(trial\_index\_by\_type\_z$\hat{\mkern6mu}$2) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) \\ 
+  & t = 5.450 & t = 5.450 \\ 
+  avg\_rt\_on\_trial & $-$0.567$^{***}$ (0.030) & $-$0.567$^{***}$ (0.030) \\ 
+  & t = $-$18.937 & t = $-$18.914 \\ 
+  isomorphicTRUE:correspondence\_suspectYes &  & $-$0.018 (0.340) \\ 
+  &  & t = $-$0.054 \\ 
+  Constant & 4.996$^{***}$ (0.294) & 4.997$^{***}$ (0.303) \\ 
+  & t = 16.992 & t = 16.517 \\ 
+ \hline \\[-1.8ex] 
+Observations & 8,350 & 8,350 \\ 
+Log Likelihood & $-$23,336.530 & $-$23,337.500 \\ 
+Akaike Inf. Crit. & 46,697.050 & 46,703.000 \\ 
+Bayesian Inf. Crit. & 46,781.410 & 46,801.420 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+} 
+\end{center}
+
 \end{frame}
 \end{document}
