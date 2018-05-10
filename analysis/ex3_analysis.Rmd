@@ -796,6 +796,10 @@ summary(ns_time_dependent_model_fractal)
 ```
 
 ```{r}
+
+```
+
+```{r}
 code_when_noticed = function(response) {
   if(is.na(response)) {
     return(NA)
@@ -855,7 +859,6 @@ contrasts(es_joined_ns_data$correspondence_suspect) = cbind(Yes=c(-1, 1)) # effe
 ns_es_time_dependent_model_1_fractal = lmer(num_steps_needed~ isomorphic * ( correspondence_suspect) + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
 summary(ns_es_time_dependent_model_1_fractal)
 contrasts(es_joined_ns_data$correspondence_suspect) = cbind(Yes=c(0, 1))
-stargazer(ns_es_time_dependent_model_1_fractal, report="vc*stp", single.row=T)
 ```
 
 ```{r}
@@ -865,13 +868,19 @@ summary(ns_es_time_dependent_model_2_fractal)
 
 ```{r}
 contrasts(es_joined_ns_data$which_condition) = cbind(Same=c(-1, 1)) # effect code 
-ns_es_time_dependent_model_3_fractal = lmer(num_steps_needed~ isomorphic * which_condition + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
-summary(ns_es_time_dependent_model_3_fractal)
+ns_es_time_dependent_model_3b_fractal = lmer(num_steps_needed~ isomorphic * which_condition + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
+summary(ns_es_time_dependent_model_3b_fractal)
 ```
 ```{r}
 ns_es_time_dependent_model_3_fractal = lmer(num_steps_needed~ isomorphic * I(scale(as.numeric(one_task_helpful_for_other))) + session_c + I(session_c^2)+ structure  + trial_index_by_type_z + I(trial_index_by_type_z^2)  + avg_rt_on_trial + (1 + session_c | subject_id), data=es_joined_ns_data  %>% filter(trial_type == "fractal"))
 summary(ns_es_time_dependent_model_3_fractal)
 ```
+
+```{r}
+
+stargazer(ns_time_dependent_model_fractal, ns_es_time_dependent_model_1_fractal, ns_es_time_dependent_model_0_fractal, ns_es_time_dependent_model_2_fractal, ns_es_time_dependent_model_3_fractal, report="vc*st", single.row=T, float=F)
+```
+
 
 ```{r}
 es_ns_summarized_data = es_joined_ns_data %>%
@@ -933,6 +942,135 @@ number of people in each condition
 xtabs( ~  isomorphic + correspondence_suspect + group, data = es_ns_summarized_data %>% filter(session_c == 1, trial_type == "fractal"))
 ```
 
+```{r}
+es_ns_fully_summarized_data = es_joined_ns_data %>%
+  filter(trial_type=="fractal") %>%
+  mutate(oth_split=as.numeric(one_task_helpful_for_other) >= 2) %>%
+  group_by(isomorphic, session, session_c, oth_split) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se,
+         is_isomorphic=ifelse(isomorphic, "Isomorphic", "Non-isomorphic"),
+         oth_helpful = factor(oth_split, levels=c(F,T), labels=c("Not helpful", "Helpful"))) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=oth_split)) +
+#  geom_bar(stat="identity",position="dodge") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
+  scale_color_brewer(palette="Set1") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  guides(color=guide_legend(title = "Helpful?")) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ is_isomorphic)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_oth.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  guides(color=guide_legend(title = "Isomorphic")) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ oth_helpful)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_oth_T.png", width=7, height=5)
+```
+
+```{r}
+es_ns_fully_summarized_data = es_joined_ns_data %>%
+  filter(trial_type=="fractal") %>%
+  mutate(sl_split=as.numeric(similarity_likert) >= 2) %>%
+  group_by(isomorphic, session, session_c, sl_split) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se,
+         is_isomorphic=ifelse(isomorphic, "Isomorphic", "Non-isomorphic"),
+         is_similar=ifelse(sl_split, "Similar", "Not very similar")) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=sl_split)) +
+#  geom_bar(stat="identity",position="dodge") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
+  scale_color_brewer(palette="Set1") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  guides(color=guide_legend(title = "Similar?")) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ is_isomorphic)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_sl.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  guides(color=guide_legend(title = "Isomorphic")) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ is_similar)
+```
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_sl_T.png", width=7, height=5)
+```
+
+```{r}
+es_ns_fully_summarized_data = es_joined_ns_data %>%
+  filter(trial_type=="fractal") %>%
+  group_by(isomorphic, session, session_c, ever_noticed) %>%
+  summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
+            num_steps_needed=mean(num_steps_needed)) %>%
+  mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
+         num_steps_needed_95ci_upper=num_steps_needed+1.96*num_steps_needed_se,
+         is_isomorphic=ifelse(isomorphic, "Isomorphic", "Non-isomorphic")) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(data=es_ns_fully_summarized_data, aes(x=session_c+2, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  labs(x="Session", y = "Average number of steps needed") +
+  scale_x_continuous(breaks=1:3) +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  guides(color=guide_legend(title = "Isomorphic")) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_wrap(~ ever_noticed)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_by_en.png", width=7, height=5)
+```
+
 # alternation_analyses
 
 ```{r}
@@ -972,7 +1110,7 @@ ggplot(data=alternation_data %>%
   geom_line(size=1.2) +
   geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), size=1.2, width=0.25) +
   scale_color_brewer(palette="Set2") +
-  labs(x="Session", y="% alternating actions (fractal_trials)") +
+  labs(x="Session", y="% alternating actions (fractal trials)") +
   scale_x_continuous(breaks=1:3) +
   ylim(0,105)+
   facet_wrap(~structure)
@@ -1039,9 +1177,7 @@ ggplot(data=alternation_data %>%
 ggsave("../writing/talks/figures/ex3/cyc_door_by_group.png", width=7, height=5)
 ```
 
-
 # dumping perf for encouragement
-
 
 ```{r}
 perf_data = num_steps_per_trial_data %>%
@@ -1052,6 +1188,7 @@ perf_data = num_steps_per_trial_data %>%
   do(data.frame(t(quantile(.$num_steps_needed, probs=seq(0,1, 0.1))))) %>%
   ungroup()
 ```
+
 ```{r}
 #num_steps_per_trial_data %>%
 #  group_by(group, start, goal) %>% 
@@ -1120,7 +1257,9 @@ s2_joined_question_data = question_data %>%
                select(-c(metric, trial_type, group)) %>%
                spread(condition, outcome)) %>%
   mutate(fractal_Flipping=fractal_hexagon_bi,
-         structure=ifelse(fractal_Flipping, "Flipping", "Cycling"))
+         structure=ifelse(fractal_Flipping, "Flipping", "Cycling")) %>%
+  inner_join(.,
+             explicit_similarity_data)
 ```
 
 ```{r}
@@ -1139,8 +1278,7 @@ s2_joined_question_data = s2_joined_question_data %>%
 ```{r}
 s2_joined_question_data = s2_joined_question_data %>%
   mutate(corrected_nac = ifelse(question != "drag_drop_on_diagram", NA,
-                                ifelse(fractal_hexagon_bi, num_assignments_correct-chance_alignments_hb, num_assignments_correct-chance_alignments_ht))) %>%
-  inner_join(explicit_similarity_data %>% select(subject_id, correspondence_suspect))
+                                ifelse(fractal_hexagon_bi, num_assignments_correct-chance_alignments_hb, num_assignments_correct-chance_alignments_ht))) 
 ```
 
 ```{r}
@@ -1187,6 +1325,50 @@ ggplot(data=s2_joined_question_data %>%
 ```
 ```{r}
 ggsave("../writing/talks/figures/ex3/nac_by_iso.png", width=7, height=5)
+```
+
+```{r}
+num_dd_assignments_correct_es_model = lm(corrected_nac ~ isomorphic  * (correspondence_suspect + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_es_model)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram") %>%
+         group_by(isomorphic, correspondence_suspect, structure) %>% 
+         summarize(nac = mean(num_assignments_correct)*100/6, nac_se=sd(num_assignments_correct*100/6)/sqrt(n()),
+                   ci_lower=nac - 1.96*nac_se, ci_upper=nac + 1.96*nac_se) %>%
+         ungroup(),
+       aes(x=isomorphic, y=nac, fill=correspondence_suspect))+
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
+  geom_hline(aes(yintercept=100/6 *2.505), linetype=2, alpha=0.5)+
+  labs(y="% of fractals correctly assigned") +
+  scale_fill_brewer(palette="Set1") + 
+  facet_wrap(~structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/nac_by_iso_group_cs.png", width=7, height=5)
+```
+
+```{r}
+num_dd_assignments_correct_es_model = lm(corrected_nac ~ isomorphic  * (scale(as.numeric(one_task_helpful_for_other), scale=F) + structure) + avg_num_steps_z, data=s2_joined_question_data %>% filter(question=="drag_drop_on_diagram"))
+summary(num_dd_assignments_correct_es_model)
+```
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram"),
+         aes(x=as.numeric(one_task_helpful_for_other), y=num_assignments_correct * 100/6, color=isomorphic))+
+  geom_point(position=position_jitter(width=0.25, height=5)) +
+  geom_smooth(method="lm") +
+  labs(x="One task helpful for other rating", y="% of fractals correctly assigned") +
+  scale_color_brewer(palette="Set2") + 
+  facet_wrap(~structure)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/nac_by_iso_group_oth.png", width=7, height=5)
 ```
 
 
@@ -1402,6 +1584,11 @@ ggsave("../writing/talks/figures/ex3/ds_by_iso_by_group.png", width=7, height=5)
 ```
 
 ```{r}
+ds_correct_model = glm(ds_correct ~ isomorphic * as.numeric(similarity_likert), family="binomial", data=s2_joined_question_data)
+summary(ds_correct_model)
+```
+
+```{r}
 coefficient_getter = function(data, indices) {
   ds_correct_model = glm(ds_correct ~ isomorphic * correspondence_suspect, family="binomial", data=data[indices,])
   return(c(ds_correct_model$coefficients[1], #noniso, nosus
@@ -1413,7 +1600,8 @@ coefficient_getter = function(data, indices) {
 ```
 
 ```{r}
-bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"), statistic=coefficient_getter, R=5000)
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"),
+                         statistic=coefficient_getter, R=5000)
 ```
 
 ```{r}
@@ -1438,6 +1626,7 @@ contrasts(ds_ci_data$isomorphic) = contrasts(s2_joined_question_data$isomorphic)
 ```{r}
 ggplot(data=s2_joined_question_data %>%
          filter(!is.na(ds_correct)) %>%
+         mutate(isomorphic=factor(isomorphic)) %>%
          group_by(isomorphic, correspondence_suspect) %>%
          summarize(pct_correct=mean(ds_correct)) %>%
          ungroup() %>%
@@ -1455,6 +1644,100 @@ ggplot(data=s2_joined_question_data %>%
 ggsave("../writing/talks/figures/ex3/ds_by_iso_by_cs.png", width=7, height=5)
 ```
 
+
+```{r}
+coefficient_getter = function(data, indices) {
+  ds_correct_model = glm(ds_correct ~ isomorphic * ever_noticed, family="binomial", data=data[indices,])
+  return(c(ds_correct_model$coefficients[1], #noniso, nosus
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[2], #iso, nosus
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[3], #noniso, yessus
+           ds_correct_model$coefficients[1] + ds_correct_model$coefficients[2] +ds_correct_model$coefficients[3] + ds_correct_model$coefficients[4] #iso, yessus
+           ))
+}
+```
+
+```{r}
+bootstrap_results = boot(data=s2_joined_question_data %>% filter(question=="diagram_selection"),
+                         statistic=coefficient_getter, R=5000)
+```
+
+```{r}
+ds_boot_noniso_nosus = boot.ci(bootstrap_results, type="perc", index=1) 
+ds_boot_iso_nosus = boot.ci(bootstrap_results, type="perc", index=2) 
+ds_boot_noniso_yessus = boot.ci(bootstrap_results, type="perc", index=3) 
+ds_boot_iso_yessus = boot.ci(bootstrap_results, type="perc", index=4) 
+ds_ci95_noniso_nosus =sigmoid(ds_boot_noniso_nosus$percent[4:5])
+ds_ci95_iso_nosus = sigmoid(ds_boot_iso_nosus$percent[4:5])
+ds_ci95_noniso_yessus = sigmoid(ds_boot_noniso_yessus$percent[4:5])
+ds_ci95_iso_yessus = sigmoid(ds_boot_iso_yessus$percent[4:5])
+
+ds_ci_data = data.frame(isomorphic=factor(c(F, T, F, T)), ever_noticed=factor(rep(c("No", "Yes"), each=2)),
+                        ci95_lower = c(ds_ci95_noniso_nosus[1], ds_ci95_iso_nosus[1], 
+                                       ds_ci95_noniso_yessus[1], ds_ci95_iso_yessus[1]),
+                        ci95_upper = c(ds_ci95_noniso_nosus[2], ds_ci95_iso_nosus[2], 
+                                       ds_ci95_noniso_yessus[2], ds_ci95_iso_yessus[2]))
+
+contrasts(ds_ci_data$isomorphic) = contrasts(s2_joined_question_data$isomorphic)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)) %>%
+         mutate(isomorphic=factor(isomorphic)) %>%
+         group_by(isomorphic, ever_noticed) %>%
+         summarize(pct_correct=mean(ds_correct)) %>%
+         ungroup() %>%
+         mutate(ever_noticed=factor(ever_noticed, levels=c(F, T), labels=c("No", "Yes"))) %>%
+         inner_join(., ds_ci_data),
+       aes(x=isomorphic, y = pct_correct, fill=ever_noticed)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_hline(aes(yintercept=0.5), linetype=2, alpha=0.5) +
+  geom_errorbar(aes(ymin=ci95_lower, ymax=ci95_upper), width=0.25, position=position_dodge(width=0.9)) +
+  ylim(0, 1) +
+  labs(y="% correctly identified structure") +
+  scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso_by_en.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)) %>%
+         mutate(isomorphic=factor(isomorphic)),
+       aes(x=as.numeric(similarity_likert), y = 1*ds_correct, color=isomorphic)) +
+  geom_point(position=position_jitter(width=0.2, height=0.2)) +
+  geom_smooth(method="glm", method.args=list(family="binomial")) +
+  labs(y="Correctly identified structure?", x="Similarity rating") +
+  scale_color_brewer(palette="Set2") +
+  facet_wrap(~isomorphic)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso_by_sl.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(!is.na(ds_correct)) %>%
+         mutate(isomorphic=factor(isomorphic)),
+       aes(x=as.numeric(one_task_helpful_for_other), y = 1*ds_correct, color=isomorphic)) +
+  geom_point(position=position_jitter(width=0.2, height=0.2)) +
+  geom_smooth(method="glm", method.args=list(family="binomial")) +
+  labs(y="Correctly identified structure?", x="One task helpful for other rating") +
+  scale_color_brewer(palette="Set2") +
+  facet_wrap(~isomorphic)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ds_by_iso_by_oth.png", width=7, height=5)
+```
+
+```{r}
+ds_correct_model = glm(ds_correct ~ isomorphic * scale(as.numeric(one_task_helpful_for_other)), family="binomial", data=s2_joined_question_data)
+summary(ds_correct_model)
+```
 
 # aggregating
 
@@ -1559,6 +1842,7 @@ ggplot(s2_joined_question_data %>%
 ```{r}
 ggsave("../writing/talks/figures/ex3/cs_by_iso.png", width=7, height=5)
 ```
+
 ```{r}
 ggplot(s2_joined_question_data %>%
          filter(question == "correspondence_suspect") %>%

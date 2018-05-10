@@ -471,10 +471,10 @@ Within fractals:
 \begin{figure}
 \centering
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{figures/corr_ident.png}
+\includegraphics[width=\textwidth]{figures/corr_drag_drop.png}
 \end{subfigure}~
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{figures/corr_drag_drop.png}
+\includegraphics[width=\textwidth]{figures/corr_ident.png}
 \end{subfigure}
 \end{figure}
 \end{frame}
@@ -526,12 +526,40 @@ Within fractals:
 \section{Results}
 
 \againframe<6>{res_ques}
-\begin{frame}[label=iso_bet_B]{Subjects in isomorphic condition perform better at fractals}
+
+\begin{frame}<1>[label=iso_bet_B]{Subjects in isomorphic condition perform better at fractals}
 \begin{figure}
 \centering
+\only<1>{
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_more_basic_plot_fractal.png}
+}\only<2>{
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_correspondence_suspect.png}
+}\only<3> {
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_en.png}
+}\only<4> {
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_sl.png}
+} \only<5> {
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_oth.png}
+} \only<6> {
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_oth_T.png}
+}
 \end{figure}
 {\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\begin{frame}{This may not be conscious}
+\begin{itemize}
+\item Consciousness is tricky to assess.
+    \begin{itemize}
+    \item<2-> Can be altered by the exact wording of question or type of probe.
+    \end{itemize}
+\item<3-> For what it's worth, regressors other than suspecting correspondence give similar results, e.g.:
+    \begin{itemize}
+    \item<4-> Likert ratings of perception that one task was helpful for the other. 
+    \item<5-> Likert ratings of similarity between the experiments.
+    \item<6-> Binary split of reports of when they noticed any relationship between the experiments (ever noticed/never noticed).
+    \end{itemize}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Subjects in isomorphic condition perform better at fractals}
@@ -540,13 +568,6 @@ Within fractals:
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_basic_plot_fractal.png}
 \end{figure}
 {\scriptsize Error bars represent 95\%-confidence intervals}
-\end{frame}
-
-\begin{frame}{Subjects in isomorphic condition perform better at fractals}
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{figures/ex3/ns_stats.png}
-\end{figure}
 \end{frame}
 
 \begin{frame}{No effect on door performance}
@@ -564,7 +585,7 @@ Isomorphism improves performance on fractals.
 \againframe<7>{res_ques}
 
 \begin{frame}
-Note: we have much less power to detect these effects, because they're generally based off of one answer per question per subject in only the final session.
+Note: we have much less power to detect explicit effects, because they're generally based off of one answer per question per subject in only the final session.
 \end{frame}
 
 \begin{frame}{Better performance on task predicts better explicit answers}
@@ -579,7 +600,7 @@ Note: we have much less power to detect these effects, because they're generally
 \end{frame}
 
 
-\begin{frame}{Isomorphism may influence within-task abstraction}
+\begin{frame}<-3>[label=iso_within_task]{Isomorphism may influence within-task abstraction}
 \begin{figure}
 \centering
 \only<1>{
@@ -590,7 +611,12 @@ Note: we have much less power to detect these effects, because they're generally
     \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_group.png}
 }\only<4>{
     \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_cs.png}
+} \only<5> {
+    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_en.png}
+} \only<6> {
+    \includegraphics[width=0.9\textwidth]{figures/ex3/ds_by_iso_by_oth.png}
 }
+
 \end{figure}
 \uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
 \end{frame}
@@ -661,7 +687,7 @@ Isomorphism may improve explicit knowledge about fractals.
 \uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\againframe<8>{res_ques} % identification 
+\againframe<9>{res_ques} % identification 
 
 \begin{frame}{Subjects can explicitly identify analogy better than chance}
 \begin{figure}
@@ -684,53 +710,35 @@ Isomorphism may improve explicit knowledge about fractals.
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\againframe<9>{res_ques} % Awareness -> ?
+\againframe<10>{res_ques} % Awareness -> ?
 
-\againframe{iso_bet_B}
-
-\begin{frame}{This may not be conscious}
-\only<1-2>{
+\begin{frame}{Assessing awareness}
 \begin{figure}
 \centering
-\only<1>{
-\includegraphics[width=0.9\textwidth]{figures/correspondence_suspect.png}
-}
-\only<2->{
-\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_correspondence_suspect.png}
-}
-\end{figure}
-\vspace{-5pt}
-}
-\uncover<2>{\scriptsize Error bars represent 95\%-confidence intervals}
-\end{frame}
-
-\begin{frame}{This may not be conscious}
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{figures/ex3/ns_by_cs_stats.png}
+\includegraphics[width=0.7\textwidth]{figures/similarity_likert.png}\\
+\includegraphics[width=0.7\textwidth]{figures/correspondence_suspect.png}\\
+\includegraphics[width=0.7\textwidth]{figures/when_noticed.png}
 \end{figure}
 \end{frame}
 
-\begin{frame}{This may not be conscious}
+\againframe<1-6>{iso_bet_B}
+
+\againframe<2,4->{iso_within_task}
+
+\begin{frame}{What's up with ``one task helpful for other''}
+\begin{figure}
+\centering
+\includegraphics[width=0.7\textwidth]{figures/one_task_helpful.png}
+\end{figure}
+A few things to note:
 \begin{itemize}
-\item Consciousness is tricky to assess.
-    \begin{itemize}
-    \item<2-> Can be altered by the exact wording of question or type of probe.
-    \end{itemize}
-\item<3-> For what it's worth, regressors other than suspecting correspondence give similar results, e.g.:
-    \begin{itemize}
-    \item<4-> Likert ratings of perception that one task was helpful for the other. 
-    \item<5-> Likert ratings of similarity between the experiments.
-    \item<6-> Binary split of reports of when they noticed any relationship between the experiments (ever noticed/never noticed).
-    \end{itemize}
+\item<2-> This question was asked \textbf{after} the similarity, suspect, and noticed questions, \textbf{and} immediately after asking subjects to describe a correspondence.
+\item<3-> Isomorphism still significantly reduced average number of steps even among those who gave low ratings (though the effect was smaller).
 \end{itemize}
 \end{frame}
 
 \begin{frame}[standout]
-Evidence of transfer to second task. \par
-\uncover<2-> {
-May not require consciousness.
-}
+Transfer between tasks may not require awareness, but further exploration is necessary.
 \end{frame}
 
 \section{Results: Policies}
@@ -811,26 +819,22 @@ May not require consciousness.
 \note{Some subjects in the *non*-isomorphic condition appear to be trying to transfer, and doing worse because of it!}
 \end{frame}
 
-\begin{frame}{Not a consciousness effect?}
-\begin{figure}
-\centering
-\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_minl1_iso_cs.png}
-\end{figure}
-{\scriptsize Error bars represent 95\%-confidence intervals}
-\end{frame}
+%%\begin{frame}{Not a consciousness effect?}
+%%\begin{figure}
+%%\centering
+%%\includegraphics[width=0.9\textwidth]{figures/ex3/ns_by_minl1_iso_cs.png}
+%%\end{figure}
+%%{\scriptsize Error bars represent 95\%-confidence intervals}
+%%\end{frame}
+%%
+%%\begin{frame}[standout]
+%%Policy alignment strongly affects performance. \par
+%%\uncover<2->{
+%%\vspace{1em}
+%%Some subjects may be ``trying'' to transfer in the non-isomorphic condition, and actually be harmed by it!
+%%}
+%%\end{frame}
 
-\begin{frame}[standout]
-Policy alignment strongly affects performance. \par
-\uncover<2->{
-\vspace{1em}
-Some subjects may be ``trying'' to transfer in the non-isomorphic condition, and actually be harmed by it!
-}
-\end{frame}
-
-\section{Results: Explicit knowledge}
-
-
-\section{Results: Explicit knowledge about relationship}
 
 \begin{frame}{Not even trending but interesting}
 \only<1>{
@@ -870,9 +874,8 @@ Akaike Inf. Crit. & 24.075 \\
 \begin{frame}{Conclusions}
 \begin{itemize}
 \item We see evidence of slow transfer between tasks.
-\item<2-> This slow transfer may be independent of consciousness.
-\item<3-> This slow transfer of knowledge affects within-task explicit knowledge. 
-\item<4-> However, the processes for implicit and explicit mapping between tasks may be at least partially dissociable. 
+\item<2-> There are also benefits of this slow transfer to explicit within-task knowledge. 
+\item<3-> This transfer may not require awareness. 
 \end{itemize}
 \end{frame}
 
@@ -882,7 +885,7 @@ Akaike Inf. Crit. & 24.075 \\
 \item<2-> Verify that direction of transfer is caused by order and not e.g. grounding
 \item<3-> Distractor tasks between
 \item<4-> Integrating abstractions (either taught or interrogated) earlier on one or both tasks
-\item<5-> Role of sleep in abstraction
+\item<5-> Try to model this with a neural network
 \end{itemize}
 \end{frame}
 
@@ -935,47 +938,111 @@ Akaike Inf. Crit. & 24.075 \\
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\begin{frame}{Number of steps needed on fractal trials}
+\begin{frame}{Models: Number of steps needed on fractal trials}
 \begin{center}
 \resizebox{!}{0.45\textheight}{%
 % Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Wed, May 09, 2018 - 06:48:49 PM
-\begin{tabular}{@{\extracolsep{5pt}}lcc} 
+% Date and time: Wed, May 09, 2018 - 07:14:49 PM
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
-\\[-1.8ex] & (1) & (2)\\ 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & \multicolumn{3}{c}{num\_steps\_needed} \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- isomorphic & $-$0.871$^{***}$ (0.321) & $-$0.872$^{**}$ (0.341) \\ 
-  & t = $-$2.718 & t = $-$2.556 \\ 
-  correspondence\_suspectYes &  & 0.013 (0.237) \\ 
-  &  & t = 0.054 \\ 
-  session\_c & $-$0.559$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) \\ 
-  & t = $-$6.744 & t = $-$6.744 \\ 
-  I(session\_c$\hat{\mkern6mu}$2) & 0.211$^{**}$ (0.092) & 0.211$^{**}$ (0.092) \\ 
-  & t = 2.301 & t = 2.301 \\ 
-  structureCycling & 0.364 (0.321) & 0.367 (0.347) \\ 
-  & t = 1.137 & t = 1.056 \\ 
-  trial\_index\_by\_type\_z & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) \\ 
-  & t = $-$8.033 & t = $-$8.032 \\ 
-  I(trial\_index\_by\_type\_z$\hat{\mkern6mu}$2) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) \\ 
-  & t = 5.450 & t = 5.450 \\ 
-  avg\_rt\_on\_trial & $-$0.567$^{***}$ (0.030) & $-$0.567$^{***}$ (0.030) \\ 
-  & t = $-$18.937 & t = $-$18.914 \\ 
-  isomorphicTRUE:correspondence\_suspectYes &  & $-$0.018 (0.340) \\ 
-  &  & t = $-$0.054 \\ 
-  Constant & 4.996$^{***}$ (0.294) & 4.997$^{***}$ (0.303) \\ 
-  & t = 16.992 & t = 16.517 \\ 
+ isomorphic & $-$0.871$^{***}$ (0.321) & $-$0.872$^{**}$ (0.341) & $-$0.799$^{**}$ (0.344) \\ 
+  & t = $-$2.718 & t = $-$2.556 & t = $-$2.321 \\ 
+  correspondence\_suspectYes &  & 0.013 (0.237) &  \\ 
+  &  & t = 0.054 &  \\ 
+  I(scale(as.numeric(one\_task\_helpful\_for\_other))) &  &  & $-$0.233 (0.308) \\ 
+  &  &  & t = $-$0.756 \\ 
+  session\_c & $-$0.559$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) \\ 
+  & t = $-$6.744 & t = $-$6.744 & t = $-$6.743 \\ 
+  I(session\_c$\hat{\mkern6mu}$2) & 0.211$^{**}$ (0.092) & 0.211$^{**}$ (0.092) & 0.210$^{**}$ (0.092) \\ 
+  & t = 2.301 & t = 2.301 & t = 2.300 \\ 
+  structureCycling & 0.364 (0.321) & 0.367 (0.347) & 0.240 (0.375) \\ 
+  & t = 1.137 & t = 1.056 & t = 0.639 \\ 
+  trial\_index\_by\_type\_z & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) \\ 
+  & t = $-$8.033 & t = $-$8.032 & t = $-$8.034 \\ 
+  I(trial\_index\_by\_type\_z$\hat{\mkern6mu}$2) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) \\ 
+  & t = 5.450 & t = 5.450 & t = 5.450 \\ 
+  avg\_rt\_on\_trial & $-$0.567$^{***}$ (0.030) & $-$0.567$^{***}$ (0.030) & $-$0.568$^{***}$ (0.030) \\ 
+  & t = $-$18.937 & t = $-$18.914 & t = $-$18.918 \\ 
+  isomorphicTRUE:correspondence\_suspectYes &  & $-$0.018 (0.340) &  \\ 
+  &  & t = $-$0.054 &  \\ 
+  isomorphicTRUE:I(scale(as.numeric(one\_task\_helpful\_for\_other))) &  &  & 0.168 (0.356) \\ 
+  &  &  & t = 0.473 \\ 
+  Constant & 4.996$^{***}$ (0.294) & 4.997$^{***}$ (0.303) & 5.002$^{***}$ (0.303) \\ 
+  & t = 16.992 & t = 16.517 & t = 16.514 \\ 
  \hline \\[-1.8ex] 
-Observations & 8,350 & 8,350 \\ 
-Log Likelihood & $-$23,336.530 & $-$23,337.500 \\ 
-Akaike Inf. Crit. & 46,697.050 & 46,703.000 \\ 
-Bayesian Inf. Crit. & 46,781.410 & 46,801.420 \\ 
+Observations & 8,350 & 8,350 & 8,350 \\ 
+Log Likelihood & $-$23,336.530 & $-$23,337.500 & $-$23,337.100 \\ 
+Akaike Inf. Crit. & 46,697.050 & 46,703.000 & 46,702.210 \\ 
+Bayesian Inf. Crit. & 46,781.410 & 46,801.420 & 46,800.620 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+} 
+\end{center}
+
+\end{frame}
+\begin{frame}{Even more models: Number of steps needed on fractal trials}
+\begin{center}
+\resizebox{!}{0.45\textheight}{%
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Wed, May 09, 2018 - 07:40:00 PM
+\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+\hline \\[-1.8ex] 
+ isomorphic & $-$0.871$^{***}$ (0.321) & $-$0.872$^{**}$ (0.341) & $-$0.870$^{**}$ (0.340) & $-$0.991$^{***}$ (0.342) & $-$0.799$^{**}$ (0.344) \\ 
+  & t = $-$2.718 & t = $-$2.556 & t = $-$2.555 & t = $-$2.900 & t = $-$2.321 \\ 
+  correspondence\_suspectYes &  & 0.013 (0.237) &  &  &  \\ 
+  &  & t = 0.054 &  &  &  \\ 
+  ever\_noticedtrue &  &  & $-$0.253 (0.227) &  &  \\ 
+  &  &  & t = $-$1.113 &  &  \\ 
+  I(as.numeric(similarity\_likert) - 2) &  &  &  & 0.528 (0.403) &  \\ 
+  &  &  &  & t = 1.309 &  \\ 
+  I(scale(as.numeric(one\_task\_helpful\_for\_other))) &  &  &  &  & $-$0.233 (0.308) \\ 
+  &  &  &  &  & t = $-$0.756 \\ 
+  session\_c & $-$0.559$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) & $-$0.558$^{***}$ (0.083) & $-$0.559$^{***}$ (0.083) \\ 
+  & t = $-$6.744 & t = $-$6.744 & t = $-$6.740 & t = $-$6.738 & t = $-$6.743 \\ 
+  I(session\_c$\hat{\mkern6mu}$2) & 0.211$^{**}$ (0.092) & 0.211$^{**}$ (0.092) & 0.210$^{**}$ (0.092) & 0.211$^{**}$ (0.092) & 0.210$^{**}$ (0.092) \\ 
+  & t = 2.301 & t = 2.301 & t = 2.292 & t = 2.304 & t = 2.300 \\ 
+  structureCycling & 0.364 (0.321) & 0.367 (0.347) & 0.301 (0.333) & 0.446 (0.329) & 0.240 (0.375) \\ 
+  & t = 1.137 & t = 1.056 & t = 0.905 & t = 1.356 & t = 0.639 \\ 
+  trial\_index\_by\_type\_z & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) & $-$0.357$^{***}$ (0.044) \\ 
+  & t = $-$8.033 & t = $-$8.032 & t = $-$8.038 & t = $-$8.041 & t = $-$8.034 \\ 
+  I(trial\_index\_by\_type\_z$\hat{\mkern6mu}$2) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) & 0.271$^{***}$ (0.050) \\ 
+  & t = 5.450 & t = 5.450 & t = 5.452 & t = 5.453 & t = 5.450 \\ 
+  avg\_rt\_on\_trial & $-$0.567$^{***}$ (0.030) & $-$0.567$^{***}$ (0.030) & $-$0.568$^{***}$ (0.030) & $-$0.569$^{***}$ (0.030) & $-$0.568$^{***}$ (0.030) \\ 
+  & t = $-$18.937 & t = $-$18.914 & t = $-$18.959 & t = $-$18.964 & t = $-$18.918 \\ 
+  isomorphicTRUE:correspondence\_suspectYes &  & $-$0.018 (0.340) &  &  &  \\ 
+  &  & t = $-$0.054 &  &  &  \\ 
+  isomorphicTRUE:ever\_noticedtrue &  &  & 0.176 (0.341) &  &  \\ 
+  &  &  & t = 0.517 &  &  \\ 
+  isomorphicTRUE:I(as.numeric(similarity\_likert) - 2) &  &  &  & $-$0.528 (0.441) &  \\ 
+  &  &  &  & t = $-$1.196 &  \\ 
+  isomorphicTRUE:I(scale(as.numeric(one\_task\_helpful\_for\_other))) &  &  &  &  & 0.168 (0.356) \\ 
+  &  &  &  &  & t = 0.473 \\ 
+  Constant & 4.996$^{***}$ (0.294) & 4.997$^{***}$ (0.303) & 5.059$^{***}$ (0.302) & 5.080$^{***}$ (0.302) & 5.002$^{***}$ (0.303) \\ 
+  & t = 16.992 & t = 16.517 & t = 16.757 & t = 16.843 & t = 16.514 \\ 
+ \hline \\[-1.8ex] 
+Observations & 8,350 & 8,350 & 8,350 & 8,350 & 8,350 \\ 
+Log Likelihood & $-$23,336.530 & $-$23,337.500 & $-$23,336.870 & $-$23,336.470 & $-$23,337.100 \\ 
+Akaike Inf. Crit. & 46,697.050 & 46,703.000 & 46,701.730 & 46,700.950 & 46,702.210 \\ 
+Bayesian Inf. Crit. & 46,781.410 & 46,801.420 & 46,800.150 & 46,799.370 & 46,800.620 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{5}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
 } 
 \end{center}
 
 \end{frame}
 \end{document}
+
+
