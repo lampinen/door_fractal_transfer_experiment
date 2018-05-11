@@ -2941,16 +2941,37 @@ summary(corr_dd_prediction_model)
 ```{r}
 cc_prediction_model = glm(data=es_dist_corr_data_2 %>% 
                      filter(question == "correspondence_identify",
-                            isomorphic=="TRUE") %>%
-                       mutate(correspondence_swaps = correspondence_correct,
-                              best_explicit_mapping_swaps = best_dd_perm_flips,
-                              best_implicit_mapping_swaps = perm_at_min_swaps),
-                     correspondence_swaps ~ best_explicit_mapping_swaps + best_implicit_mapping_swaps,
+                            isomorphic=="TRUE")  %>%
+                     mutate(correspondence_swaps = correspondence_correct,
+                            best_explicit_mapping_swaps = best_dd_perm_flips,
+                            best_implicit_mapping_swaps = perm_at_min_swaps > 0),
+                     correspondence_swaps ~ best_explicit_mapping_swaps + best_implicit_mapping_swaps ,
                      family="binomial")
 summary(cc_prediction_model)
 ```
 ```{r}
 stargazer(cc_prediction_model, report="vc*stp", single.row=T)
+```
+
+```{r}
+ex_vs_imp = es_dist_corr_data_2 %>% 
+  filter(question == "correspondence_identify",
+         isomorphic=="TRUE")  %>%
+  mutate(correspondence_swaps = correspondence_correct,
+         best_explicit_mapping_swaps = best_dd_perm_flips,
+         best_implicit_mapping_swaps = perm_at_min_swaps > 0) %>%
+  group_by(best_explicit_mapping_swaps, best_implicit_mapping_swaps) %>%
+  summarize(pswaps=mean(correspondence_swaps), pct_swaps = pswaps * 100, se_swaps =pswaps*(1-pswaps)) %>%
+  mutate(ci_lower=pct_swaps-196*se_swaps, ci_upper = pct_swaps+196*se_swaps)
+
+```
+```{r}
+ggplot(data=ex_vs_imp, aes(x = best_explicit_mapping_swaps, y = pct_swaps, fill=best_implicit_mapping_swaps)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_fill_manual(values=c("#660066", "#00BB00")) +
+  geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
+  labs(x="Room-fractal mapping swaps actions?", y="% subjects swap actions") + 
+  guides(fill=guide_legend(title="Policy mapping swaps actions?"))
 ```
 
 # policy clustering
@@ -3022,7 +3043,7 @@ for (i in 1:(nsubjs-1)) {
         subj_j_pol_perms[perm_k,] = as.numeric(ht_permuted_data[[perm_k]][j,3:38])
       }
     }
-    subj_policy_distances[i, j] = min(as.matrix(dist(rbind(subj_i_pol_perms, subj_j_pol_perms), method = "euclidean"))[(nrow(subj_i_pol_perms)+1):(nrow(subj_i_pol_perms)+nrow(subj_j_pol_perms)),1:nrow(subj_i_pol_perms)])
+    subj_policy_distances[i, j] = min(as.matrix(dist(rbind(subj_i_pol_perms, subj_j_pol_perms), method = "manhattan"))[(nrow(subj_i_pol_perms)+1):(nrow(subj_i_pol_perms)+nrow(subj_j_pol_perms)),1:nrow(subj_i_pol_perms)])
     subj_policy_distances[j, i] = subj_policy_distances[i,j] 
   }
 }
@@ -3053,10 +3074,20 @@ ggplot(tsne_data, aes(x=dimension_1, y= dimension_2, color=condition)) +
   geom_density_2d() +
   facet_grid(isomorphic ~ structure)
 ```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/policy_tsne.png", width=8, height=5)
+```
+
+
+
 ```{r}
 ggplot(tsne_data, aes(x=dimension_1, y=dimension_2, color=ns_z)) +
   scale_color_gradient(low ="#0000D0", high="#D00000") + 
   geom_point(size=4) +
   facet_grid(isomorphic ~ structure)
+```
+```{r}
+
 ```
 

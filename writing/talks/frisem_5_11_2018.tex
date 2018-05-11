@@ -184,7 +184,7 @@ Transfer speed helps reconcile why some people think transfer is important, whil
 Slow transfer between tasks is important.
 \end{frame}
 
-\begin{frame}{Is abstraction transfer?}
+\begin{frame}{Abstraction and transfer}
 We often progress from procedural to more explicit, abstract, or formal knowledge: \vspace{-0.2em}
 \begin{figure}
 \centering
@@ -547,7 +547,7 @@ Within fractals:
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\begin{frame}{True in both groups}
+\begin{frame}{True in both structures}
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_basic_plot_fractal.png}
@@ -682,6 +682,10 @@ Subjects in the isomorphic condition were more likely to notice the relationship
 
 \againframe<9>{res_ques} % identification 
 
+\begin{frame}
+Note: we have even less power here because analyses only make sense for subjects in the isomorphic condition, and in this experiment we collected this data only a subset of subjects.
+\end{frame}
+
 \begin{frame}<-2>[label=cddnac]{Subjects can explicitly identify mapping better than chance}
 \begin{figure}
 \centering
@@ -760,7 +764,7 @@ Awareness appears to be neither necessary nor sufficient for transfer, but may b
 \begin{frame}{Conclusions}
 \begin{itemize}
 \item We see evidence of slow transfer between tasks.
-\item<2-> There are also benefits of this slow transfer to explicit within-task knowledge. 
+\item<2-> This also appears to increase explicit within-task knowledge. 
 \item<3-> This transfer may not require awareness, though awareness may be positively associated with it. 
 \end{itemize}
 \end{frame}
@@ -799,6 +803,7 @@ Awareness appears to be neither necessary nor sufficient for transfer, but may b
 \node at (4.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/pam.jpg}};
 \node at (0, -6) {\includegraphics[width=1.5cm]{figures/people/erin.jpg}};
 \node at (1.5, -6) {\includegraphics[width=1.5cm]{figures/people/shaw.jpg}};
+\node at (6, -6) {\bf You!};
 
 \end{tikzpicture}
 \end{figure}
@@ -932,39 +937,39 @@ Awareness appears to be neither necessary nor sufficient for transfer, but may b
 %%\end{frame}
 
 
-\begin{frame}{Not even trending but interesting}
+\begin{frame}{Suggestive but not significant}
 \only<1>{
 \includegraphics[width=0.9\textwidth]{figures/corr_ident.png}
 } \only<2> {
+\includegraphics[width=0.9\textwidth]{figures/ex3/imp_vs_exp_swaps.png}
+} \only<3> {
 \centering
-\resizebox{0.66\textwidth}{!}{%
+\resizebox{!}{0.4\textheight}{%
 % Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
-% Date and time: Wed, May 09, 2018 - 06:05:19 PM
-\centering
+% Date and time: Fri, May 11, 2018 - 02:36:12 PM
 \begin{tabular}{@{\extracolsep{5pt}}lc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-2} 
-\\[-1.8ex] & Correspondence swaps actions \\ 
+\\[-1.8ex] & correspondence\_swaps \\ 
 \hline \\[-1.8ex] 
- Best explicit mapping swaps actions & $-$0.032 (1.172) \\ 
-  & t = $-$0.027 \\ 
-  & p = 0.979 \\ 
- Best implicit mapping swaps actions & 1.994 (1.386) \\ 
-  & t = 1.438 \\ 
-  & p = 0.151 \\ 
- Intercept & 0.135 (0.827) \\ 
-  & t = 0.164 \\ 
-  & p = 0.870 \\ 
+ best\_explicit\_mapping\_swaps & $-$0.081 (1.204) \\ 
+  & t = $-$0.067 \\ 
+  & p = 0.947 \\ 
+  best\_implicit\_mapping\_swaps & 2.086 (1.279) \\ 
+  & t = 1.631 \\ 
+  & p = 0.103 \\ 
+  Constant & 0.030 (0.839) \\ 
+  & t = 0.036 \\ 
+  & p = 0.972 \\ 
  \hline \\[-1.8ex] 
 Observations & 17 \\ 
-Log Likelihood & $-$9.037 \\ 
-Akaike Inf. Crit. & 24.075 \\ 
+Log Likelihood & $-$8.682 \\ 
+Akaike Inf. Crit. & 23.365 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-\end{tabular}}}
+\end{tabular} 
+}}
 \end{frame}
 
 \begin{frame}
