@@ -218,10 +218,10 @@ Yet there are also times when procedural and formal knowledge seem partially dis
 \end{frame}
 
 \begin{frame}[standout]
-When and how does procedural knowledge transfer to more explicit, abstract, or formal knowledge?
+When and how do procedural and more explicit, abstract, or formal knowledge influence each other?
 \end{frame}
 
-\begin{frame}<-9>[label=phenomena]
+\begin{frame}<-8>[label=phenomena]
 \frametitle<-9>{A diagram of potential phenomena of interest}
 \frametitle<10>{What explicit knowledge?}
 \vspace{-1em}
@@ -253,18 +253,15 @@ When and how does procedural knowledge transfer to more explicit, abstract, or f
 \path [line, ->, onslide={<10>,{opacity=0.2}}] (Aabs.east) to node (abstrans) {transfer?} (Babs.west); 
 }
 \uncover<6->{
-%\path [line, <->, onslide={<10>,{opacity=0.2}}] ([yshift=-0.75em]proctrans.north) to node (procabstrans) {} (abstrans.south); 
+\node [rectangle, draw, thick, text width=3.5cm, align=center] (ABabs) at (0, 6.5) {Explicit knowledge about relationship between A and B}; 
 }
 \uncover<7->{
-\node [rectangle, draw, thick, text width=3.5cm, align=center] (ABabs) at (0, 6.5) {Explicit knowledege about relationship between A and B}; 
-}
-\uncover<8->{
 \path [line, <->, onslide={<10>,{opacity=0.2}}] (Aabs.north) to  (ABabs.west); 
 \path [line, <->, onslide={<10>,{opacity=0.2}}] (Babs.north) to  (ABabs.east); 
 \path [line, <->, onslide={<10>,{opacity=0.2}}] ([yshift=-0.5em]abstrans.north) to(ABabs.south); 
 \path [line, <->, bend right=40, onslide={<10>,{opacity=0.2}}] ([xshift=-0.5em, yshift=-0.25em]proctrans.north east) to([xshift=0.5em]ABabs.south); 
 }
-\uncover<9->{
+\uncover<8->{
 \node (abs0) at (6, 1.5) {};
 \node (abs1) at (6, 7) {};
 \path [line, ->, opacity=0.5] (abs0) to node [xshift=0.5em, yshift=3em, opacity=0.5, rotate=90] {abstractness} (abs1); 
@@ -360,7 +357,7 @@ When and how does procedural knowledge transfer to more explicit, abstract, or f
 \note{experimental manipulation will be which structure they have in the fractal condition, whether it's the same as door, and outcomes will be performance in fractal condition and abstractions.}
 \end{frame}
 
-\begin{frame}{Structures}
+\begin{frame}[label=structure_diagrams]{Structures}
 \begin{center}
 \begin{table}
 \begin{tabular}{|c|c|}
@@ -467,7 +464,7 @@ Within fractals:
 \end{figure}
 \end{frame}
 
-\begin{frame}{Explicit knowledge about the relationship between tasks}
+\begin{frame}{Explicit identification of the mapping between tasks}
 \begin{figure}
 \centering
 \begin{subfigure}{0.45\textwidth}
@@ -482,12 +479,12 @@ Within fractals:
 \begin{frame}{Interrogating explicit knowledge}
 \begin{itemize}
 \item It's difficult to assess whether knowledge is explicit or implicit \citep{Newell2014} -- results can be altered by the details of the probe. 
-\item<2-> We carefully developed our protocol: 
+\item<2-> We carefully developed our protocol, including: 
 \begin{itemize}
-\item<3-> We asked within-task explicit knowledge questions only on one task, and before any between-task questions.
-\item<4-> We organized questions in order of increasing specificity, for example we asked if participants thought there was a relationship between the tasks before asking them to identify such a relationship. 
+\item<3-> Asking within-task explicit knowledge questions only on one task, and before any between-task questions.
+\item<4-> Organizing questions in order of increasing specificity. 
 \end{itemize}
-\item <4-> However, likely needs more work, input is welcome.
+\item <5-> However, likely needs more work, input is welcome.
 \end{itemize}
 \end{frame}
 
@@ -506,20 +503,23 @@ Within fractals:
     \item[] {\bf Performance, isomorphism(?)} 
     \end{itemize}}
 \item<3->
-    \only<6-7>{\semitransp[20]{What affects awareness of the relationship?}}%
-    \only<3-5,8->{What affects awareness of the relationship?}%
+    \only<6-7>{\semitransp[20]{What affects awareness of the relationship between the tasks?}}%
+    \only<3-5,8->{What affects awareness of the relationship between the tasks?}%
     \only<9->{
     \begin{itemize}
-    \item[] {\bf Condition, performance} 
+    \item[] {\bf Isomorphism, structure, performance} 
     \end{itemize}}
 \item<4->
-    \only<6-8>{\semitransp[20]{What affects explicit knowledge about the relationship?}}%
-    \only<4-5,9->{What affects explicit knowledge about the relationship?}%
-    \only<10->{}
+    \only<6-8>{\semitransp[20]{What affects ability to explicitly identify the relationship?}}%
+    \only<4-5,9->{What affects ability to explicitly identify the relationship?}%
+    \only<10->{
+    \begin{itemize}
+    \item[] {\bf Performance?} 
+    \end{itemize}}
 \item<5->
-    \only<6-9>{\semitransp[20]{What does awareness affect?}}%
-    \only<5,10->{What does awareness affect?}%
-    \only<11->{}
+    \only<6-9>{\semitransp[20]{Is awareness related to transfer?}}%
+    \only<5,10->{Is awareness related to transfer?}%
+    \only<11->{Maybe, but it is not determinative.}
 \end{itemize}
 \end{frame}
 
@@ -547,22 +547,7 @@ Within fractals:
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
-\begin{frame}{This may not be conscious}
-\begin{itemize}
-\item Consciousness is tricky to assess.
-    \begin{itemize}
-    \item<2-> Can be altered by the exact wording of question or type of probe.
-    \end{itemize}
-\item<3-> For what it's worth, regressors other than suspecting correspondence give similar results, e.g.:
-    \begin{itemize}
-    \item<4-> Likert ratings of perception that one task was helpful for the other. 
-    \item<5-> Likert ratings of similarity between the experiments.
-    \item<6-> Binary split of reports of when they noticed any relationship between the experiments (ever noticed/never noticed).
-    \end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Subjects in isomorphic condition perform better at fractals}
+\begin{frame}{True in both groups}
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures/ex3/ns_basic_plot_fractal.png}
@@ -573,7 +558,7 @@ Within fractals:
 \begin{frame}{No effect on door performance}
 \begin{figure}
 \centering
-\includegraphics[width=0.9\textwidth]{figures/ex3/ns_basic_plot_door.png}
+\includegraphics[width=0.9\textwidth]{figures/ex3/ns_more_basic_plot_door.png}
 \end{figure}
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
@@ -588,7 +573,7 @@ Isomorphism improves performance on fractals.
 Note: we have much less power to detect explicit effects, because they're generally based off of one answer per question per subject in only the final session.
 \end{frame}
 
-\begin{frame}{Better performance on task predicts better explicit answers}
+\begin{frame}{Better performance on task predicts better mapping}
 \begin{figure}
 \centering
 \only<1>{
@@ -600,7 +585,7 @@ Note: we have much less power to detect explicit effects, because they're genera
 \end{frame}
 
 
-\begin{frame}<-3>[label=iso_within_task]{Isomorphism may influence within-task abstraction}
+\begin{frame}<-3>[label=iso_within_task]{Isomorphism may influence ability to identify structure}
 \begin{figure}
 \centering
 \only<1>{
@@ -621,13 +606,17 @@ Note: we have much less power to detect explicit effects, because they're genera
 \uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
 \end{frame}
 
-\begin{frame}{Isomorphism may influence within-task abstraction}
+\begin{frame}<-2>[label=iso_within_nac]{Isomorphism may influence mapping of structure}
 \begin{figure}
 \centering
 \only<1>{
     \includegraphics[height=0.9\textheight]{figures/drag_drop_example.png}
 } \only<2>{
     \includegraphics[width=0.9\textwidth]{figures/ex3/nac_by_iso_by_group.png}
+} \only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/nac_by_iso_group_cs.png}
+} \only<4>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/nac_by_iso_oth.png}
 }
 \end{figure}
 \uncover<2->{\scriptsize Error bars represent bootstrap 95\%-confidence intervals}
@@ -687,15 +676,23 @@ Isomorphism may improve explicit knowledge about fractals.
 \uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
+\begin{frame}[standout]
+Subjects in the isomorphic condition were more likely to notice the relationship between the tasks, especially if they performed well.
+\end{frame}
+
 \againframe<9>{res_ques} % identification 
 
-\begin{frame}{Subjects can explicitly identify analogy better than chance}
+\begin{frame}<-2>[label=cddnac]{Subjects can explicitly identify mapping better than chance}
 \begin{figure}
 \centering
 \only<1>{
     \includegraphics[height=0.9\textheight]{figures/corr_drag_drop.png}
 } \only<2>{
     \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_only_iso.png}
+} \only<3>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_by_group_cs.png}
+} \only<4>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cddnac_isoonly_by_oth.png}
 }
 \end{figure}
 \uncover<2->{\scriptsize Error bars represent 95\%-confidence intervals}
@@ -710,42 +707,141 @@ Isomorphism may improve explicit knowledge about fractals.
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
 
+\begin{frame}[standout]
+Subjects could identify the relationship somewhat above chance, weakly predicted by performance.
+\end{frame}
+
 \againframe<10>{res_ques} % Awareness -> ?
 
 \begin{frame}{Assessing awareness}
 \begin{figure}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/similarity_likert.png}\\
-\includegraphics[width=0.7\textwidth]{figures/correspondence_suspect.png}\\
-\includegraphics[width=0.7\textwidth]{figures/when_noticed.png}
+\includegraphics[width=0.8\textwidth]{figures/similarity_likert.png}\\
+\includegraphics[width=0.8\textwidth]{figures/correspondence_suspect.png}\\
+\includegraphics[width=0.8\textwidth]{figures/one_task_helpful.png}
 \end{figure}
+\note{Also asked some free response which I haven't looked at too thoroughly yet}
 \end{frame}
 
 \againframe<1-6>{iso_bet_B}
 
-\againframe<2,4->{iso_within_task}
+\begin{frame}{Awareness}
+\begin{itemize}
+\item Most measure of awareness are not associated with basic transfer.
+\item<2-> One task helpful for other ratings, however, appear to be.
+\item<3-> This pattern was similar for other awareness analyses, so we'll focus on one-task-helpful from now on.
+\end{itemize}
+\end{frame}
 
-\begin{frame}{What's up with ``one task helpful for other''}
+\againframe<1-2,6>{iso_within_task}
+
+\againframe<1-2,4>{iso_within_nac}
+
+\againframe<1-2,4>{cddnac}
+
+\begin{frame}{What's up with ``one task helpful for other?''}
 \begin{figure}
 \centering
-\includegraphics[width=0.7\textwidth]{figures/one_task_helpful.png}
+\includegraphics[width=0.8\textwidth]{figures/one_task_helpful.png}
 \end{figure}
-A few things to note:
+\vspace{-1em}
 \begin{itemize}
-\item<2-> This question was asked \textbf{after} the similarity, suspect, and noticed questions, \textbf{and} immediately after asking subjects to describe a correspondence.
-\item<3-> Isomorphism still significantly reduced average number of steps even among those who gave low ratings (though the effect was smaller).
+\item<2-> Isomorphism still significantly reduced average number of steps even among those who gave low ratings (though the effect was smaller).
+\item<3-> Similar on explicit within-task questions (trending on diagram selection, significant on fractal assignments). 
+\item<4-> This question was asked \textbf{after} the similarity, suspect, and noticed questions, \textbf{and} immediately after asking subjects to describe a correspondence.
 \end{itemize}
 \end{frame}
 
 \begin{frame}[standout]
-Transfer between tasks may not require awareness, but further exploration is necessary.
+Awareness appears to be neither necessary nor sufficient for transfer, but may be positively asssociated with it. 
 \end{frame}
 
-\section{Results: Policies}
+
+\begin{frame}{Conclusions}
+\begin{itemize}
+\item We see evidence of slow transfer between tasks.
+\item<2-> There are also benefits of this slow transfer to explicit within-task knowledge. 
+\item<3-> This transfer may not require awareness, though awareness may be positively associated with it. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Next steps \& possible future directions}
+\begin{itemize}
+\item See whether these results hold/replicate 
+\item<2-> Verify that direction of transfer is caused by order and not e.g. grounding
+\item<3-> Include distractor tasks between
+\item<4-> Integrating abstractions (either taught or interrogated) earlier on one or both tasks
+\item<5-> Try to model this with a neural network
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+\vspace{-2em}
+\begin{figure}
+\centering
+\begin{tikzpicture}[auto] 
+\node at (0, 0) {\includegraphics[width=2cm]{figures/people/jay.jpg}};
+\node at (2, 0) {\includegraphics[width=2cm]{figures/people/arianna.jpg}};
+\node at (4, 0) {\includegraphics[width=2cm]{figures/people/katherine.jpg}};
+\node at (7, 0) {\includegraphics[width=2cm]{figures/people/erin.jpg}};
+\node at (9, 0) {\includegraphics[width=2cm]{figures/people/yochai.jpg}};
+\node at (7, -2) {\includegraphics[width=2cm]{figures/people/jesse.jpg}};
+\node at (9, -2) {\includegraphics[width=2cm]{figures/people/pam.jpg}};
+\node at (8, -5) {\includegraphics[width=2cm]{figures/nsf.jpeg}};
+
+\node at (0, -3) {\includegraphics[width=1.5cm]{figures/people/dan.jpg}};
+\node at (1.5, -3) {\includegraphics[width=1.5cm]{figures/people/mona.jpg}};
+\node at (3, -3) {\includegraphics[width=1.5cm]{figures/people/corey.jpg}};
+\node at (4.5, -3) {\includegraphics[width=1.5cm]{figures/people/robert.jpg}};
+\node at (0, -4.5) {\includegraphics[width=1.5cm]{figures/people/dawn.jpg}};
+\node at (1.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/daniel.jpg}};
+\node at (3, -4.5) {\includegraphics[width=1.5cm]{figures/people/tyler.png}};
+\node at (4.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/pam.jpg}};
+\node at (0, -6) {\includegraphics[width=1.5cm]{figures/people/erin.jpg}};
+\node at (1.5, -6) {\includegraphics[width=1.5cm]{figures/people/shaw.jpg}};
+
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+\bibliographystyle{plainnat}
+\blfootnote{\bibliography{transfer}}
+\end{frame}
+
+\appendix
+
+\againframe<1>{structure_diagrams}
+
+\begin{frame}{Alternation}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/alt_fractal_by_group.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/alt_door_by_group.png}
+}
+\end{figure}
+{\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
+
+\againframe<1>{structure_diagrams}
+
+\begin{frame}{Cycling}
+\begin{figure}
+\centering
+\only<1>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cyc_fractal_by_group.png}
+} \only<2>{
+    \includegraphics[width=0.9\textwidth]{figures/ex3/cyc_door_by_group.png}
+}
+\end{figure}
+{\scriptsize Error bars represent 95\%-confidence intervals}
+\end{frame}
 
 \begin{frame}{Policies}
 \begin{itemize}
-\item A number of my remaining analyses rely on the idea of a \emph{policy} from reinforcement learning.
+\item The remaining analyses rely on the idea of a \emph{policy} from reinforcement learning.
 \item<2-> A policy is a function that maps states to action probabilities:
 \begin{center}
 \begin{table}
@@ -792,7 +888,7 @@ Transfer between tasks may not require awareness, but further exploration is nec
 \end{center}
 \end{column}
 \end{columns}
-\item<3-> We'll consider all the structure-preserving mappings between the doors and fractal policies, and see how well the participants' policies align across tasks.
+\item<3-> We'll consider all the structure-preserving mappings between the door and fractal policies, and see how well the participants' policies align across tasks.
 \end{itemize}
 \end{frame}
 
@@ -871,56 +967,12 @@ Akaike Inf. Crit. & 24.075 \\
 \end{tabular}}}
 \end{frame}
 
-\begin{frame}{Conclusions}
-\begin{itemize}
-\item We see evidence of slow transfer between tasks.
-\item<2-> There are also benefits of this slow transfer to explicit within-task knowledge. 
-\item<3-> This transfer may not require awareness. 
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Next steps \& possible future directions}
-\begin{itemize}
-\item See whether these results hold/replicate 
-\item<2-> Verify that direction of transfer is caused by order and not e.g. grounding
-\item<3-> Distractor tasks between
-\item<4-> Integrating abstractions (either taught or interrogated) earlier on one or both tasks
-\item<5-> Try to model this with a neural network
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Acknowledgements}
+\begin{frame}
 \begin{figure}
 \centering
-\begin{tikzpicture}[auto] 
-\node at (0, 0) {\includegraphics[width=2cm]{figures/people/jay.jpg}};
-\node at (2, 0) {\includegraphics[width=2cm]{figures/people/arianna.jpg}};
-\node at (4, 0) {\includegraphics[width=2cm]{figures/people/katherine.jpg}};
-\node at (7, 0) {\includegraphics[width=2cm]{figures/people/erin.jpg}};
-\node at (9, 0) {\includegraphics[width=2cm]{figures/people/yochai.jpg}};
-\node at (7, -2) {\includegraphics[width=2cm]{figures/people/jesse.jpg}};
-\node at (9, -2) {\includegraphics[width=2cm]{figures/people/pam.jpg}};
-\node at (8, -5) {\includegraphics[width=2cm]{figures/nsf.jpeg}};
-
-\node at (0, -3) {\includegraphics[width=1.5cm]{figures/people/dan.jpg}};
-\node at (1.5, -3) {\includegraphics[width=1.5cm]{figures/people/mona.jpg}};
-\node at (3, -3) {\includegraphics[width=1.5cm]{figures/people/corey.jpg}};
-\node at (4.5, -3) {\includegraphics[width=1.5cm]{figures/people/robert.jpg}};
-\node at (0, -4.5) {\includegraphics[width=1.5cm]{figures/people/dawn.jpg}};
-\node at (1.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/daniel.jpg}};
-\node at (3, -4.5) {\includegraphics[width=1.5cm]{figures/people/tyler.png}};
-\node at (4.5, -4.5) {\includegraphics[width=1.5cm]{figures/people/pam.jpg}};
-
-\end{tikzpicture}
+\includegraphics[width=\textwidth]{figures/ex3/policy_tsne.png}
 \end{figure}
 \end{frame}
-
-\begin{frame}[allowframebreaks]
-\bibliographystyle{plainnat}
-\blfootnote{\bibliography{transfer}}
-\end{frame}
-
-\appendix
 
 \begin{frame}{Flipping is easier}
 \begin{figure}
@@ -937,6 +989,12 @@ Akaike Inf. Crit. & 24.075 \\
 \end{figure}
 {\scriptsize Error bars represent 95\%-confidence intervals}
 \end{frame}
+
+\againframe<1-2,4-5>{iso_within_task}
+
+\againframe<3>{iso_within_nac}
+
+\againframe<3>{cddnac}
 
 \begin{frame}{Models: Number of steps needed on fractal trials}
 \begin{center}
@@ -1043,6 +1101,117 @@ Bayesian Inf. Crit. & 46,781.410 & 46,801.420 & 46,800.150 & 46,799.370 & 46,800
 \end{center}
 
 \end{frame}
+
+\begin{frame}{Models: Fractal mapping}
+\begin{center}
+\resizebox{!}{0.45\textheight}{%
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Thu, May 10, 2018 - 09:41:23 AM
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ isomorphic & 1.337$^{**}$ (0.523) & 1.363$^{**}$ (0.579) & 1.862$^{***}$ (0.623) & 1.861$^{***}$ (0.577) \\ 
+  & t = 2.555 & t = 2.354 & t = 2.987 & t = 3.225 \\ 
+  & p = 0.014 & p = 0.023 & p = 0.005 & p = 0.003 \\ 
+  scale(as.numeric(similarity\_likert), scale = F) &  & $-$0.028 (0.495) &  &  \\ 
+  &  & t = $-$0.057 &  &  \\ 
+  &  & p = 0.955 &  &  \\ 
+  correspondence\_suspectYes &  &  & 0.229 (0.557) &  \\ 
+  &  &  & t = 0.412 &  \\ 
+  &  &  & p = 0.683 &  \\ 
+  scale(as.numeric(one\_task\_helpful\_for\_other), scale = F) &  &  &  & $-$0.646$^{*}$ (0.328) \\ 
+  &  &  &  & t = $-$1.966 \\ 
+  &  &  &  & p = 0.055 \\ 
+  structureFlipping & 1.198$^{**}$ (0.523) & 1.208$^{**}$ (0.558) & 1.128$^{**}$ (0.548) & 1.832$^{***}$ (0.606) \\ 
+  & t = 2.289 & t = 2.165 & t = 2.059 & t = 3.021 \\ 
+  & p = 0.027 & p = 0.036 & p = 0.045 & p = 0.004 \\ 
+  avg\_num\_steps\_z & $-$0.838$^{***}$ (0.187) & $-$0.855$^{***}$ (0.202) & $-$0.840$^{***}$ (0.187) & $-$0.842$^{***}$ (0.197) \\ 
+  & t = $-$4.472 & t = $-$4.224 & t = $-$4.495 & t = $-$4.267 \\ 
+  & p = 0.00005 & p = 0.0002 & p = 0.00005 & p = 0.0001 \\ 
+  isomorphicTRUE:scale(as.numeric(similarity\_likert), scale = F) &  & $-$0.026 (0.538) &  &  \\ 
+  &  & t = $-$0.049 &  &  \\ 
+  &  & p = 0.962 &  &  \\ 
+  isomorphicTRUE:correspondence\_suspectYes &  &  & $-$1.156 (0.830) &  \\ 
+  &  &  & t = $-$1.393 &  \\ 
+  &  &  & p = 0.170 &  \\ 
+  isomorphicTRUE:scale(as.numeric(one\_task\_helpful\_for\_other), scale = F) &  &  &  & 0.719$^{*}$ (0.410) \\ 
+  &  &  &  & t = 1.754 \\ 
+  &  &  &  & p = 0.086 \\ 
+  isomorphicTRUE:structureFlipping & $-$1.746$^{**}$ (0.754) & $-$1.750$^{**}$ (0.786) & $-$1.356$^{*}$ (0.798) & $-$2.466$^{***}$ (0.857) \\ 
+  & t = $-$2.316 & t = $-$2.227 & t = $-$1.698 & t = $-$2.876 \\ 
+  & p = 0.025 & p = 0.031 & p = 0.096 & p = 0.006 \\ 
+  Constant & 0.555 (0.364) & 0.542 (0.429) & 0.494 (0.391) & 0.048 (0.440) \\ 
+  & t = 1.525 & t = 1.265 & t = 1.261 & t = 0.110 \\ 
+  & p = 0.134 & p = 0.212 & p = 0.214 & p = 0.914 \\ 
+ \hline \\[-1.8ex] 
+Observations & 56 & 56 & 56 & 56 \\ 
+R$^{2}$ & 0.354 & 0.354 & 0.384 & 0.402 \\ 
+Adjusted R$^{2}$ & 0.303 & 0.275 & 0.309 & 0.329 \\ 
+Residual Std. Error & 1.409 (df = 51) & 1.436 (df = 49) & 1.403 (df = 49) & 1.382 (df = 49) \\ 
+F Statistic & 6.976$^{***}$ (df = 4; 51) & 4.484$^{***}$ (df = 6; 49) & 5.096$^{***}$ (df = 6; 49) & 5.494$^{***}$ (df = 6; 49) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+} 
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}{Models: Diagram selection}
+\begin{center}
+\resizebox{!}{0.45\textheight}{%
+% Table created by stargazer v.5.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Thu, May 10, 2018 - 09:42:32 AM
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & \multicolumn{4}{c}{ds\_correct} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ isomorphic & 0.916 (0.602) & 1.406 (1.611) & 0.647 (0.949) & 1.117$^{*}$ (0.656) \\ 
+  & t = 1.522 & t = 0.873 & t = 0.681 & t = 1.702 \\ 
+  & p = 0.129 & p = 0.383 & p = 0.496 & p = 0.089 \\ 
+  as.numeric(similarity\_likert) &  & 0.300 (0.725) &  &  \\ 
+  &  & t = 0.414 &  &  \\ 
+  &  & p = 0.680 &  &  \\ 
+  isomorphicTRUE:as.numeric(similarity\_likert) &  & $-$0.290 (0.808) &  &  \\ 
+  &  & t = $-$0.359 &  &  \\ 
+  &  & p = 0.720 &  &  \\ 
+  correspondence\_suspectYes &  &  & $-$0.788 (0.790) &  \\ 
+  &  &  & t = $-$0.998 &  \\ 
+  &  &  & p = 0.319 &  \\ 
+  isomorphicTRUE:correspondence\_suspectYes &  &  & 0.714 (1.263) &  \\ 
+  &  &  & t = 0.566 &  \\ 
+  &  &  & p = 0.572 &  \\ 
+  scale(as.numeric(one\_task\_helpful\_for\_other)) &  &  &  & $-$0.825 (0.555) \\ 
+  &  &  &  & t = $-$1.488 \\ 
+  &  &  &  & p = 0.137 \\ 
+  isomorphicTRUE:scale(as.numeric(one\_task\_helpful\_for\_other)) &  &  &  & 1.535$^{**}$ (0.752) \\ 
+  &  &  &  & t = 2.042 \\ 
+  &  &  &  & p = 0.042 \\ 
+  Constant & 0.288 (0.382) & $-$0.225 (1.296) & 0.606 (0.508) & 0.051 (0.432) \\ 
+  & t = 0.753 & t = $-$0.174 & t = 1.194 & t = 0.117 \\ 
+  & p = 0.452 & p = 0.863 & p = 0.233 & p = 0.907 \\ 
+ \hline \\[-1.8ex] 
+Observations & 54 & 54 & 54 & 54 \\ 
+Log Likelihood & $-$33.167 & $-$33.081 & $-$32.659 & $-$30.683 \\ 
+Akaike Inf. Crit. & 70.333 & 74.161 & 73.318 & 69.366 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+} 
+\end{center}
+
+\end{frame}
+
+
 \end{document}
 
 

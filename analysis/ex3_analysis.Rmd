@@ -369,7 +369,7 @@ main_data = main_data %>%
 ```
 
 ```{r}
-main_data = inner_join(main_data, demographic_data) # Note: this implicitly excludes anyone who didn't complete all 3 sessions, use left_join to include
+main_data = inner_join(main_data, demographic_data) # Note: this implicitly excludes anyone who didn't complete all 4 sessions, use left_join to include
 ```
 
 
@@ -732,6 +732,22 @@ ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(trial_type =
 
 ```{r}
 ggsave("../writing/talks/figures/ex3/ns_more_basic_plot_fractal.png", width=7, height=5)
+```
+
+```{r}
+ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(trial_type == "door"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
+#  geom_bar(stat="identity",position="dodge") +
+  scale_color_brewer(palette="Set2") +
+  geom_line(size=1.2) + 
+  geom_point(size=1.2) +
+  labs(x="Session", y = "Average number of steps needed (door trials)") +
+  scale_x_continuous(breaks=1:3) +
+  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
+  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5)
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/ns_more_basic_plot_door.png", width=7, height=5)
 ```
 
 
@@ -1369,13 +1385,24 @@ ggplot(data=s2_joined_question_data %>%
   geom_smooth(method="lm") +
   labs(x="One task helpful for other rating", y="% of fractals correctly assigned") +
   scale_color_brewer(palette="Set2") + 
-  facet_grid(~isomorphic)
+  facet_grid(~isomorphic) +
+  scale_y_continuous(breaks=c(0, 50, 100))
 ```
 
 ```{r}
 ggsave("../writing/talks/figures/ex3/nac_by_iso_oth.png", width=7, height=5)
 ```
 
+```{r}
+ggplot(data=s2_joined_question_data %>%
+         filter(question == "drag_drop_on_diagram"),
+         aes(x=as.numeric(one_task_helpful_for_other), y=num_assignments_correct * 100/6, color=isomorphic))+
+  geom_point(position=position_jitter(width=0.25, height=5)) +
+  geom_smooth(method="lm") +
+  labs(x="One task helpful for other rating", y="% of fractals correctly assigned") +
+  scale_color_brewer(palette="Set2") + 
+  facet_grid(structure~isomorphic)
+```
 
 ```{r}
 ggplot(data=s2_joined_question_data %>%
@@ -1387,7 +1414,7 @@ ggplot(data=s2_joined_question_data %>%
        aes(x=structure, y=nac, fill=isomorphic))+
   geom_bar(stat="identity", position="dodge") +
   geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
-  labs(y="Number of fractals correctly assigned") +
+  labs(y="% of fractals correctly assigned") +
   annotate("segment", x=0.5, xend=1.5, y=2.111 * 100/6, yend=2.111 * 100/6, alpha=0.5, linetype=2) +
   annotate("segment", x=1.5, xend=2.5, y=2.9 * 100/6, yend=2.9 * 100/6, alpha=0.5, linetype=2) +
   annotate("segment", x=1, xend=2, y=97,alpha=0.5, yend=97) +
@@ -1469,7 +1496,6 @@ s2_joined_question_data = s2_joined_question_data %>%
 
 ```{r}
 xtabs(~ ds_correct + isomorphic + fractal_Flipping, s2_joined_question_data)
-
 ```
 
 ```{r}
@@ -1525,10 +1551,10 @@ ggplot(data=s2_joined_question_data %>%
   geom_hline(aes(yintercept=50), linetype=2, alpha=0.5) +
   geom_errorbar(aes(ymin=ci95_lower*100, ymax=ci95_upper*100),  width=0.25,) +
   labs(y="% of subjects that correctly identified structure") +
-  annotate("text", x=2, y= 100, size=10, alpha=0.5, label="**") +
-  annotate("text", x=1, y= 103, size=6,alpha=0.5, label="ns") +
-  annotate("segment", x=1, xend=2, y=110,alpha=0.5, yend=110) +
-  annotate("text", x=1.5, y= 115, size=6, alpha=0.5,label="ns") +
+  annotate("text", x=2, y= 95, size=10, alpha=0.5, label="**") +
+  annotate("text", x=1, y= 97, size=6,alpha=0.5, label="ns") +
+  annotate("segment", x=1, xend=2, y=101,alpha=0.5, yend=101) +
+  annotate("text", x=1.5, y= 105, size=6, alpha=0.5,label="ns") +
   scale_fill_brewer(palette="Set2") 
 #  facet_wrap(~ fractal_Flipping)
 ```
@@ -1736,7 +1762,8 @@ ggplot(data=s2_joined_question_data %>%
   geom_smooth(method="glm", method.args=list(family="binomial")) +
   labs(y="Correctly identified structure?", x="One task helpful for other rating") +
   scale_color_brewer(palette="Set2") +
-  facet_wrap(~isomorphic)
+  facet_wrap(~isomorphic) +
+  scale_y_continuous(breaks=c(0,1), labels=c("No", "Yes"))
 ```
 
 ```{r}
@@ -2035,11 +2062,26 @@ ggplot(data=s2_joined_question_data %>%
   labs(x = "% correct room-fractal matches", y="Density") 
 ```
 
+
+
+```{r}
+ggplot(data=s2_joined_question_data %>% 
+         filter(question == "correspondence_drag_drop", isomorphic =="TRUE"),
+       aes(x=num_assignments_correct * 100/6)) +
+  geom_histogram(fill="#FC8D62", breaks=((0:7)-0.5)*100/6)+ 
+  geom_vline(aes(xintercept=2.505* 100/6), alpha=0.5, linetype=2) +
+  annotate("segment", y= 7.75, x = 54.9, yend=8.75, xend=54.9, size=1.5) +
+  annotate("segment", y= 8.0, x = 43.1, yend=8.5, xend=43.1, size=0.5) +
+  annotate("segment", y= 8.0, x = 66.7, yend=8.5, xend=66.7, size=0.5) +
+  annotate("segment", y= 8.25, x = 43.1, yend=8.25, xend=54.9, size=0.5) +
+  annotate("segment", y= 8.25, x = 66.7, yend=8.25, xend=54.9, size=0.5) +
+  labs(x = "% correct room-fractal matches", y="Count") +
+  scale_y_continuous(breaks=c(0,2,4,6,8))
+```
+
 ```{r}
 ggsave("../writing/talks/figures/ex3/cddnac_only_iso.png", width=7, height=5)
 ```
-
-
 ```{r}
 ggplot(data=s2_joined_question_data %>% 
          filter(question == "correspondence_drag_drop",
@@ -2064,9 +2106,9 @@ ggsave("../writing/talks/figures/ex3/cddnac_iso_by_group.png", width=7, height=5
 ggplot(data=s2_joined_question_data %>% 
          filter(question == "correspondence_drag_drop",
                 isomorphic=="TRUE"),
-       aes(x=avg_num_steps, y=num_assignments_correct)) +
-  labs(x = "Average number of steps (door & fractal", y = "Number of correct room-fractal matches") +
-  geom_point(position="dodge", color="#FC8D62")+ 
+       aes(x=avg_num_steps, y=num_assignments_correct*100/6)) +
+  labs(x = "Average number of steps (door & fractal", y = "% correct room-fractal matches") +
+  geom_point(position=position, color="#FC8D62")+ 
   geom_smooth(method="lm", color="#FC8D62") +
   geom_hline(aes(yintercept=2.505), alpha=0.5, linetype=2)
 ```
@@ -2980,7 +3022,7 @@ for (i in 1:(nsubjs-1)) {
         subj_j_pol_perms[perm_k,] = as.numeric(ht_permuted_data[[perm_k]][j,3:38])
       }
     }
-    subj_policy_distances[i, j] = min(as.matrix(dist(rbind(subj_i_pol_perms, subj_j_pol_perms)))[(nrow(subj_i_pol_perms)+1):(nrow(subj_i_pol_perms)+nrow(subj_j_pol_perms)),1:nrow(subj_i_pol_perms)])
+    subj_policy_distances[i, j] = min(as.matrix(dist(rbind(subj_i_pol_perms, subj_j_pol_perms), method = "euclidean"))[(nrow(subj_i_pol_perms)+1):(nrow(subj_i_pol_perms)+nrow(subj_j_pol_perms)),1:nrow(subj_i_pol_perms)])
     subj_policy_distances[j, i] = subj_policy_distances[i,j] 
   }
 }
@@ -2998,7 +3040,10 @@ tsne_data = data.frame(subject_id=factor(1:nsubjs), dimension_1=res[,1], dimensi
   inner_join(., num_steps_summarized_data %>%
                filter(trial_type=="fractal", session==2) %>%
                select(subject_id, isomorphic, structure, num_steps_needed)) %>%
-  mutate(condition=factor(sprintf("Isomorphic: %s, Structure: %s", isomorphic, structure)))
+  mutate(condition=factor(sprintf("Isomorphic: %s, Structure: %s", isomorphic, structure))) %>%
+  group_by(structure) %>%
+  mutate(ns_z = scale(num_steps_needed)) %>%
+  ungroup()
 ```
 
 ```{r}
@@ -3006,6 +3051,12 @@ ggplot(tsne_data, aes(x=dimension_1, y= dimension_2, color=condition)) +
   geom_point() +
   scale_color_brewer(palette="Dark2") + 
   geom_density_2d() +
+  facet_grid(isomorphic ~ structure)
+```
+```{r}
+ggplot(tsne_data, aes(x=dimension_1, y=dimension_2, color=ns_z)) +
+  scale_color_gradient(low ="#0000D0", high="#D00000") + 
+  geom_point(size=4) +
   facet_grid(isomorphic ~ structure)
 ```
 
