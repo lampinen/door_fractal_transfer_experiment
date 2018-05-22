@@ -2971,7 +2971,13 @@ ggplot(data=ex_vs_imp, aes(x = best_explicit_mapping_swaps, y = pct_swaps, fill=
   scale_fill_manual(values=c("#660066", "#00BB00")) +
   geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=0.25, position=position_dodge(width=0.9)) +
   labs(x="Room-fractal mapping swaps actions?", y="% subjects swap actions") + 
-  guides(fill=guide_legend(title="Policy mapping swaps actions?"))
+  guides(fill=guide_legend(title="Policy mapping swaps actions?")) +
+  scale_x_continuous(breaks=c(0,1), labels=c("No", "Yes")) + 
+  scale_y_continuous(breaks=c(0, 50, 100))
+```
+
+```{r}
+ggsave("../writing/talks/figures/ex3/imp_vs_exp_swaps.png", width=7, height=5)
 ```
 
 # policy clustering
@@ -3089,5 +3095,13 @@ ggplot(tsne_data, aes(x=dimension_1, y=dimension_2, color=ns_z)) +
 ```
 ```{r}
 
+```
+
+# free response
+
+```{r}
+View(question_data %>%
+  filter(question %in% c("similarity_descr", "correspondence_descr")) %>% 
+  select(subject_id, isomorphic, fractal_hexagon_bi, question, response))
 ```
 
