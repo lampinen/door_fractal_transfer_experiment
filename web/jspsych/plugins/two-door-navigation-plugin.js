@@ -740,10 +740,6 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     }
 
     ////// End room stuff /////////////////////////////////////////////////////////
-      function drawProgressBar() {
-              
-                }
-
     
     function end_function() {
 
