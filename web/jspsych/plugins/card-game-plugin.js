@@ -96,9 +96,10 @@ jsPsych.plugins['card-game'] = (function() {
     var pi = Math.PI;
     var two_pi = 2*pi;
     var pi_2 = pi/2;
+    var pi_3 = pi/3;
     var pi_4 = pi/4;
     var pi_6 = pi/6;
-    var shrink_constant = 0.1;
+    var shrink_constant = 0.3;
     function draw_card(x, y, scale, contents, angle, azimuth_angle, back_color) {
         angle = (typeof angle === 'undefined') ? 0 : angle;
         azimuth_angle = (typeof azimuth_angle === 'undefined') ? 0 : azimuth_angle;
@@ -107,7 +108,6 @@ jsPsych.plugins['card-game'] = (function() {
         var c_height = 0.8*scale; // + 2 cc_r
         var cc_r = 0.1*scale; //card corner radius
 
-        //TODO: back non-negative
         var flip_scale_x = Math.cos(azimuth_angle);
         var front = flip_scale_x >= 0;
         if (!front) {
@@ -115,16 +115,16 @@ jsPsych.plugins['card-game'] = (function() {
         }
         var cc_rx = flip_scale_x * cc_r;
         var c_width_sc = flip_scale_x * c_width;
-
         // farther side of card needs to shrink for foreshortening
-        var cc_ry = (1-flip_scale_x * shrink_constant) * cc_r;
-        var c_height_sc = (1-flip_scale_x * shrink_constant) * c_height; 
+        var cc_ry = (1-(1-flip_scale_x) * shrink_constant) * cc_r;
+        var c_height_sc = (1- (1-flip_scale_x) * shrink_constant) * c_height; 
         var offset_y = (c_height + cc_r - (c_height_sc + cc_ry))*0.5;
 
 
 
         draw.translate(x, y);
         draw.rotate(angle);
+
 
         if (front) {
             draw.beginPath();
@@ -141,7 +141,112 @@ jsPsych.plugins['card-game'] = (function() {
             draw.strokeStyle = "Black";
             draw.fill();
             draw.stroke();
-            //TODO: contents
+
+            //NOTE: symbols assume azimuth angle is zero (except for patterns)
+            var c_full_width = c_width + cc_r + cc_r;
+            var c_full_height = c_height + cc_r + cc_r;
+            var s_size  = 0.8 * c_full_width;
+            if (contents === "square") {
+                s_size = 0.7 * c_full_width;
+            }
+            var s_off_x = (c_full_width - s_size) * 0.5;
+            var s_off_y = (c_full_height - s_size) * 0.5;
+
+
+            switch(contents) {
+                case "triangle":
+                    draw.beginPath()
+                    draw.moveTo(s_off_x, s_off_y + s_size);
+                    draw.lineTo(s_off_x + s_size * 0.5, s_off_y);
+                    draw.lineTo(s_off_x + s_size, s_off_y + s_size);
+                    draw.closePath();
+                    draw.fillStyle = "Black";
+                    draw.fill();
+                    break;
+                case "square":
+                    draw.beginPath()
+                    draw.moveTo(s_off_x, s_off_y);
+                    draw.lineTo(s_off_x + s_size, s_off_y);
+                    draw.lineTo(s_off_x + s_size, s_off_y + s_size);
+                    draw.lineTo(s_off_x, s_off_y + s_size);
+                    draw.closePath();
+                    draw.fillStyle = "Black";
+                    draw.fill();
+                    break;
+                case "circle":
+                    var s_r = 0.5 * s_size;
+                    draw.beginPath()
+                    draw.arc(s_off_x + s_r, s_off_y + s_r, s_r, 0, two_pi);
+                    draw.closePath();
+                    draw.fillStyle = "Black";
+                    draw.fill();
+                    break;
+                case "diamond":
+                    draw.beginPath()
+                    draw.moveTo(s_off_x, s_off_y + 0.5*s_size);
+                    draw.lineTo(s_off_x + s_size * 0.5, s_off_y);
+                    draw.lineTo(s_off_x + s_size, s_off_y + 0.5*s_size);
+                    draw.lineTo(s_off_x + s_size * 0.5, s_off_y + s_size);
+                    draw.closePath();
+                    draw.fillStyle = "Black";
+                    draw.fill();
+                    break;
+                case "moon":
+                    s_off_x = 0.3 * s_off_x;
+                    var s_r = 0.5 * s_size;
+                    var s_r_2 = 0.33 * s_size;
+                    draw.beginPath()
+                    draw.arc(s_off_x + s_r, s_off_y + s_r, s_r, -2*pi_3, 2*pi_3);
+                    draw.arc(s_off_x, s_off_y + s_r, s_r, pi_3, -pi_3, true);
+                    draw.closePath();
+                    draw.fillStyle = "Black";
+                    draw.fill();
+                    break;
+                case "squiggle":
+                    var s_r = 0.25 * s_size;
+                    draw.beginPath()
+                    draw.arc(s_off_x + 2*s_r, s_off_y + s_r, s_r, pi_6 -pi, pi_2);
+                    draw.arc(s_off_x + 2*s_r, s_off_y + 3*s_r, s_r, -pi_2, pi_6, true);
+                    draw.strokeStyle = "Black";
+                    draw.lineWidth = 0.1*scale;
+                    draw.stroke();
+                    draw.lineWidth = 1;
+                    break;
+                case "lightning":
+                    s_off_x = 1.75* s_off_x;
+                    draw.beginPath()
+                    draw.moveTo(s_off_x + 0.25 * s_size, s_off_y);
+                    draw.lineTo(s_off_x + 0.55*s_size, s_off_y);
+                    draw.lineTo(s_off_x + 0.4*s_size, s_off_y + 0.4 * s_size);
+                    draw.lineTo(s_off_x + 0.7*s_size, s_off_y + 0.4 * s_size);
+                    draw.lineTo(s_off_x + 0.3*s_size, s_off_y + 1.1* s_size);
+                    draw.lineTo(s_off_x + 0.35*s_size, s_off_y + 0.6* s_size);
+                    draw.lineTo(s_off_x+0.15*s_size, s_off_y + 0.6* s_size);
+                    draw.closePath();
+                    draw.fillStyle = "Black";
+                    draw.fill();
+                    break;
+                case "plus":
+                    var half_size = 0.5 * s_size;
+                    draw.beginPath()
+                    draw.moveTo(s_off_x, s_off_y + half_size);
+                    draw.lineTo(s_off_x + s_size, s_off_y + half_size);
+                    draw.moveTo(s_off_x + half_size, s_off_y );
+                    draw.lineTo(s_off_x + half_size, s_off_y + s_size);
+                    draw.strokeStyle = "Black";
+                    draw.lineWidth = 0.1*scale;
+                    draw.stroke();
+                    draw.lineWidth = 1;
+
+                    break;
+                case "dots":
+
+                    break;
+                case "stripes":
+
+                    break;
+
+            }
         } else {
             draw.beginPath();
             draw.ellipse( cc_rx, offset_y + cc_ry, cc_rx, cc_ry, 0, -pi, -pi_2);
@@ -379,8 +484,15 @@ jsPsych.plugins['card-game'] = (function() {
 
 
         draw_opponent();
-        draw_card(100, 100, card_scale, "", -pi_6, pi_6);
-        draw_card(200, 100, card_scale, "", -pi_6, pi - pi_6);
+        draw_card(200, 100, card_scale, "triangle", -pi_6, pi-pi_4);
+        draw_card(100, 100, card_scale, "triangle");
+        draw_card(100, 200, card_scale, "square");
+        draw_card(100, 300, card_scale, "circle");
+        draw_card(0, 100, card_scale, "squiggle");
+        draw_card(0, 200, card_scale, "moon");
+        draw_card(0, 300, card_scale, "lightning");
+        draw_card(300, 100, card_scale, "diamond");
+        draw_card(300, 200, card_scale, "plus");
     }
 
     ////// End card stuff /////////////////////////////////////////////////////////
