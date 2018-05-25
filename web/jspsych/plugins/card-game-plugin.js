@@ -41,7 +41,7 @@ jsPsych.plugins['card-game'] = (function() {
     var draw = canvas.getContext("2d");
 
 
-    display_element.append('<div id="instruction-div">Get the other player to play the target card.<br /><br /></div>');
+    display_element.append('<div id="instruction-div">Get the other player to show the target card.<br /><br /></div>');
 
     // if any trial variables are functions
     // this evaluates the function and replaces
@@ -98,31 +98,45 @@ jsPsych.plugins['card-game'] = (function() {
     var pi_2 = pi/2;
     var pi_4 = pi/4;
     var pi_6 = pi/6;
+    var shrink_constant = 0.1;
     function draw_card(x, y, scale, contents, angle, azimuth_angle, back_color) {
         angle = (typeof angle === 'undefined') ? 0 : angle;
         azimuth_angle = (typeof azimuth_angle === 'undefined') ? 0 : azimuth_angle;
-        back_color = (typeof background === 'undefined') ?  "#5544FF" : background;
+        back_color = (typeof background === 'undefined') ?  "#6660FF" : background;
         var c_width = 0.4*scale; // + 2 cc_r
         var c_height = 0.8*scale; // + 2 cc_r
         var cc_r = 0.1*scale; //card corner radius
 
-        var flip_scale = Math.sin(azimuth_angle);
+        //TODO: back non-negative
+        var flip_scale_x = Math.cos(azimuth_angle);
+        var front = flip_scale_x >= 0;
+        if (!front) {
+            flip_scale_x = -flip_scale_x;
+        }
+        var cc_rx = flip_scale_x * cc_r;
+        var c_width_sc = flip_scale_x * c_width;
+
+        // farther side of card needs to shrink for foreshortening
+        var cc_ry = (1-flip_scale_x * shrink_constant) * cc_r;
+        var c_height_sc = (1-flip_scale_x * shrink_constant) * c_height; 
+        var offset_y = (c_height + cc_r - (c_height_sc + cc_ry))*0.5;
+
+
 
         draw.translate(x, y);
         draw.rotate(angle);
 
-        //TODO: azimuth angles
-        if (flip_scale >= 0) {
+        if (front) {
             draw.beginPath();
             draw.moveTo(0, cc_r);
-            draw.ellipse( cc_r, cc_r, cc_r, cc_r, 0, -pi, -pi_2);
-            draw.lineTo( cc_r + c_width, 0);
-            draw.ellipse( cc_r + c_width, cc_r, cc_r, cc_r, 0, -pi_2, 0);
-            draw.lineTo( cc_r + cc_r + c_width, cc_r + c_height);
-            draw.ellipse( cc_r + c_width, cc_r + c_height, cc_r, cc_r, 0, 0, pi_2);
-            draw.lineTo( cc_r , cc_r + cc_r + c_height);
-            draw.ellipse( cc_r , cc_r + c_height, cc_r, cc_r, 0, pi_2, pi);
-            draw.closePath()
+            draw.ellipse( cc_rx, cc_r, cc_rx, cc_r, 0, -pi, -pi_2);
+            draw.lineTo( cc_rx + c_width_sc, offset_y);
+            draw.ellipse( cc_rx + c_width_sc, offset_y + cc_ry, cc_rx, cc_ry, 0, -pi_2, 0);
+            draw.lineTo( cc_rx + cc_rx + c_width_sc, offset_y + cc_ry + c_height_sc);
+            draw.ellipse( cc_rx + c_width_sc, offset_y + cc_ry + c_height_sc, cc_rx, cc_ry, 0, 0, pi_2);
+            draw.lineTo( cc_rx , cc_r + cc_r + c_height);
+            draw.ellipse( cc_rx , cc_r + c_height, cc_rx, cc_r, 0, pi_2, pi);
+            draw.closePath();
             draw.fillStyle = "White";
             draw.strokeStyle = "Black";
             draw.fill();
@@ -130,20 +144,18 @@ jsPsych.plugins['card-game'] = (function() {
             //TODO: contents
         } else {
             draw.beginPath();
-            draw.moveTo(0, cc_r);
-            draw.ellipse( cc_r, cc_r, cc_r, cc_r, 0, -pi, -pi_2);
-            draw.lineTo( cc_r + c_width, 0);
-            draw.ellipse( cc_r + c_width, cc_r, cc_r, cc_r, 0, -pi_2, 0);
-            draw.lineTo( cc_r + cc_r + c_width, cc_r + c_height);
-            draw.ellipse( cc_r + c_width, cc_r + c_height, cc_r, cc_r, 0, 0, pi_2);
-            draw.lineTo( cc_r , cc_r + cc_r + c_height);
-            draw.ellipse( cc_r , cc_r + c_height, cc_r, cc_r, 0, pi_2, pi);
-            draw.closePath()
+            draw.ellipse( cc_rx, offset_y + cc_ry, cc_rx, cc_ry, 0, -pi, -pi_2);
+            draw.lineTo( cc_rx + c_width_sc, 0);
+            draw.ellipse( cc_rx + c_width_sc, cc_r, cc_rx, cc_r, 0, -pi_2, 0);
+            draw.lineTo( cc_rx + cc_rx + c_width_sc, cc_r + c_height);
+            draw.ellipse( cc_rx + c_width_sc, cc_r + c_height, cc_rx, cc_r, 0, 0, pi_2);
+            draw.lineTo( cc_rx , offset_y + cc_ry + cc_ry + c_height_sc);
+            draw.ellipse( cc_rx , offset_y + cc_ry + c_height_sc, cc_rx, cc_ry, 0, pi_2, pi);
+            draw.closePath();
             draw.fillStyle = back_color;
             draw.strokeStyle = "Black";
             draw.fill();
             draw.stroke();
-
         }
 
         draw.rotate(-angle);
@@ -367,7 +379,8 @@ jsPsych.plugins['card-game'] = (function() {
 
 
         draw_opponent();
-        draw_card(100, 100, card_scale, "", -pi_6, -pi);
+        draw_card(100, 100, card_scale, "", -pi_6, pi_6);
+        draw_card(200, 100, card_scale, "", -pi_6, pi - pi_6);
     }
 
     ////// End card stuff /////////////////////////////////////////////////////////
