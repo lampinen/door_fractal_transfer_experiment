@@ -17,6 +17,8 @@ jsPsych.plugins['card-game'] = (function() {
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
+    var patterns = ['dots', 'stripes'];
+    patterns = [patterns[trial.pattern_generator_assignment[0]], patterns[trial.pattern_generator_assignment[1]]];
 
     //hacky p-bar update but I don't want to change to jspsych 6
     if (typeof trial.progress !== 'undefined') {
@@ -118,7 +120,7 @@ jsPsych.plugins['card-game'] = (function() {
         // farther side of card needs to shrink for foreshortening
         var cc_ry = (1-(1-flip_scale_x) * shrink_constant) * cc_r;
         var c_height_sc = (1- (1-flip_scale_x) * shrink_constant) * c_height; 
-        var offset_y = (c_height + cc_r - (c_height_sc + cc_ry))*0.5;
+        var offset_y = (c_height + cc_r + cc_r - (c_height_sc + cc_ry + cc_ry))*0.5;
 
 
 
@@ -143,7 +145,7 @@ jsPsych.plugins['card-game'] = (function() {
             draw.stroke();
 
             //NOTE: symbols assume azimuth angle is zero (except for patterns)
-            var c_full_width = c_width + cc_r + cc_r;
+            var c_full_width = c_width_sc + cc_rx + cc_rx;
             var c_full_height = c_height + cc_r + cc_r;
             var s_size  = 0.8 * c_full_width;
             if (contents === "square") {
@@ -237,13 +239,58 @@ jsPsych.plugins['card-game'] = (function() {
                     draw.lineWidth = 0.1*scale;
                     draw.stroke();
                     draw.lineWidth = 1;
-
                     break;
                 case "dots":
-
+                    var dot_rx = 0.1 * c_full_width;
+                    var widths = [0.2 * c_full_width, 0.5 * c_full_width, 0.8 * c_full_width];
+                    var width_scales = [0.2, 0.5, 0.8];
+                    var c_full_height = c_height + cc_r + cc_r;
+                    var this_height_sc; 
+                    var this_offset_y;
+                    var dot_ry;
+                    draw.fillStyle = "Black";
+                    var locs = [0.25, 0.5, 0.75];
+                    for (var width_i = 0; width_i < 3; width_i++) {
+                        this_height_sc = (1- width_scales[width_i] *(1-flip_scale_x) * shrink_constant) * c_full_height; 
+                        this_offset_y = (c_full_height - this_height_sc) * 0.5;
+                        dot_ry = 0.06 * this_height_sc;
+                        for (var loc_i = 0; loc_i < 3; loc_i++) { 
+                            draw.beginPath();
+                            draw.ellipse(widths[width_i], this_offset_y + locs[loc_i] * this_height_sc, dot_rx, dot_ry, 0, 0, two_pi);
+                            draw.closePath();
+                            draw.fill();
+                        }
+                    }
+                    
                     break;
                 case "stripes":
-
+                    var line_half_width = 0.1 * c_full_width;
+                    var width_1 = 0.3 * c_full_width;
+                    var width_2 = 0.7 * c_full_width;
+                    var c_full_height = c_height + cc_r + cc_r;
+                    var this_height_sc = (1- 0.2 *(1-flip_scale_x) * shrink_constant) * c_full_height; 
+                    var this_offset_y = (c_full_height - this_height_sc) * 0.5;
+                    draw.fillStyle = "Black";
+                    draw.beginPath();
+                    draw.moveTo(width_1-line_half_width, this_offset_y);
+                    draw.lineTo(width_1-line_half_width, this_offset_y + this_height_sc);
+                    this_height_sc = (1- 0.4 *(1-flip_scale_x) * shrink_constant) * c_full_height; 
+                    this_offset_y = (c_full_height - this_height_sc) * 0.5;
+                    draw.lineTo(width_1+line_half_width, this_offset_y + this_height_sc);
+                    draw.lineTo(width_1+line_half_width, this_offset_y);
+                    draw.closePath();
+                    draw.fill();
+                    this_height_sc = (1- 0.6 *(1-flip_scale_x) * shrink_constant) * c_full_height; 
+                    this_offset_y = (c_full_height - this_height_sc) * 0.5;
+                    draw.beginPath();
+                    draw.moveTo(width_2-line_half_width, this_offset_y);
+                    draw.lineTo(width_2-line_half_width, this_offset_y + this_height_sc);
+                    this_height_sc = (1- 0.8 *(1-flip_scale_x) * shrink_constant) * c_full_height; 
+                    this_offset_y = (c_full_height - this_height_sc) * 0.5;
+                    draw.lineTo(width_2+line_half_width, this_offset_y + this_height_sc);
+                    draw.lineTo(width_2+line_half_width, this_offset_y);
+                    draw.closePath();
+                    draw.fill();
                     break;
 
             }
@@ -269,6 +316,7 @@ jsPsych.plugins['card-game'] = (function() {
 
 
     var o_r = 80;
+    var o_hand_r = 15;
     var o_eye_r = 8;
     function draw_opponent() {
         draw.fillStyle = "#EEEE00";
@@ -276,6 +324,13 @@ jsPsych.plugins['card-game'] = (function() {
         draw.lineWidth = 3;
         draw.beginPath();
         draw.arc(canvas.width/2, canvas.height/3, o_r, 0, two_pi);
+        draw.closePath()
+        draw.fill();
+        draw.stroke();
+
+        draw.lineWidth = 2;
+        draw.beginPath();
+        draw.arc(400, 250, o_hand_r, 0, two_pi);
         draw.closePath()
         draw.fill();
         draw.stroke();
@@ -301,6 +356,62 @@ jsPsych.plugins['card-game'] = (function() {
         draw.lineWidth = 1;
     }
 
+    function draw_card_table() {
+        draw.fillStyle = "SaddleBrown";
+        draw.strokeStyle = "Black";
+   	draw.rect(30, 350, 25, 50); 
+        draw.fill();
+        draw.stroke();
+   	draw.rect(55, 350, 10, 50); 
+        draw.fill();
+        draw.stroke();
+
+        draw.beginPath();
+   	draw.rect(520, 350, 25, 50); 
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+   	draw.rect(510, 350, 10, 50); 
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+
+        draw.fillStyle = "#6B3503";
+
+        draw.beginPath();
+   	draw.rect(150, 270, 20, 150); 
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+   	draw.rect(170, 270, 8, 150); 
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+
+        draw.beginPath();
+   	draw.rect(430, 270, 20, 150); 
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+   	draw.rect(422, 270, 8, 150); 
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+
+        draw.fillStyle = "SaddleBrown";
+        draw_trapezoid_h(20, 350, 560, 300, 80);
+        draw.fill();
+        draw.stroke();
+        draw.beginPath();
+        draw.rect(20, 350, 560, 10);
+        draw.closePath();
+        draw.fill();
+        draw.stroke();
+    }
+
     
     var animation_time = 500; //length of animation in ms
     var post_animation_delay = 500; // how long to wait on last frame
@@ -319,13 +430,13 @@ jsPsych.plugins['card-game'] = (function() {
     }
 
 
-    function door_contains(door_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the door 
-        if (door_loc == 0) {
-            curr_door_loc = left_door_loc; 
+    function card_contains(card_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the card 
+        if (card_loc == 0) {
+            curr_card_loc = left_card_loc; 
         } else {
-            curr_door_loc = right_door_loc; 
+            curr_card_loc = right_card_loc; 
         }
-        return x >= curr_door_loc && x <= curr_door_loc + door_width && y >= door_offset && y <= door_offset + door_height; 
+        return x >= curr_card_loc && x <= curr_card_loc + card_width && y >= card_offset && y <= card_offset + card_height; 
     }
 
     
@@ -473,26 +584,13 @@ jsPsych.plugins['card-game'] = (function() {
 
     function draw_current_cards(current_location) {
         draw.clearRect(0, 0, canvas.width, canvas.height);
-        var card_color = trial.card_assignment[current_location];
+        var card_contents = trial.card_assignment[current_location];
 
-        if (card_color === "brown") {
-
-            draw.fillStyle = "sienna";
-        } else {
-            draw.fillStyle = card_color;
-        }
-
-
+        draw_card_table();
         draw_opponent();
-        draw_card(200, 100, card_scale, "triangle", -pi_6, pi-pi_4);
-        draw_card(100, 100, card_scale, "triangle");
-        draw_card(100, 200, card_scale, "square");
-        draw_card(100, 300, card_scale, "circle");
-        draw_card(0, 100, card_scale, "squiggle");
-        draw_card(0, 200, card_scale, "moon");
-        draw_card(0, 300, card_scale, "lightning");
-        draw_card(300, 100, card_scale, "diamond");
-        draw_card(300, 200, card_scale, "plus");
+        draw_card(370, 150, card_scale, card_contents);
+        draw_card(160, 300, card_scale*1.4, patterns[0], -pi_6, 0);
+        draw_card(360, 260, card_scale*1.4, patterns[1], pi_6, 0);
     }
 
     ////// End card stuff /////////////////////////////////////////////////////////
