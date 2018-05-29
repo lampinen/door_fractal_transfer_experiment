@@ -1,4 +1,4 @@
-// two-door-navigation-plugin 
+// two-card-navigation-plugin 
 // adapted from jspych demons
 
 jsPsych.plugins['card-game'] = (function() {
@@ -315,40 +315,48 @@ jsPsych.plugins['card-game'] = (function() {
     }
 
 
+    var o_x = 300; 
     var o_r = 80;
     var o_hand_r = 15;
     var o_eye_r = 8;
+    var o_c_x = 270;
+    var o_lh_x = 320; // x coords of hands
+    var o_rh_x = 280;
+    function draw_opponent_hand(x, y) {
+        draw.fillStyle = "#EEEE00";
+        draw.strokeStyle = "Black";
+        draw.lineWidth = 2;
+        draw.beginPath();
+        draw.arc(x, y, o_hand_r, 0, two_pi);
+        draw.closePath()
+        draw.fill();
+        draw.stroke();
+    }
+
     function draw_opponent() {
         draw.fillStyle = "#EEEE00";
         draw.strokeStyle = "Black";
         draw.lineWidth = 3;
         draw.beginPath();
-        draw.arc(canvas.width/2, canvas.height/3, o_r, 0, two_pi);
-        draw.closePath()
-        draw.fill();
-        draw.stroke();
-
-        draw.lineWidth = 2;
-        draw.beginPath();
-        draw.arc(400, 250, o_hand_r, 0, two_pi);
+        draw.arc(o_x, canvas.height/3, o_r, 0, two_pi);
         draw.closePath()
         draw.fill();
         draw.stroke();
 
         //smile
         draw.beginPath();
-        draw.arc(canvas.width/2, canvas.height/3-0.4*o_r, o_r, pi_4, pi_4+pi_2);
+        draw.arc(o_x, canvas.height/3-0.4*o_r, o_r, pi_4, pi_4+pi_2);
         draw.stroke();
 
 
         //eyes 
         draw.fillStyle = "Black";
         draw.beginPath();
-        draw.arc(canvas.width/2 + 0.4 *o_r, canvas.height/3-0.4*o_r, o_eye_r, 0, two_pi);
+        draw.arc(o_x + 0.4 *o_r, canvas.height/3-0.4*o_r, o_eye_r, 0, two_pi);
         draw.fill();
         draw.stroke();
         draw.beginPath();
-        draw.arc(canvas.width/2 - 0.4 *o_r, canvas.height/3-0.4*o_r, o_eye_r, 0, two_pi);
+        draw.arc(o_x - 0.4 *o_r, canvas.height/3-0.4*o_r, o_eye_r, 0, two_pi);
         draw.fill();
         draw.stroke();
 
@@ -413,23 +421,94 @@ jsPsych.plugins['card-game'] = (function() {
     }
 
     
-    var animation_time = 500; //length of animation in ms
-    var post_animation_delay = 500; // how long to wait on last frame
-    var num_frames = 20;
+    // putting it all together
+
+    function draw_current_cards(current_location, goal_location, transition_t, transition_a, transition_next) {
+        draw.clearRect(0, 0, canvas.width, canvas.height);
+        var card_contents = trial.card_assignment[current_location];
+        var target_contents = trial.card_assignment[goal_location];
+        var next_card_contents, opp_t;
+        if (typeof transition_t !== 'undefined') {
+            next_card_contents = trial.card_assignment[transition_next];
+            opp_t = Math.max(0, 2*transition_t - 1); 
+        }
+
+        draw_card_table();
+
+        //target 
+        draw.fillStyle = "Black";
+        draw.font = "20px Arial";
+        draw.fillText("Target:", 10, 25);
+        draw_card(10, 35, card_scale, target_contents);
+
+        // opponent +  card(s)
+        draw_opponent();
+        if ((typeof transition_t === 'undefined') || opp_t === 0) {
+            draw_card(o_c_x, 150, card_scale, card_contents);
+            draw_opponent_hand(o_lh_x, 250);
+        } else {
+            var nc_off = 60*Math.sin(opp_t * pi);
+            if (opp_t < 0.5)  {
+                draw_card(o_c_x + nc_off, 150, card_scale, next_card_contents);
+                draw_opponent_hand(o_lh_x + nc_off, 250);
+                draw_card(o_c_x, 150, card_scale, card_contents);
+            } else {
+                draw_card(o_c_x, 150, card_scale, card_contents);
+                draw_card(o_c_x + nc_off, 150, card_scale, next_card_contents);
+                draw_opponent_hand(o_lh_x + nc_off, 250);
+            }
+        }
+        draw_opponent_hand(o_rh_x, 250);
+
+        //own cards
+        if (typeof transition_t === 'undefined') {
+            draw_card(157, 300, card_scale*1.4, patterns[0], -pi_6, 0);
+            draw_card(363, 260, card_scale*1.4, patterns[1], pi_6, 0);
+        } else {
+            var c_ang = Math.min(transition_t, 1 - transition_t) * two_pi;
+            if (transition_a === 0) {
+                draw_card(157, 300, card_scale*1.4, patterns[0], -pi_6, c_ang);
+                draw_card(363, 260, card_scale*1.4, patterns[1], pi_6, 0);
+            } else {
+                draw_card(157, 300, card_scale*1.4, patterns[0], -pi_6, 0);
+                draw_card(363, 260, card_scale*1.4, patterns[1], pi_6, c_ang);
+            }
+        }
+    }
+
+    // animation + interaction
+    function next_card(current_location, action) {
+        if (Math.random() < trial.action_noise) {
+            action = 1 - action;
+        }
+        var generators = trial.group.get_some_generators()
+        new_location = trial.group.operation(current_location, generators[action]); 
+        return new_location;
+    }
+
+    var animation_time = 1000; //length of animation in ms
+    var post_animation_delay = 0; // how long to wait on last frame
+    var num_frames = 40;
     var frame_time = animation_time/num_frames;
-    function animate_door_opening(door_loc, callback, remaining_frames) {
+    function animate_card_transition(card_loc, old_card, next_card, callback, remaining_frames) {
             if (remaining_frames === 0) {
                 setTimeout(callback, post_animation_delay);
                 return;
             }
             remaining_frames = remaining_frames || num_frames;
-            draw_door(door_loc, 0.5 * Math.PI * (1 - remaining_frames/num_frames)); 
+            draw_current_cards(old_card, trial.goal, (num_frames - remaining_frames)/num_frames, card_loc, next_card); 
             setTimeout(function() {
-                animate_door_opening(door_loc, callback, remaining_frames-1);
+                animate_card_transition(card_loc, old_card, next_card, callback, remaining_frames-1);
             }, frame_time);
     }
 
+    var left_card_loc = 160;
+    var right_card_loc = 300;
+    var card_width = 140;
+    var card_offset = 260;
+    var card_height = 200;
 
+    //TODO? some basic geometry
     function card_contains(card_loc,x,y) { //Returns whether (x,y) on the canvas is 'within' the card 
         if (card_loc == 0) {
             curr_card_loc = left_card_loc; 
@@ -439,7 +518,6 @@ jsPsych.plugins['card-game'] = (function() {
         return x >= curr_card_loc && x <= curr_card_loc + card_width && y >= card_offset && y <= card_offset + card_height; 
     }
 
-    
 
     // Room event handlers
     var clickable = true;
@@ -472,15 +550,6 @@ jsPsych.plugins['card-game'] = (function() {
 	    my = e.pageY - offsetY;
 	    return {x: mx, y: my};
     };
-
-    function next_card(current_location, action) {
-        if (Math.random() < trial.action_noise) {
-            action = 1 - action;
-        }
-        var generators = trial.group.get_some_generators()
-        new_location = trial.group.operation(current_location, generators[action]); 
-        return new_location;
-    }
 
 
     function get_percentile_string(start, goal, num_steps) {
@@ -539,14 +608,14 @@ jsPsych.plugins['card-game'] = (function() {
             return;
         }
         var mouse = getMouse(e, canvas);
-        var door_loc;
-        if (door_contains(0, mouse.x, mouse.y)) {
-            //go through left door
-            door_loc = 0;
+        var card_loc;
+        if (card_contains(0, mouse.x, mouse.y)) {
+            //go through left card
+            card_loc = 0;
 
-        } else if (door_contains(1, mouse.x, mouse.y)) {
-            //go through right door
-            door_loc = 1;
+        } else if (card_contains(1, mouse.x, mouse.y)) {
+            //go through right card
+            card_loc = 1;
         } else {
             //mis-click, ignore
             return;
@@ -554,15 +623,16 @@ jsPsych.plugins['card-game'] = (function() {
         // update everything 
         var curr_time = (new Date()).getTime();
         location_rts.push(curr_time - this_card_time);
-        click_history.push(door_loc);
-        var this_action = trial.door_generator_assignment[door_loc]; 
+        click_history.push(card_loc);
+        var this_action = trial.pattern_generator_assignment[card_loc]; 
+        var old_location = current_location;
         current_location = next_card(current_location, this_action);
         action_history.push(this_action); 
 
         // animate
         clickable = false;
-        animate_door_opening(door_loc, function() {
-            draw_current_card(current_location);
+        animate_card_transition(card_loc, old_location, current_location, function() {
+            draw_current_cards(current_location, trial.goal);
             location_history.push(current_location);
             this_card_time = (new Date()).getTime();
 
@@ -580,29 +650,6 @@ jsPsych.plugins['card-game'] = (function() {
         return;
     }, true);
 
-    // putting it all together
-
-    function draw_current_cards(current_location, goal_location) {
-        draw.clearRect(0, 0, canvas.width, canvas.height);
-        var card_contents = trial.card_assignment[current_location];
-        var target_contents = trial.card_assignment[goal_location];
-
-        draw_card_table();
-
-        //target 
-        draw.fillStyle = "Black";
-        draw.font = "20px Arial";
-        draw.fillText("Target:", 10, 25);
-        draw_card(10, 35, card_scale, target_contents);
-
-        // opponent +  card
-        draw_opponent();
-        draw_card(370, 150, card_scale, card_contents);
-
-        //own cards
-        draw_card(157, 300, card_scale*1.4, patterns[0], -pi_6, 0);
-        draw_card(363, 260, card_scale*1.4, patterns[1], pi_6, 0);
-    }
 
     ////// End card stuff /////////////////////////////////////////////////////////
 
@@ -614,8 +661,8 @@ jsPsych.plugins['card-game'] = (function() {
       var trial_data = {
         "group": trial.group.get_name(),
         "card_assignment": trial.card_assignment,
-        "door_color_assignment": trial.door_color_assignment,
-        "door_generator_assignment": trial.door_generator_assignment,
+        "card_color_assignment": trial.card_color_assignment,
+        "pattern_generator_assignment": trial.pattern_generator_assignment,
         "goal": trial.goal,
         "start": trial.start,
         "action_noise": trial.action_noise,
