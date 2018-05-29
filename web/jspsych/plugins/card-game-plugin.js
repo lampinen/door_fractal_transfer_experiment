@@ -367,12 +367,12 @@ jsPsych.plugins['card-game'] = (function() {
         draw.stroke();
 
         draw.beginPath();
-   	draw.rect(520, 350, 25, 50); 
+   	draw.rect(545, 350, 25, 50); 
         draw.closePath();
         draw.fill();
         draw.stroke();
         draw.beginPath();
-   	draw.rect(510, 350, 10, 50); 
+   	draw.rect(535, 350, 10, 50); 
         draw.closePath();
         draw.fill();
         draw.stroke();
@@ -582,15 +582,26 @@ jsPsych.plugins['card-game'] = (function() {
 
     // putting it all together
 
-    function draw_current_cards(current_location) {
+    function draw_current_cards(current_location, goal_location) {
         draw.clearRect(0, 0, canvas.width, canvas.height);
         var card_contents = trial.card_assignment[current_location];
+        var target_contents = trial.card_assignment[goal_location];
 
         draw_card_table();
+
+        //target 
+        draw.fillStyle = "Black";
+        draw.font = "20px Arial";
+        draw.fillText("Target:", 10, 25);
+        draw_card(10, 35, card_scale, target_contents);
+
+        // opponent +  card
         draw_opponent();
         draw_card(370, 150, card_scale, card_contents);
-        draw_card(160, 300, card_scale*1.4, patterns[0], -pi_6, 0);
-        draw_card(360, 260, card_scale*1.4, patterns[1], pi_6, 0);
+
+        //own cards
+        draw_card(157, 300, card_scale*1.4, patterns[0], -pi_6, 0);
+        draw_card(363, 260, card_scale*1.4, patterns[1], pi_6, 0);
     }
 
     ////// End card stuff /////////////////////////////////////////////////////////
@@ -618,7 +629,7 @@ jsPsych.plugins['card-game'] = (function() {
     }
 
 
-    draw_current_cards(current_location);
+    draw_current_cards(current_location, trial.goal);
     clickable = true;
 
   };
