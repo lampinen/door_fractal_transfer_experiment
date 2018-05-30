@@ -307,7 +307,7 @@ jsPsych.plugins['drag-drop-on-image'] = (function() {
     function end_function() {
         if (any_targets_unoccupied()) {
             // slacking off, typical Marissa 
-            alert("Please place every fractal somewhere within the structure!");
+            alert("Please place every image somewhere!");
             return;
         }
         display_element.html('');
