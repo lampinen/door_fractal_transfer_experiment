@@ -8,7 +8,9 @@
     <script src="jspsych/jspsych.js"></script>
     <script src="jspsych/plugins/fractal-mutation-plugin.js"></script>
     <script src="jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <script src="jspsych/plugins/card-game-plugin.js"></script>
     <script src="jspsych/plugins/drag-drop-on-image-plugin.js"></script>
+    <script src="jspsych/plugins/drag-drop-clustering-plugin.js"></script>
     <script src="jspsych/plugins/jspsych-survey-multi-choice.js"></script>
     <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
     <link href="css/other.css" rel="stylesheet" type="text/css"></link>
@@ -29,6 +31,29 @@
     var this_room_assignment = ["red", "green", "blue", "grey", "yellow", "purple"];
     var this_door_generator_assignment = [1, 0];
     var this_door_color_assignment = ["white", "black"];
+
+    var this_card_assignment = ['triangle', 'circle', 'square', 'diamond', 'moon', 'lightning', 'squiggle', 'plus'];
+    var this_pattern_assignment = [1, 0]; 
+
+    var test_card = {
+        type: 'card-game',
+        group: this_group,
+        card_assignment: this_card_assignment,
+        pattern_generator_assignment: this_pattern_assignment,
+        action_noise: 0,
+        goal: 4,
+        start: 0
+    };
+
+    var test_card_2 = {
+        type: 'card-game',
+        group: this_group,
+        card_assignment: this_card_assignment,
+        pattern_generator_assignment: this_pattern_assignment,
+        action_noise: 0,
+        goal: 1,
+        start: 4
+    };
 
     var test_fractal = {
         type: 'fractal-mutation',
@@ -116,6 +141,15 @@
         instruction_text:"Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a fractal in the visual patterns experiment. Drag the fractals onto the rooms you think they corresponded to." 
     }
 
+    var drag_clust_test = { //TODO: fix paths, names
+	type: 'drag-drop-clustering',
+	dragging_images: dragging_images_2,
+	location_labels: [0, 1],
+        snap_padding: 10,
+        background_order: drag_corr_room_order,
+        instruction_text:"Place the different fractals onto the grey part of the display in two or more groups that reflect how you thought about them as you were performing the task." 
+    }
+
     var diagram_selection = {
 	type: 'survey-multi-choice',
 	questions: [ "The fractal relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
@@ -131,7 +165,7 @@
 
     var start_experiment = function() {
         jsPsych.init({
-            timeline: [test_room, test_room_2, test_fractal, test_fractal_2, correspondence_suspect, drag_test, drag_corr_test, correspondence_identification],
+            timeline: [drag_clust_test, test_card, test_card_2, test_room, test_room_2, test_fractal, test_fractal_2, correspondence_suspect, drag_test, drag_corr_test, correspondence_identification],
             on_finish: function() {
                 jsPsych.data.displayData('json');
             }
