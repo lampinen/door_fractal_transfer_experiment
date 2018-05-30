@@ -293,7 +293,7 @@ jsPsych.plugins['drag-drop-clustering'] = (function() {
             "rt": (new Date()).getTime() - start_time,
             "assignments": get_current_assignments() 
         };
-        alert(JSON.stringify(trial_data))
+        //alert(JSON.stringify(trial_data))
 
         jsPsych.finishTrial(trial_data);
     }
