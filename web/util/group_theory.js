@@ -321,7 +321,7 @@ odd_cycles.prototype.get_some_generators = function() {
 odd_cycles.prototype.operation = function(x, y) {
     // only defined if y is an action 
     if (y != 0 && y != 1) {
-        alert("Tri cycles operation error!");
+        alert("Odd cycles operation error!");
         return y;
     }
 
