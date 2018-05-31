@@ -224,4 +224,46 @@ class hexagon_tri(object):
 		return x;
         return res
 
+class odd_cycles(object):
+    def __init__(self):
+        self.order = 8;
+        self.elements = range(8);
+
+    def get_some_generators(self): 
+        return [0, 1]
+
+    def operation(self, x, y):
+        # only defined if y is an action 
+        if (y != 0 and y != 1):
+            print("Odd cycles operation error!")
+            return y
+
+        if (y == 1):
+            if (x == 0):
+                res = 3
+            elif (x == 3):
+                res = 1
+            elif (x == 1):
+                res = 0
+            elif (x == 2):
+                res = 6
+            elif (x == 5):
+                res = 2
+            elif (x == 7):
+                res = 4
+            else: #6, 4
+                res = x + 1
+        else: # y == 0
+            if (x == 4):
+                res = 0
+            elif (x == 5):
+                res = 7 
+            elif (x == 6):
+                res = 5 
+            elif (x == 7):
+                res = 6
+            else: # 0-3
+                res = x + 1
+        
+        return res
 

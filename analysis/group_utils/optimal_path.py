@@ -183,25 +183,55 @@ if __name__ == "__main__":
 #
 #    np.savetxt("hb_table.csv", hb_table, fmt='%i', delimiter=',')
 #    np.savetxt("ht_table.csv", ht_table, fmt='%i', delimiter=',')
+#
+#    hb = hexagon_bi() 
+#    ht = hexagon_tri() 
+#    hb_table = np.full([6, 6], fill_value=-1)
+#
+#    ht_table = np.full([6, 6], fill_value=-1)
+#
+#    for state in xrange(6):
+#        for goal in xrange(6):
+#            solution_paths = BFS(state, goal, hb) 
+#            hb_table[state, goal] = len(solution_paths[0]) 
+#            solution_paths = BFS(state, goal, ht) 
+#            ht_table[state, goal] = len(solution_paths[0]) 
+#
+#    print(hb_table)
+#    print(ht_table)
+#    hb_table = hb_table[hb_table != -1]
+#    ht_table = ht_table[ht_table != -1]
+#
+#    print(np.mean(hb_table))
+#    print(np.mean(ht_table))
 
-    hb = hexagon_bi() 
-    ht = hexagon_tri() 
-    hb_table = np.full([6, 6], fill_value=-1)
+    sq = square_cycles() 
+    od = odd_cycles() 
+    sq_table = np.full([8, 8], fill_value=-1)
 
-    ht_table = np.full([6, 6], fill_value=-1)
+    od_table = np.full([8, 8], fill_value=-1)
 
-    for state in xrange(6):
-        for goal in xrange(6):
-            solution_paths = BFS(state, goal, hb) 
-            hb_table[state, goal] = len(solution_paths[0]) 
-            solution_paths = BFS(state, goal, ht) 
-            ht_table[state, goal] = len(solution_paths[0]) 
+    for state in xrange(8):
+        for goal in xrange(8):
+            sq_table[state, goal] = BFS_unique_optimal_action(state, goal, sq) 
+            od_table[state, goal] = BFS_unique_optimal_action(state, goal, od) 
 
-    print(hb_table)
-    print(ht_table)
-    hb_table = hb_table[hb_table != -1]
-    ht_table = ht_table[ht_table != -1]
+    np.savetxt("sq_table.csv", sq_table, fmt='%i', delimiter=',')
+    np.savetxt("od_table.csv", od_table, fmt='%i', delimiter=',')
 
-    print(np.mean(hb_table))
-    print(np.mean(ht_table))
+    sq_table = np.full([8, 8], fill_value=-1)
 
+    od_table = np.full([8, 8], fill_value=-1)
+
+    for state in xrange(8):
+        for goal in xrange(8):
+            solution_paths = BFS(state, goal, sq) 
+            sq_table[state, goal] = len(solution_paths[0]) 
+            solution_paths = BFS(state, goal, od) 
+            od_table[state, goal] = len(solution_paths[0]) 
+
+    sq_table = sq_table[sq_table != -1]
+    od_table = od_table[od_table != -1]
+
+    print(np.mean(sq_table))
+    print(np.mean(od_table))
