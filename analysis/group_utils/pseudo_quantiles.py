@@ -46,11 +46,11 @@ if __name__ == "__main__":
                 od_table[state][goal] = {"X90": 4,
                                          "X80": 4.5,
                                          "X70": 5,
-                                         "X60": 5,
-                                         "X50": 6,
-                                         "X40": 7,
-                                         "X30": 8,
-                                         "X20": 9,
+                                         "X60": 6,
+                                         "X50": 7,
+                                         "X40": 8,
+                                         "X30": 9,
+                                         "X20": 10,
                                          "X10": 11}
 
     sq_table = [[{} for j in range(8)] for i in range(8)] 
@@ -94,11 +94,11 @@ if __name__ == "__main__":
                 sq_table[state][goal] = {"X90": 4,
                                          "X80": 4.5,
                                          "X70": 5,
-                                         "X60": 5,
-                                         "X50": 6,
-                                         "X40": 7,
-                                         "X30": 8,
-                                         "X20": 9,
+                                         "X60": 6,
+                                         "X50": 7,
+                                         "X40": 8,
+                                         "X30": 9,
+                                         "X20": 10,
                                          "X10": 11}
 
     with open("../../web/distributions/odd_cycles.json", "w") as fout:
