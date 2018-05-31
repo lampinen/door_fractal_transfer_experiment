@@ -295,6 +295,70 @@ tri_cycles.prototype.operation = function(x, y) {
     return res
 }
 
+// five and three cycles (in cube)
+function odd_cycles() {
+    this.order = 8;
+    this.elements = range(8);
+}
+
+odd_cycles.prototype.get_order = function() {
+    return this.order;
+}
+
+odd_cycles.prototype.get_elements = function() {
+    return this.elements;
+}
+
+odd_cycles.prototype.get_name = function() {
+    return "tri cycles (cube, non-group)"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+odd_cycles.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+odd_cycles.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Tri cycles operation error!");
+        return y;
+    }
+
+    var res;
+    if (y == 1) {
+        if (x == 0) {
+            res = 3;
+        } else if (x == 3) {
+            res = 1; 
+        } else if (x == 1) {
+            res = 0;
+        } else if (x == 2) {
+            res = 6;
+        } else if (x == 5) {
+            res = 2;
+        } else if (x == 7) {
+            res = 4;
+        } else { //6, 4
+            res = x + 1;
+        }
+    } else { // y == 0
+        if (x == 4) {
+            res = 0;
+        } else if (x == 5) {
+            res = 7; 
+        } else if (x == 6) {
+            res = 5; 
+        } else if (x == 7) {
+            res = 6; 
+        } else { // 0-3
+            res = x + 1;
+        }
+    }
+    
+    return res
+}
+
 // hexagon with 2-cycles
 
 function hexagon_bi() {
