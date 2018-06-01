@@ -224,7 +224,7 @@
                 type: 'instructions',
                 show_clickable_nav: true,
                 pages: [
-                   "You are now beginning our second learning over time experiment, which investigates spatial learning.",
+                   "You are now returning to our second experiment, which investigates spatial learning.",
                    "In this experiment, you are exploring a house. The house has many rooms, each of a different color. Your task is to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right. Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path." 
                 ]
             }
@@ -255,7 +255,7 @@
             var worker_id = turk_info.workerId;
 
             jsPsych.init({
-                timeline: [welcome_instructions, room_instructions, room_trials, inter_instructions, fractal_instructions, fractal_trials, reminder_to_return, debrief],
+                timeline: this_timeline,
 		on_finish: function() {
 		    document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
 		    var final_submit = function() {
