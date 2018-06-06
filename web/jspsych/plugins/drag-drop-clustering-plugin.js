@@ -156,7 +156,9 @@ jsPsych.plugins['drag-drop-clustering'] = (function() {
 
         this.mouseup_handler = function(e, mouse) {
             this.dragging = false; 
+            var curr_assigned = false;
             for (var i = 0; i < all_locations.length; i++ ) {
+                
                 if (all_locations[i].contains(mouse)) {
                     if (this.curr_location) {
                         if (all_locations[i].occupied) {
@@ -166,12 +168,17 @@ jsPsych.plugins['drag-drop-clustering'] = (function() {
                         }
                     }
                     all_locations[i].assign_draggable(this);
+                    curr_assigned = true;
                     return;
-                } else {
-                    if (this.curr_location) {
-                        this.curr_location.free();
-                        this.curr_location = null;
-                    }
+                }
+            }
+            if (!curr_asssigned) {
+                if (this.curr_location) {
+                    this.curr_location.free();
+                    this.curr_location = null;
+                }
+                if (this.position_x >= 120 && this.position_x <= 160) { // "snap" to within grey region
+                    this.position_x = 160;
                 }
             }
         }
@@ -299,7 +306,7 @@ jsPsych.plugins['drag-drop-clustering'] = (function() {
     }
 
     // start trial once images are loaded
-    jsPsych.pluginAPI.preloadImages(trial.dragging_images.concat([trial.background_image]), function() {
+    jsPsych.pluginAPI.preloadImages(trial.dragging_images, function() {
 	$('#drag-drop-submit-btn').on('click', end_function);
         setInterval(redraw, frame_freq);
     });
