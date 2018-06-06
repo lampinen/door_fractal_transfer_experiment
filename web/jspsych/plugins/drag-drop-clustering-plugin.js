@@ -166,6 +166,11 @@ jsPsych.plugins['drag-drop-clustering'] = (function() {
                         } else {
                             this.curr_location.free();
                         }
+                    } else {
+                        if (all_locations[i].occupied) {
+                            all_locations[i].draggable.position_x = this.drag_init_x;
+                            all_locations[i].draggable.position_y = this.drag_init_y;
+                        } 
                     }
                     all_locations[i].assign_draggable(this);
                     curr_assigned = true;
