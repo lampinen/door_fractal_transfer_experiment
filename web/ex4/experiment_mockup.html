@@ -99,9 +99,13 @@
         if (fractals_target) {
 	    var dragging_images = this_fractal_assignment.slice(); 
 	    shuffle(dragging_images);
+
+            var mutagen_types = ["acid", "ray"];
+            var this_square_cycles_diagram = "../images/diagrams/square_cycles_fractal_"+ mutagen_types[this_mutagen_assignment[0]] +"_"+ mutagen_types[this_mutagen_assignment[1]]+".png";
+            var this_odd_cycles_diagram = "../images/diagrams/odd_cycles_fractal_"+ mutagen_types[this_mutagen_assignment[0]] +"_"+ mutagen_types[this_mutagen_assignment[1]]+".png";
 	    var diagram_dragging = {
 		type: 'drag-drop-on-image',
-		background_image: (target_square_cycles) ? "../images/diagrams/square_cycles.png" : "../images/diagrams/odd_cycles.png",
+		background_image: (target_square_cycles) ? this_square_cycles_diagram : this_odd_cycles_diagram,
 		dragging_images: dragging_images,
 		target_locations: [{"x": 180, "y": 320}, {"x": 400, "y": 320},
                                    {"x": 500, "y": 220}, {"x": 281, "y": 220},
@@ -156,8 +160,8 @@
 
 	    var diagram_selection = {
 		type: 'survey-multi-choice',
-		questions: [ "The fractal (visual pattern) relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
-		 options: [["<img src='../images/diagrams/square_cycles.png'>", "<img src='../images/diagrams/odd_cycles.png'>"]],
+		questions: [ "The fractal (visual pattern) relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Click on the structure that you think you had."],
+		 options: [["<img src='" + this_square_cycles_diagram +"' width=300 height=300>", "<img src='" + this_odd_cycles_diagram + "' width=300 height=300>"]],
 	    }
 
 	    var correspondence_options = ["left (" + this_door_color_assignment[0] + ") door = acid, right (" + this_door_color_assignment[1] + ") door = ray", "left (" + this_door_color_assignment[0] + ") door = ray, right (" + this_door_color_assignment[1] + ") door = acid"];
@@ -172,11 +176,14 @@
                                    "../images/room_snapshots/"+ this_room_assignment[6] + "_room_" + this_door_color_assignment[0] + "_left.png",
                                    "../images/room_snapshots/"+ this_room_assignment[7] + "_room_" + this_door_color_assignment[0] + "_left.png"];
 
+            var this_square_cycles_diagram = "../images/diagrams/square_cycles_door_"+ this_door_color_assignment[this_door_generator_assignment[0]] +"_"+ this_door_color_assignment[this_door_generator_assignment[1]]+".png";
+            var this_odd_cycles_diagram = "../images/diagrams/odd_cycles_door_"+ this_door_color_assignment[this_door_generator_assignment[0]] +"_"+ this_door_color_assignment[this_door_generator_assignment[1]]+".png";
+
 	    var dragging_images = door_image_list.slice(); 
 	    shuffle(dragging_images);
 	    var diagram_dragging = {
 		type: 'drag-drop-on-image',
-		background_image: (target_square_cycles) ? "../images/diagrams/square_cycles.png" : "../images/diagrams/odd_cycles.png",
+		background_image: (target_square_cycles) ? this_square_cycles_diagram : this_odd_cycles_diagram,
 		dragging_images: dragging_images,
 		target_locations: [{"x": 180, "y": 333}, {"x": 400, "y": 333},
                                    {"x": 500, "y": 233}, {"x": 281, "y": 233},
@@ -219,31 +226,30 @@
 	        dragging_image_width: 80,
 		dragging_images: dragging_images_2,
 		target_locations: [{"x": 200, "y": 133}, {"x": 300, "y": 133}, 
-                    {"x": 400, "y": 133}, {"x": 500, "y": 133}, 
-                    {"x": 200, "y": 223}, {"x": 300, "y": 223}, 
-                    {"x": 400, "y": 223}, {"x": 500, "y": 223}],
+		    {"x": 400, "y": 133}, {"x": 500, "y": 133}, 
+		    {"x": 200, "y": 223}, {"x": 300, "y": 223}, 
+		    {"x": 400, "y": 223}, {"x": 500, "y": 223}],
 		location_labels: [0, 1],
 		snap_padding: 10,
 		background_order: drag_corr_room_order,
 		instruction_text:"Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a fractal in the visual patterns experiment. Drag the rooms onto the fractals you think they corresponded to." 
 	    }
 
-            var diagram_selection = {
-                type: 'survey-multi-choice',
+	    var diagram_selection = {
+		type: 'survey-multi-choice',
                 horizontal: true,
-                questions: [ "The rooms in your spatial navigation experiment experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
-                 options: [["<img src='../images/diagrams/square_cycles.png' width=300 height=300>", "<img src='../images/diagrams/odd_cycles.png' width=300 height=300>"]],
-            }
+		questions: [ "The rooms in your spatial navigation experiment experiment obeyed one of the structures below, where the black squares correspond to rooms, the red arrows correspond to either the one door, and the blue arrows correspond to the other. Select the structure that you think you had."],
+		 options: [["<img src='" + this_square_cycles_diagram + "' width=300 height=300>", "<img src='" + this_odd_cycles_diagram +"' width=300 height=300>"]],
+	    }
 
 	    var correspondence_options = ["acid = left (" + this_door_color_assignment[0] + ") door, ray = right (" + this_door_color_assignment[1] + ") door", "ray = left (" + this_door_color_assignment[0] + ") door, acid = right (" + this_door_color_assignment[1] + ") door"];
 	    shuffle(correspondence_options);
 
         }
-
         var experiment_debrief = {
             timeline:[
-                {type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"], rows: [5], required: true},
-                {type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"], rows: [5], required: true},
+                //{type: "survey-text", questions: ["What do you think the first experiment (on spatial navigation) was trying to investigate?"], rows: [5], required: true},
+                //{type: "survey-text", questions: ["What do you think the second experiment (on learning relationships between visual patterns) was trying to investigate?"], rows: [5], required: true},
 		drag_clust,
 		diagram_selection,
                 diagram_dragging,
@@ -369,7 +375,8 @@
                 timeline: block_timeline 
             };
 
-            var this_timeline = [welcome_instructions, fractal_instructions, fractal_trials, inter_instructions, room_instructions, room_trials, debrief_instructions, experiment_debrief, demographics, debrief];
+            var this_timeline = [debrief_instructions, experiment_debrief, demographics, debrief];
+//welcome_instructions, fractal_instructions, fractal_trials, inter_instructions, room_instructions, room_trials, 
 
         }
 
