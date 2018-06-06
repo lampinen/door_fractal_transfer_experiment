@@ -172,7 +172,7 @@ jsPsych.plugins['drag-drop-clustering'] = (function() {
                     return;
                 }
             }
-            if (!curr_asssigned) {
+            if (!curr_assigned) {
                 if (this.curr_location) {
                     this.curr_location.free();
                     this.curr_location = null;
