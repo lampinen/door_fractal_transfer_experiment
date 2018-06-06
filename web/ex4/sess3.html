@@ -162,7 +162,7 @@
 		location_labels: [0, 1],
 		preplaced_image: this_fractal_assignment[0],
 		preplaced_image_location: 0, // This is the ``0'' location in the group_theory.js representation 
-		instruction_text:"The fractal relationships in your experiment obeyed the structure above (black squares = fractals, red arrows = either acid or gamma ray, blue arrows = the other). Drag the fractals onto the black squares that you think they map onto (one has been placed to get you started)." 
+		instruction_text:"The fractal relationships in your experiment obeyed the structure above (grey squares = fractals, red arrows = acid, purple arrows = gamma ray). Drag the fractals onto the squares that you think they map onto (one has been placed to get you started)." 
 	    }
 
 	    var drag_clust = { 
@@ -208,7 +208,7 @@
 
 	    var diagram_selection = {
 		type: 'survey-multi-choice',
-		questions: [ "The fractal (visual pattern) relationships in your experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Click on the structure that you think you had."],
+		questions: [ "The fractal (visual pattern) relationships in your experiment obeyed one of the structures below, where the grey squares correspond to fractals, the red arrows correspond to either the acid, and the blue arrows correspond to the gamma ray. Click on the structure that you think you had."],
 		 options: [["<img src='" + this_square_cycles_diagram +"' width=300 height=300>", "<img src='" + this_odd_cycles_diagram + "' width=300 height=300>"]],
 	    }
 
@@ -242,7 +242,7 @@
 	        dragging_image_width: 80,
 		preplaced_image: door_image_list[0],
 		preplaced_image_location: 0, // This is the ``0'' location in the group_theory.js representation 
-		instruction_text:"The rooms in your experiment obeyed the structure above (black squares = rooms, red arrows = where you go with one of the doors, blue arrows = the other door). Drag the rooms onto the black squares that you think they map onto (one has been placed to get you started)." 
+		instruction_text:"The rooms in your experiment obeyed the structure above (grey squares = rooms, red arrows = where the white door goes, black arrows = where the black door goes). Drag the rooms onto the squares that you think they map onto (one has been placed to get you started)." 
 	    }
 
 	    var drag_clust = { 
@@ -286,7 +286,7 @@
 	    var diagram_selection = {
 		type: 'survey-multi-choice',
                 horizontal: true,
-		questions: [ "The rooms in your spatial navigation experiment experiment obeyed one of the structures below, where the black squares correspond to rooms, the red arrows correspond to either the one door, and the blue arrows correspond to the other. Select the structure that you think you had."],
+		questions: [ "The rooms in your spatial navigation experiment experiment obeyed one of the structures below, where the grey squares correspond to rooms, the white arrows show where the white door goes, and the black arrows show where the black door goes. Select the structure that you think you had."],
 		 options: [["<img src='" + this_square_cycles_diagram + "' width=300 height=300>", "<img src='" + this_odd_cycles_diagram +"' width=300 height=300>"]],
 	    }
 
