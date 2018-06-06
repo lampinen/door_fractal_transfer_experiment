@@ -228,11 +228,12 @@
 		instruction_text:"Assuming the experiments were teaching you the same structure, each room in the navigation experiment corresponded to a fractal in the visual patterns experiment. Drag the rooms onto the fractals you think they corresponded to." 
 	    }
 
-	    var diagram_selection = {
-		type: 'survey-multi-choice',
-		questions: [ "The rooms in your spatial navigation experiment experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
-		 options: [["<img src='../images/diagrams/square_cycles.png'>", "<img src='../images/diagrams/odd_cycles.png'>"]],
-	    }
+            var diagram_selection = {
+                type: 'survey-multi-choice',
+                horizontal: true,
+                questions: [ "The rooms in your spatial navigation experiment experiment obeyed one of the structures below, where the black squares correspond to fractals, the red arrows correspond to either the gamma ray or the acid, and the blue arrows correspond to the other. Select the structure that you think you had."],
+                 options: [["<img src='../images/diagrams/square_cycles.png' width=300 height=300>", "<img src='../images/diagrams/odd_cycles.png' width=300 height=300>"]],
+            }
 
 	    var correspondence_options = ["acid = left (" + this_door_color_assignment[0] + ") door, ray = right (" + this_door_color_assignment[1] + ") door", "ray = left (" + this_door_color_assignment[0] + ") door, acid = right (" + this_door_color_assignment[1] + ") door"];
 	    shuffle(correspondence_options);
@@ -354,7 +355,7 @@
                 type: 'instructions',
                 show_clickable_nav: true,
                 pages: [
-                   "You are now beginning our second learning over time experiment, which investigates spatial learning.",
+                   "You are now returning to our second learning over time experiment, which investigates spatial learning.",
                    "In this experiment, you are exploring a house. The house has many rooms, each of a different color. Your task is to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right. Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path." 
                 ]
             }
