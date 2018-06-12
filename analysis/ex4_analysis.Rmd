@@ -112,12 +112,12 @@ chance_alignments_od = 1.56
 
 # Data loading
 ```{r}
-num_subjects = 60
+num_subjects = 12
 data_dir = "../anonymized_data/ex4"
 drag_drop_target_locations_order = 1:8
 ```
 
-TODO: fix question IDs
+TODO: fix question IDs, ...
 ```{r message=FALSE, warning=FALSE}
 auxiliary_data = list()
 main_data = data.frame()
@@ -133,7 +133,7 @@ for (i in 1:num_subjects) {
 #    next
 #  }
   aux_d_list = fromJSON(file=sprintf("%s/%s/%i.json", data_dir,"aux",i))
-  aux_d_frame = data.frame(aux_d_list[c("fractal_square_cycles", "isomorphic")])
+  aux_d_frame = data.frame(aux_d_list[c("target_square_cycles", "fractals_target", "isomorphic")])
   aux_d_frame$subject_id = i
   aux_d_frame$this_fractal_assignment = list(aux_d_list$this_fractal_assignment)
   aux_d_frame$this_room_assignment = list(aux_d_list$this_room_assignment)
@@ -187,7 +187,7 @@ for (i in 1:num_subjects) {
           z = this_trial$background_order + 1
           this_Q_d$assignments[[1]] = (this_Q_d$assignments[[1]])[z][z][z][z][z][z][z] # a little group theory -- x^7 = x^-1 for all x in S_8
         }
-        if (aux_d_frame$fractal_square_cycles) {
+        if (aux_d_frame$target_square_cycles) {
           perm_list = sq_perm_locs
         } else {
           perm_list = od_perm_locs
@@ -221,7 +221,7 @@ Easy get of condition variables
 ```{r}
 main_data = inner_join(main_data, 
                        auxiliary_data %>%
-                         select(fractal_square_cycles, isomorphic, target_square_cycles, subject_id))
+                         select(target_square_cycles, isomorphic, fractals_target, subject_id))
 ```
 
 Some renaming for convenience/clarity
@@ -229,7 +229,10 @@ Some renaming for convenience/clarity
 main_data = main_data %>%
   rename(location=location_history, action=action_history) %>%
   mutate(group = ifelse(grepl("square_cycles", group), "square_cycles", "odd_cycles"),
-         trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"))
+         trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"),
+         target_or_source = ifelse(fractals_target, 
+                                   ifelse(trial_type == "fractal", "target", "source"),
+                                   ifelse(trial_type == "door", "target", "source")))
 ```
 
 Load correct action info
@@ -313,7 +316,7 @@ TODO: check substrings
 ```{r}
 question_data = inner_join(question_data,
                            auxiliary_data %>%
-                             select(fractal_square_cycles,
+                             select(target_square_cycles,
                                     isomorphic,
                                     this_door_color_assignment,
                                     this_door_generator_assignment,
@@ -377,7 +380,7 @@ main_data = main_data %>%
 ```{r}
 collapsed_main_data = main_data %>%
 #  filter(trial_index_by_type >= 50) %>%
-  group_by(subject_id, isomorphic, fractal_square_cycles, group, trial_type, session,
+  group_by(subject_id, isomorphic, target_square_cycles, group, trial_type, session,
            education, age, gender, race, education_high) %>%
   summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)),
             median_rt = median(location_rts),
@@ -555,7 +558,7 @@ ggplot(data=pcc2_data, aes(x=isomorphic, y= pct_correct_dot, color=isomorphic)) 
 
 
 ```{r}
-pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + fractal_square_cycles + (1|subject_id), data=pcc_data)
+pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + target_square_cycles + (1|subject_id), data=pcc_data)
 summary(pc_model)
 ```
 
@@ -1072,13 +1075,13 @@ ggsave("../writing/talks/figures/ex4/ns_by_en.png", width=7, height=5)
 
 ```{r}
 alternation_data = main_data %>%
-  group_by(subject_id, isomorphic, group, fractal_square_cycles, structure, session, session_c, structure, trial_type, trial_index_by_type_z) %>%
+  group_by(subject_id, isomorphic, group, target_square_cycles, structure, session, session_c, structure, trial_type, trial_index_by_type_z) %>%
   mutate(next_action=lead(action, n=1),
          alternates=next_action != action,
          next_next_action=lead(action, n=2),
          cycles=(next_action==action) & (next_next_action != action)) %>%
   ungroup() %>%
-  group_by(subject_id, isomorphic, group, fractal_square_cycles, structure, session, session_c, structure, trial_type) %>%
+  group_by(subject_id, isomorphic, group, target_square_cycles, structure, session, session_c, structure, trial_type) %>%
   summarize(pct_alternates=mean(alternates, na.rm=T), pct_cycles=mean(cycles, na.rm=T),
             pct_alternates_sd=sd(alternates, na.rm=T), pct_cycles_sd=sd(cycles, na.rm=T))
   
@@ -1232,7 +1235,7 @@ for (start_i in 1:6) {
 s3_joined_question_data = question_data %>% 
   inner_join(.,
              collapsed_main_data %>%
-               group_by(subject_id, session, trial_type, isomorphic, fractal_square_cycles, education_high) %>%
+               group_by(subject_id, session, trial_type, isomorphic, target_square_cycles, education_high) %>%
                summarize(pct_correct = mean(pct_correct),
                          mean_rt=mean(mean_location_rt)/1000) %>%
                ungroup() %>%
@@ -1253,7 +1256,7 @@ s3_joined_question_data = question_data %>%
                mutate(condition=paste(trial_type, metric, sep="_")) %>%
                select(-c(metric, trial_type, group)) %>%
                spread(condition, outcome)) %>%
-  mutate(fractal_Flipping=fractal_square_cycles,
+  mutate(fractal_Flipping=target_square_cycles,
          structure=ifelse(fractal_Flipping, "Flipping", "Cycling")) %>%
   inner_join(.,
              explicit_similarity_data)
@@ -1265,7 +1268,7 @@ s3_joined_question_data = s3_joined_question_data %>%
          total_pct_correct_z = as.vector(scale(total_pct_correct, center=T, scale=T)),
          avg_num_steps = (door_num_steps_needed + fractal_num_steps_needed)/2,
          abs_tpc_d = abs(total_pct_correct-0.5)) %>%
-  group_by(isomorphic, fractal_square_cycles) %>%
+  group_by(isomorphic, target_square_cycles) %>%
   mutate(avg_num_steps_z = as.vector(scale(avg_num_steps, center=T, scale=T)),
          avg_num_steps_fractal_z = as.vector(scale(fractal_num_steps_needed, center=T, scale=T))) %>%
   ungroup()
@@ -1275,7 +1278,7 @@ s3_joined_question_data = s3_joined_question_data %>%
 ```{r}
 s3_joined_question_data = s3_joined_question_data %>%
   mutate(corrected_nac = ifelse(question != "drag_drop_on_diagram", NA,
-                                ifelse(fractal_square_cycles, num_assignments_correct-chance_alignments_sq, num_assignments_correct-chance_alignments_od))) 
+                                ifelse(target_square_cycles, num_assignments_correct-chance_alignments_sq, num_assignments_correct-chance_alignments_od))) 
 ```
 
 ```{r}
@@ -1471,7 +1474,7 @@ stargazer(num_dd_assignments_correct_model, num_dd_assignments_correct_sl_model,
 ## diagram selection
 ```{r}
 s3_joined_question_data = s3_joined_question_data %>%
-  mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("square_cycles", response), fractal_square_cycles, !fractal_square_cycles)))
+  mutate(ds_correct = ifelse(question != "diagram_selection", NA, ifelse(grepl("square_cycles", response), target_square_cycles, !target_square_cycles)))
 ```
 
 
@@ -1910,7 +1913,7 @@ ggsave("../writing/talks/figures/ex4/cs_by_iso_group_ns.png", width=7, height=5)
 # one task helpful for other? 
 
 ```{r}
-oth_model = lm(response ~  isomorphic * avg_num_steps_z  + fractal_square_cycles , data=s3_joined_question_data %>%
+oth_model = lm(response ~  isomorphic * avg_num_steps_z  + target_square_cycles , data=s3_joined_question_data %>%
                 filter(question == "one_task_helpful_for_other"))
 summary(oth_model)
 ```
@@ -2008,7 +2011,7 @@ ggsave("../writing/talks/figures/ex4/wc_by_ns.png", width=7, height=5)
 ```{r}
 s3_joined_question_data = s3_joined_question_data %>%
   mutate(corrected_nac = ifelse(question != "correspondence_drag_drop", corrected_nac,
-                                ifelse(fractal_square_cycles, num_assignments_correct-chance_alignments_sq, num_assignments_correct-chance_alignments_od)))
+                                ifelse(target_square_cycles, num_assignments_correct-chance_alignments_sq, num_assignments_correct-chance_alignments_od)))
 ```
 
 
@@ -2213,16 +2216,16 @@ summary(when_noticed_model)
 getting a distribution for each subject
 ```{r}
 distributional_data = main_data %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal, action, education_high) %>% 
+  group_by(isomorphic, target_square_cycles, group, subject_id, session, trial_type, location, goal, action, education_high) %>% 
   summarize(action_count = n()) %>%
   ungroup() %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal, education_high) %>% 
+  group_by(isomorphic, target_square_cycles, group, subject_id, session, trial_type, location, goal, education_high) %>% 
   mutate(action_probability = action_count/sum(action_count)) %>%
   ungroup() %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, education_high) %>% 
+  group_by(isomorphic, target_square_cycles, group, subject_id, session, trial_type, education_high) %>% 
   complete(location, goal, action, fill=list(action_count=NA, action_probability=NA)) %>%
   ungroup() %>%
-  group_by(isomorphic, fractal_square_cycles, group, subject_id, session, trial_type, location, goal, education_high) %>% 
+  group_by(isomorphic, target_square_cycles, group, subject_id, session, trial_type, location, goal, education_high) %>% 
   mutate(never_visited = all(is.na(action_count)),
          action_probability=ifelse(never_visited, NA, 
                                    ifelse(is.na(action_probability), 0., action_probability))) %>%
@@ -2305,12 +2308,12 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
                       ))) %>% 
   select(-action_count, -group) %>%
   spread(trial_type, action_probability) %>%
-  group_by(isomorphic, fractal_square_cycles, subject_id, perm, education_high) %>% 
+  group_by(isomorphic, target_square_cycles, subject_id, perm, education_high) %>% 
   summarize(L1 = sum(abs(door-fractal), na.rm=T),
             L2 = sum((door-fractal)^2, na.rm=T),
             Linf = max(abs(door-fractal), na.rm=T)) %>%
   ungroup() %>%
-  group_by(isomorphic, fractal_square_cycles, subject_id, education_high) %>% 
+  group_by(isomorphic, target_square_cycles, subject_id, education_high) %>% 
   summarize(avg_L1 = mean(L1), min_L1 = min(L1), 
             avg_L2 = mean(L2), min_L2 = min(L2), 
             avg_Linf = mean(Linf), min_Linf = min(Linf), 
@@ -2326,8 +2329,8 @@ distributional_similarity_data = distributional_similarity_data[rep(seq_len(dd_n
             perm_swaps_minus_perm_non_swaps_Linf = sum(Linf[which(perm %in% perms_which_flip)]) - sum(Linf[which(!(perm %in% perms_which_flip))]),
             ) %>% 
   ungroup() %>%
-  mutate(fractal_Flipping = fractal_square_cycles,
-         structure = factor(ifelse(fractal_square_cycles, "Flipping", "Cycling")),
+  mutate(fractal_Flipping = target_square_cycles,
+         structure = factor(ifelse(target_square_cycles, "Flipping", "Cycling")),
          isomorphic=factor(isomorphic))
  
 ```
@@ -2516,7 +2519,7 @@ dist_corr_data = inner_join(s3_joined_question_data %>%
          psmnps_Linf_z = as.vector(scale(perm_swaps_minus_perm_non_swaps_Linf)),
          psmnps_L2_z = as.vector(scale(perm_swaps_minus_perm_non_swaps_L2)),
          rt=rt/1000) %>%
-  group_by(isomorphic, fractal_square_cycles) %>%
+  group_by(isomorphic, target_square_cycles) %>%
   mutate(avg_L1_z = scale(avg_L1),
          min_L1_z = scale(min_L1)) %>%
   ungroup()
@@ -2754,7 +2757,7 @@ contrasts(es_dist_corr_data$correspondence_suspect) = cbind(Yes=c(-1, 1)) # effe
 ```
 
 ```{r}
-es_dist_corr_correct_model = glm(correspondence_correct ~ fractal_square_cycles  + I(scale(perm_swaps_minus_perm_non_swaps)) * correspondence_suspect  + I(rt/1000) + mean_rt , family="binomial", data=es_dist_corr_data)
+es_dist_corr_correct_model = glm(correspondence_correct ~ target_square_cycles  + I(scale(perm_swaps_minus_perm_non_swaps)) * correspondence_suspect  + I(rt/1000) + mean_rt , family="binomial", data=es_dist_corr_data)
 summary(es_dist_corr_correct_model)
 ```
 
@@ -2763,13 +2766,13 @@ summary(es_dist_corr_correct_model)
 ```{r}
 es_dist_corr_data_2 = es_dist_corr_data %>%
   filter(two_corr_Qs & question %in% c("correspondence_identify", "correspondence_drag_drop")) %>%
-  group_by(subject_id, fractal_square_cycles) %>%
+  group_by(subject_id, target_square_cycles) %>%
   mutate(best_dd_perm = head(best_dd_perm, 1), 
          best_dd_perms = head(best_dd_perms, 1),
          best_dd_perm_flips = mean(best_dd_perm_flips, na.rm=T),
          best_dd_equals_perm_at_min = best_dd_perm == perm_at_min,
          perm_at_min_in_best_dd_perms = perm_at_min %in% head(best_dd_perms, 1)[[1]],
-         perm_at_min_alignment_with_best_dd_perms = ifelse(fractal_square_cycles, 
+         perm_at_min_alignment_with_best_dd_perms = ifelse(target_square_cycles, 
                                                            max_aligned_with_permutations(c(1,2,3,4,5,6), sq_perm_locs[head(best_dd_perms, 1)[[1]]], unlist(sq_perm_locs[head(perm_at_min, 1)]))[1],
                                                            max_aligned_with_permutations(c(1,2,3,4,5,6), od_perm_locs[head(best_dd_perms, 1)[[1]]], unlist(od_perm_locs[head(perm_at_min, 1)]))[1])) %>%
   ungroup()
@@ -2778,7 +2781,7 @@ es_dist_corr_data_2 = es_dist_corr_data %>%
 
 Is there residual variance in policy projections after controlling for their explicit guess at the correspondence? 
 ```{r}
-dist_corr_correct_model_b = glm(correspondence_correct ~ fractal_square_cycles  + I(scale(perm_swaps_minus_perm_non_swaps)) + best_dd_perm_flips +  avg_num_steps_z   + I(rt/1000) + mean_rt , family="binomial", data=es_dist_corr_data_2)
+dist_corr_correct_model_b = glm(correspondence_correct ~ target_square_cycles  + I(scale(perm_swaps_minus_perm_non_swaps)) + best_dd_perm_flips +  avg_num_steps_z   + I(rt/1000) + mean_rt , family="binomial", data=es_dist_corr_data_2)
 summary(dist_corr_correct_model_b)
 ```
 Hard to say because of lack of power to detect the effect at all
@@ -3058,6 +3061,6 @@ ggplot(tsne_data, aes(x=dimension_1, y=dimension_2, color=ns_z)) +
 ```{r}
 View(question_data %>%
   filter(question %in% c("similarity_descr", "correspondence_descr")) %>% 
-  select(subject_id, isomorphic, fractal_square_cycles, question, response))
+  select(subject_id, isomorphic, target_square_cycles, question, response))
 ```
 
