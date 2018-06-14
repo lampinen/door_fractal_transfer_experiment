@@ -310,7 +310,7 @@ odd_cycles.prototype.get_elements = function() {
 }
 
 odd_cycles.prototype.get_name = function() {
-    return "tri cycles (cube, non-group)"
+    return "odd cycles (cube, non-group)"
 }
 
 // gets *SOME* generating set (actually the canonical one)
