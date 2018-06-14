@@ -112,7 +112,7 @@ chance_alignments_od = 1.56
 
 # Data loading
 ```{r}
-num_subjects = 12
+num_subjects = 16
 data_dir = "../anonymized_data/ex4"
 drag_drop_target_locations_order = 1:8
 ```
@@ -147,7 +147,6 @@ for (i in 1:num_subjects) {
       next
     }
     main_d_list = fromJSON(file=sprintf("%s/s%i/%i.json", data_dir,s,i))
-    two_corr_Qs = TRUE
     main_d_frame = data.frame()
     question_d_frame = data.frame()
     for (trial_i in 1:length(main_d_list)) {
@@ -172,7 +171,6 @@ for (i in 1:num_subjects) {
         parsed_responses = fromJSON(this_trial$responses)
         for (name in names(parsed_responses)) {
           this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
-          this_Q_d$two_corr_Qs = two_corr_Qs
           this_Q_d$session = s
           this_Q_d$name = name
           this_Q_d$response = as.character(parsed_responses[[name]])
@@ -180,7 +178,6 @@ for (i in 1:num_subjects) {
         }
       } else if (grepl("drag-drop-on-image",this_trial$trial_type)) {
         this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
-        this_Q_d$two_corr_Qs = two_corr_Qs
         this_Q_d$session = s
         this_Q_d$assignments = list(this_trial$assignments)
         if (trial_i == 117) { # drag drop correspondence, must undo shuffling of rooms
@@ -197,6 +194,11 @@ for (i in 1:num_subjects) {
         this_Q_d$best_dd_perm = blah[2]
         this_Q_d$best_dd_perm_flips = blah[2] %in% perms_which_flip
         this_Q_d$best_dd_perms = list(blah[3:length(blah)])
+        question_d_frame = bind_rows(question_d_frame, this_Q_d)      
+      } else if (grepl("drag-drop-clustering",this_trial$trial_type)) {
+        this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
+        this_Q_d$session = s
+        this_Q_d$assignments = list(this_trial$assignments)
         question_d_frame = bind_rows(question_d_frame, this_Q_d)      
       } else {
         # instructions or other
@@ -216,6 +218,7 @@ auxiliary_data = data.frame(auxiliary_data)
 main_data = data.frame(main_data)
 question_data = data.frame(question_data)
 ```
+
 # data manipulation
 Easy get of condition variables
 ```{r}
@@ -228,7 +231,7 @@ Some renaming for convenience/clarity
 ```{r}
 main_data = main_data %>%
   rename(location=location_history, action=action_history) %>%
-  mutate(group = ifelse(grepl("square_cycles", group), "square_cycles", "odd_cycles"),
+  mutate(group = ifelse(grepl("square cycles", group), "square_cycles", "odd_cycles"),
          trial_type = ifelse(grepl("fractal", trial_type), "fractal", "door"),
          target_or_source = ifelse(fractals_target, 
                                    ifelse(trial_type == "fractal", "target", "source"),
@@ -265,48 +268,45 @@ main_data = main_data %>%
 
 # question data manipulation
 
-TODO: indices
 ```{r}
 question_data = question_data %>%
-  mutate(question = ifelse(session < 3 | ((!two_corr_Qs & trial_index == 118) | (two_corr_Qs & trial_index == 119)),
+  mutate(question = ifelse(session < 3 | trial_index == 118,
                            "comments",
                     ifelse(trial_index == 105,
-                           "door_hyp_guess",
+                           "target_clustering",
                     ifelse(trial_index == 106,
-                           "fractal_hyp_guess",
-                    ifelse(trial_index == 107,
                            "diagram_selection",
-                    ifelse(trial_index == 108,
+                    ifelse(trial_index == 107,
                            "drag_drop_on_diagram",
-                    ifelse(trial_index == 109,
+                    ifelse(trial_index == 108,
                            "similarity_likert",
-                    ifelse(trial_index == 110,
+                    ifelse(trial_index == 109,
                            "similarity_descr",
-                    ifelse(trial_index == 111,
+                    ifelse(trial_index == 110,
                            "correspondence_suspect",
-                    ifelse(trial_index == 112,
+                    ifelse(trial_index == 111,
                            "when_noticed",
-                    ifelse(trial_index == 113,
+                    ifelse(trial_index == 112,
                            "correspondence_descr",
-                    ifelse(trial_index == 114,
+                    ifelse(trial_index == 113,
                            "one_task_helpful_for_other",
-                    ifelse(trial_index == 115,
+                    ifelse(trial_index == 114,
                            "which_condition",
-                    ifelse(two_corr_Qs & trial_index == 116,
+                    ifelse( trial_index == 115,
                            "correspondence_drag_drop",
-                    ifelse(((!two_corr_Qs & trial_index == 116) | (two_corr_Qs & trial_index == 117)) & name == "Q0",
+                    ifelse(trial_index == 116 & name == "Q0",
                            "correspondence_identify",
-                    ifelse(((!two_corr_Qs & trial_index == 116) | (two_corr_Qs & trial_index == 117)) & name == "Q1",
+                    ifelse(trial_index == 116 & name == "Q1",
                            "correspondence_identify_confidence",
-                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q0",
+                    ifelse(trial_index == 117 & name == "Q0",
                            "age",
-                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q1",
+                    ifelse(trial_index == 117 & name == "Q1",
                            "education",
-                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q2",
+                    ifelse(trial_index == 117 & name == "Q2",
                            "gender",
-                    ifelse(((!two_corr_Qs & trial_index == 117) | (two_corr_Qs & trial_index == 118)) & name == "Q3",
+                    ifelse(trial_index == 117 & name == "Q3",
                            "race",
-                           NA))))))))))))))))))))
+                           NA)))))))))))))))))))
   
 
 any(is.na(question_data$question))
@@ -318,6 +318,7 @@ question_data = inner_join(question_data,
                            auxiliary_data %>%
                              select(target_square_cycles,
                                     isomorphic,
+                                    fractals_target,
                                     this_door_color_assignment,
                                     this_door_generator_assignment,
                                     this_mutagen_assignment,
@@ -348,7 +349,7 @@ factoring
 main_data = main_data %>% 
   mutate(trial_type = factor(trial_type),
          group = factor(group),
-         structure = factor(group, levels=c("square_cycles", "odd_cycles"), labels=c("Flipping", "Cycling")),
+         structure = factor(group, levels=c("square_cycles", "odd_cycles"), labels=c("Square", "Odd")),
          subject_id = factor(subject_id))
 ```
 
@@ -358,12 +359,12 @@ main_data = inner_join(main_data, demographic_data) # Note: this implicitly excl
 
 
 # More main data + collapsed data
-TODO: indices
 Centering as appropriate
 ```{r}
 main_data = main_data %>%
   mutate(session_c = session-1.5, #scale(session, center=T, scale=F), # center session variable
-         trial_index_by_type = ifelse(trial_type == "fractal", trial_index - 55, trial_index-3), # align indices for door and fractal trials
+         is_target_domain = (trial_type == "fractal" & fractals_target) | (trial_type == "door" & !fractals_target),
+         trial_index_by_type = ifelse(is_target_domain, trial_index - 55, trial_index-3), # align indices for door and fractal trials
          trial_index_by_type_z = scale(trial_index_by_type, center=T, scale=T)) %>%
   group_by(subject_id) %>% 
   mutate(rt_z_by_subj = scale(location_rts, center=T, scale=T)) %>%
@@ -380,7 +381,7 @@ main_data = main_data %>%
 ```{r}
 collapsed_main_data = main_data %>%
 #  filter(trial_index_by_type >= 50) %>%
-  group_by(subject_id, isomorphic, target_square_cycles, group, trial_type, session,
+  group_by(subject_id, isomorphic, fractals_target, is_target_domain, target_square_cycles, group, trial_type, session,
            education, age, gender, race, education_high) %>%
   summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)),
             median_rt = median(location_rts),
@@ -397,7 +398,7 @@ collapsed_main_data = main_data %>%
 
 
 ```{r}
-is_ev_off_chance = xtabs(~isomorphic + ever_off_chance, data=collapsed_main_data %>% filter(session==3, trial_type=="fractal"))
+is_ev_off_chance = xtabs(~isomorphic + ever_off_chance, data=collapsed_main_data %>% filter(session==3, trial_type==ifelse(fractals_target, "fractal", "door")))
 chisq.test(is_ev_off_chance) 
 ```
 
@@ -408,7 +409,7 @@ summary(pct_correct_model)
 
 ```{r}
 fully_summarized_data = collapsed_main_data %>%
-  group_by(isomorphic, group, session) %>%
+  group_by(isomorphic, is_target_domain, fractals_target, group, session) %>%
   summarize(mean_pct_correct = mean(pct_correct), sd_pct_correct = sd(pct_correct)) %>%
   mutate(c95_lower = mean_pct_correct - 1.96*sd_pct_correct/sqrt(n()),
          c95_upper = mean_pct_correct + 1.96*sd_pct_correct/sqrt(n()))
@@ -487,7 +488,7 @@ ggplot(data=fully_summarized_data, aes(x=factor(session), y=mean_pct_correct, fi
   geom_errorbar(aes(ymin=c95_lower, ymax = c95_upper), position=position_dodge(width=1), width=0.5) +
   geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
   ylim(0,1) +
-  facet_wrap(~ group)
+  facet_grid(fractals_target ~ group)
 ```
 
 ```{r}
@@ -521,52 +522,6 @@ summary(rt_model)
 
 
 # basic models
-## pct correct correlation
-```{r}
-pcc_data = collapsed_main_data %>%
-  mutate(pct_correct = pct_correct-0.5) %>% #center at chance
-  select(-c(group, pct_correct_se, pct_correct_95ci_lower, pct_correct_95ci_upper)) %>%
-  spread(trial_type, pct_correct) %>%
-  rename(fractal_pct_correct = fractal,
-         door_pct_correct = door) 
-```
-
-```{r}
-pcc_data %>%
-  group_by(isomorphic) %>%
-  summarize(pct_correct_dot = mean(fractal_pct_correct * door_pct_correct), pct_correct_dot_sd = sd(fractal_pct_correct * door_pct_correct))
-```
-
-```{r}
-ggplot(data=pcc_data, aes(x=door_pct_correct, y=fractal_pct_correct, color=isomorphic)) +
-  geom_point() +
-  geom_abline(intercept=0, slope=1, linetype=2, alpha=0.5) +
-  xlim(-0.5,0.5) +
-  ylim(-0.5,0.5) +
-  facet_wrap(~ isomorphic)
-```
-```{r}
-pcc2_data = pcc_data %>%
-  group_by(subject_id, isomorphic) %>%
-  summarize(pct_correct_dot = mean(fractal_pct_correct * door_pct_correct))
-```
-
-```{r}
-ggplot(data=pcc2_data, aes(x=isomorphic, y= pct_correct_dot, color=isomorphic)) +
-  geom_point(position="jitter")
-```
-
-
-```{r}
-pc_model = lmer(fractal_pct_correct ~ door_pct_correct * isomorphic + target_square_cycles + (1|subject_id), data=pcc_data)
-summary(pc_model)
-```
-
-```{r}
-pc2_model=lm(pct_correct_dot ~ isomorphic, data=pcc2_data)
-summary(pc2_model)
-```
-
 
 ## action optimal
 Just looking at condition and extremely important controls and random effects
@@ -598,14 +553,14 @@ summary(action_model)
 main outcome variable is number of steps needed to get to a goal
 ```{r}
 num_steps_per_trial_data = main_data %>%
-  group_by(subject_id, isomorphic, group, session, session_c, structure, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
+  group_by(subject_id, isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session, session_c, structure, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
   summarize(num_steps_needed=n(),
             avg_rt_on_trial=mean(truncated_RT))
 ```
 
 ```{r}
 num_steps_summarized_data = num_steps_per_trial_data %>%
-  group_by(subject_id, isomorphic, group, session, session_c, structure, trial_type, education_high) %>%
+  group_by(subject_id, isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session, session_c, structure, trial_type, education_high) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
@@ -625,21 +580,21 @@ ggplot(data=num_steps_summarized_data, aes(x=session_c, y=num_steps_needed, line
   geom_point(size=2) +
   scale_color_brewer(palette="Set1") +
   labs(x="Session", y = "Average number of steps needed") +
-  geom_hline(yintercept=0.5, alpha=0.75, linetype=2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax=num_steps_needed_95ci_upper), width=0.5) +
-  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  geom_hline(aes(yintercept=2.0), linetype=2, color="#E41A1C", alpha=0.5) +
+  geom_hline(aes(yintercept=2.125), linetype=2, color="#377EB8", alpha=0.5) +
   facet_wrap(~ isomorphic + subject_id)
 ```
 
 ```{r}
 ggsave("./figures/ex4/ns_individual_curve_plot.png", width=10, height=10)
-ggsave("../writing/talks/figures/ex4/ns_individual_curve_plot.png", width=10, height=10)
+#ggsave("../writing/talks/figures/ex4/ns_individual_curve_plot.png", width=10, height=10)
 ```
 
 
 ```{r}
 num_steps_fully_summarized_data = num_steps_summarized_data  %>%
-  group_by(isomorphic, group, session_c, structure) %>%
+  group_by(isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session_c, structure) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -656,7 +611,7 @@ ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed
   geom_point(size=1.2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_wrap(~ structure)
+  facet_grid(fractals_target~ structure)
 ```
 ```{r}
 ggsave("figures/ex4/ns_basic_plot.png")
@@ -682,7 +637,7 @@ ggsave("../writing/talks/figures/ex4/flipping_easier.png", width=7, height=5)
 
 ```{r}
 num_steps_fully_summarized_data_by_type = num_steps_summarized_data  %>%
-  group_by(isomorphic, group, session_c, structure, trial_type) %>%
+  group_by(isomorphic, group, session_c, is_target_domain, fractals_target, target_square_cycles, structure, trial_type) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -692,7 +647,7 @@ num_steps_fully_summarized_data_by_type = num_steps_summarized_data  %>%
 
 ```{r}
 num_steps_more_fully_summarized_data_by_type = num_steps_summarized_data  %>%
-  group_by(isomorphic, session_c, trial_type) %>%
+  group_by(isomorphic, structure, is_target_domain, session_c, trial_type) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -701,102 +656,57 @@ num_steps_more_fully_summarized_data_by_type = num_steps_summarized_data  %>%
 ```
 
 ```{r}
-ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(trial_type == "fractal"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
+ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(is_target_domain), aes(x=session_c + 2.5, y=num_steps_needed, color=isomorphic)) +
 #  geom_bar(stat="identity",position="dodge") +
   scale_color_brewer(palette="Set2") +
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
   labs(x="Session", y = "Average number of steps needed (fractal trials)") +
-  scale_x_continuous(breaks=1:3) +
+  scale_x_continuous(breaks=1:4) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
-  annotate("segment", x=1.5, xend=1.5, y=4, yend=4.7, alpha=0.3, size=1.2) +
-  annotate("text", x=1.4, y=4.4, label="**", size=10, alpha=0.3) +
-  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5)
+#  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_grid(structure ~ trial_type)
 ```
 
 ```{r}
-ggsave("../writing/talks/figures/ex4/ns_more_basic_plot_fractal.png", width=7, height=5)
+ggsave("figures/ex4/ns_more_basic_plot_target.png", width=7, height=5)
 ```
 
 ```{r}
-ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(trial_type == "door"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
-#  geom_bar(stat="identity",position="dodge") +
-  scale_color_brewer(palette="Set2") +
-  geom_line(size=1.2) + 
-  geom_point(size=1.2) +
-  labs(x="Session", y = "Average number of steps needed (door trials)") +
-  scale_x_continuous(breaks=1:3) +
-  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
-  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5)
-```
-
-```{r}
-ggsave("../writing/talks/figures/ex4/ns_more_basic_plot_door.png", width=7, height=5)
-```
-
-
-```{r}
-ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "fractal"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
+ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(!is_target_domain), aes(x=session_c + 2.5, y=num_steps_needed, color=isomorphic)) +
 #  geom_bar(stat="identity",position="dodge") +
   scale_color_brewer(palette="Set2") +
   geom_line(size=1.2) + 
   geom_point(size=1.2) +
   labs(x="Session", y = "Average number of steps needed (fractal trials)") +
-  scale_x_continuous(breaks=1:3) +
+  scale_x_continuous(breaks=1:4) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
-  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_wrap(~ structure )
+#  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
+  facet_grid(structure ~ trial_type)
 ```
 
 ```{r}
-ggsave("figures/ex4/ns_basic_plot_fractal.png")
-ggsave("../writing/talks/figures/ex4/ns_basic_plot_fractal.png", width=7, height=5)
-
-```
-
-
-```{r}
-ggplot(data=num_steps_fully_summarized_data_by_type %>% filter(trial_type == "door"), aes(x=session_c + 2, y=num_steps_needed, color=isomorphic)) +
-#  geom_bar(stat="identity",position="dodge") +
-  scale_color_brewer(palette="Set2") +
-  geom_line(size=1.2) + 
-  geom_point(size=1.2) +
-  labs(x="Session", y = "Average number of steps needed (door trials)") +
-  scale_x_continuous(breaks=1:3) +
-  geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
-  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_wrap(~ structure)
-
-```
-
-```{r}
-ggsave("figures/ex4/ns_basic_plot_door.png")
-ggsave("../writing/talks/figures/ex4/ns_basic_plot_door.png", width=7, height=5)
+ggsave("figures/ex3/ns_more_basic_plot_door.png", width=7, height=5)
 ```
 
 
 ```{r}
-ns_time_dependent_model_0 = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F)
-ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * trial_type + session_c + I(session_c^2) + group  +  trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F )
-ns_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (session_c  + trial_type)+ I(session_c^2) + group + trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data , REML=F)
-ns_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (session_c ) *trial_type + I(session_c^2)  + group + trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F )
+ns_time_dependent_model_0 = lmer(num_steps_needed~ isomorphic +is_target_domain + session_c + I(session_c^2) + group  + trial_type + trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F)
+ns_time_dependent_model_0.5 = lmer(num_steps_needed~ isomorphic * is_target_domain + trial_type + session_c + I(session_c^2) + group  +  trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F )
+ns_time_dependent_model_1 = lmer(num_steps_needed~ isomorphic * (session_c  + is_target_domain) + trial_type+ I(session_c^2) + group + trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data , REML=F)
+ns_time_dependent_model_1.5 = lmer(num_steps_needed~ isomorphic * (session_c ) *is_target_domain +trial_type + I(session_c^2)  + group + trial_index_by_type_z + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data, REML=F )
 AIC(ns_time_dependent_model_0)
 AIC(ns_time_dependent_model_0.5)
 AIC(ns_time_dependent_model_1)
 AIC(ns_time_dependent_model_1.5)
-summary(ns_time_dependent_model_0)
-summary(ns_time_dependent_model_0.5) # min AIC
+summary(ns_time_dependent_model_1) # min AIC
 ```
 
 ```{r}
-ns_time_dependent_model_door = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + structure + trial_index_by_type_z + I(trial_index_by_type_z^2) + avg_rt_on_trial  + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="door"))
-ns_time_dependent_model_fractal = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + structure + trial_index_by_type_z + I(trial_index_by_type_z^2) + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="fractal"))
-summary(ns_time_dependent_model_door)
-summary(ns_time_dependent_model_fractal)
-```
-
-```{r}
-
+# ns_time_dependent_model_door = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + structure + trial_index_by_type_z + I(trial_index_by_type_z^2) + avg_rt_on_trial  + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="door"))
+# ns_time_dependent_model_fractal = lmer(num_steps_needed~ isomorphic + session_c + I(session_c^2) + structure + trial_index_by_type_z + I(trial_index_by_type_z^2) + avg_rt_on_trial + (1 + session_c | subject_id), data=num_steps_per_trial_data %>% filter(trial_type=="fractal"))
+# summary(ns_time_dependent_model_door)
+# summary(ns_time_dependent_model_fractal)
 ```
 
 ```{r}
