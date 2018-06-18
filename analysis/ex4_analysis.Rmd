@@ -180,7 +180,7 @@ for (i in 1:num_subjects) {
         this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
         this_Q_d$session = s
         this_Q_d$assignments = list(this_trial$assignments)
-        if (trial_i == 117) { # drag drop correspondence, must undo shuffling of rooms
+        if (trial_i == 116 & "background_order" %in% names(this_trial)) { # drag drop correspondence, must undo shuffling of rooms
           z = this_trial$background_order + 1
           this_Q_d$assignments[[1]] = (this_Q_d$assignments[[1]])[z][z][z][z][z][z][z] # a little group theory -- x^7 = x^-1 for all x in S_8
         }
@@ -1831,7 +1831,7 @@ ggplot(data=s3_joined_question_data %>%
   geom_vline(data=stuff, aes(xintercept=chance* 100/8), alpha=0.5, linetype=2) +
   xlim(0, 105) +
   labs(x = "% correct room-fractal matches", y="Density")  +
-  facet_grid(~target_square_cycles)
+  facet_grid(~ target_square_cycles)
 ```
 
 
