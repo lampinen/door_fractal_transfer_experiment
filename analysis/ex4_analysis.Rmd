@@ -180,7 +180,10 @@ for (i in 1:num_subjects) {
         this_Q_d = data.frame(this_trial[c("trial_type", "rt", "trial_index", "time_elapsed")])
         this_Q_d$session = s
         this_Q_d$assignments = list(this_trial$assignments)
-        if (trial_i == 116 & "background_order" %in% names(this_trial)) { # drag drop correspondence, must undo shuffling of rooms
+        if (trial_i == 116) { # drag drop correspondence, must undo shuffling of rooms
+          if (!("background_order" %in% names(this_trial))) {
+            next # failed to save background order on a few pilot subjects, so that data needs to be removed
+          }
           z = this_trial$background_order + 1
           this_Q_d$assignments[[1]] = (this_Q_d$assignments[[1]])[z][z][z][z][z][z][z] # a little group theory -- x^7 = x^-1 for all x in S_8
         }
