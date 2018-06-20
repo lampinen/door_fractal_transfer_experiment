@@ -30,8 +30,6 @@
 </script>
 
 <script>
-
-
     var target_square_cycles = false; // will fractal task be square_cycles (otherwise odd_cycles) 
     var isomorphic = true; // will two tasks be isomorphic?
     var fractals_target = true; // will fractals be target task or doors?
@@ -64,57 +62,130 @@
     var this_door_color_assignment = ["white", "black"];
     shuffle(this_door_color_assignment);
 
+    var force_timeline;
+    if ((target_square_cycles && isomorphic) || (!target_square_cycles && !isomorphic)) { // first task sq
+        force_timeline = [
+            {start: 0, goal: 1, progress: 0, force_sequence: [0]},
+            {start: 6, goal: 5, progress: 1, force_sequence: [0]},
+            {start: 1, goal: 0, progress: 2, force_sequence: [1]},
+            {start: 7, goal: 3, progress: 3, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 4, force_sequence: [0]},
+            {start: 5, goal: 1, progress: 5, force_sequence: [1]},
+            {start: 3, goal: 0, progress: 6, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 7, force_sequence: [1]},
+            {start: 0, goal: 4, progress: 8, force_sequence: [1]},
+            {start: 6, goal: 7, progress: 9, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 10, force_sequence: [0]},
+            {start: 7, goal: 6, progress: 11, force_sequence: [0]},
+            {start: 2, goal: 6, progress: 12, force_sequence: [1]},
+            {start: 5, goal: 4, progress: 13, force_sequence: [0]},
+            {start: 3, goal: 2, progress: 14, force_sequence: [1]},
+            {start: 4, goal: 7, progress: 15, force_sequence: [0]},
+            {start: 0, goal: 1, progress: 16, force_sequence: [0]},
+            {start: 6, goal: 5, progress: 17, force_sequence: [0]},
+            {start: 7, goal: 3, progress: 18, force_sequence: [1]},
+            {start: 2, goal: 6, progress: 19, force_sequence: [1]},
+            {start: 4, goal: 7, progress: 20, force_sequence: [0]},
+            {start: 1, goal: 0, progress: 21, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 22, force_sequence: [0]},
+            {start: 5, goal: 1, progress: 23, force_sequence: [1]},
+            {start: 3, goal: 0, progress: 24, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 25, force_sequence: [1]},
+            {start: 6, goal: 7, progress: 26, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 27, force_sequence: [0]},
+            {start: 7, goal: 6, progress: 28, force_sequence: [0]},
+            {start: 0, goal: 4, progress: 29, force_sequence: [1]},
+            {start: 3, goal: 2, progress: 30, force_sequence: [1]},
+            {start: 5, goal: 4, progress: 31, force_sequence: [0]}           
+        ]
+    } else {
+        force_timeline = [
+            {start: 0, goal: 1, progress: 0, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 1, force_sequence: [1]},
+            {start: 1, goal: 0, progress: 2, force_sequence: [1]},
+            {start: 7, goal: 4, progress: 3, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 4, force_sequence: [0]},
+            {start: 0, goal: 4, progress: 5, force_sequence: [1]},
+            {start: 5, goal: 7, progress: 6, force_sequence: [0]},
+            {start: 3, goal: 4, progress: 7, force_sequence: [0]},
+            {start: 6, goal: 7, progress: 8, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 9, force_sequence: [0]},
+            {start: 4, goal: 0, progress: 10, force_sequence: [0]},
+            {start: 2, goal: 6, progress: 11, force_sequence: [1]},
+            {start: 5, goal: 2, progress: 12, force_sequence: [1]},
+            {start: 7, goal: 6, progress: 13, force_sequence: [0]},
+            {start: 3, goal: 1, progress: 14, force_sequence: [1]},
+            {start: 6, goal: 5, progress: 15, force_sequence: [0]},
+            {start: 7, goal: 4, progress: 16, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 17, force_sequence: [0]},
+            {start: 6, goal: 5, progress: 18, force_sequence: [0]},
+            {start: 2, goal: 6, progress: 19, force_sequence: [1]},
+            {start: 5, goal: 7, progress: 20, force_sequence: [0]},
+            {start: 0, goal: 1, progress: 21, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 22, force_sequence: [1]},
+            {start: 1, goal: 0, progress: 23, force_sequence: [1]},
+            {start: 3, goal: 4, progress: 24, force_sequence: [0]},
+            {start: 6, goal: 7, progress: 25, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 26, force_sequence: [0]},
+            {start: 4, goal: 0, progress: 27, force_sequence: [0]},
+            {start: 5, goal: 2, progress: 28, force_sequence: [1]},
+            {start: 7, goal: 6, progress: 29, force_sequence: [0]},
+            {start: 0, goal: 4, progress: 30, force_sequence: [1]},
+            {start: 3, goal: 1, progress: 31, force_sequence: [1]}
+        ]
+    }
+
     var block_timeline = [
-        {start: 0, goal: 2, progress: 0},
-        {start: 2, goal: 3, progress: 2},
-        {start: 3, goal: 4, progress: 4},
-        {start: 4, goal: 1, progress: 6},
-        {start: 1, goal: 7, progress: 8},
-        {start: 7, goal: 5, progress: 10},
-        {start: 5, goal: 6, progress: 12},
-        {start: 6, goal: 0, progress: 14},
-        {start: 0, goal: 7, progress: 16},
-        {start: 7, goal: 6, progress: 18},
-        {start: 6, goal: 5, progress: 20},
-        {start: 5, goal: 3, progress: 22},
-        {start: 3, goal: 4, progress: 24},
-        {start: 4, goal: 2, progress: 26},
-        {start: 2, goal: 1, progress: 28},
-        {start: 1, goal: 4, progress: 30},
-        {start: 4, goal: 6, progress: 32},
-        {start: 6, goal: 1, progress: 34},
-        {start: 1, goal: 2, progress: 36},
-        {start: 2, goal: 5, progress: 38},
-        {start: 5, goal: 0, progress: 40},
-        {start: 0, goal: 3, progress: 42},
-        {start: 3, goal: 7, progress: 44},
-        {start: 7, goal: 3, progress: 46},
-        {start: 3, goal: 1, progress: 48},
-        {start: 1, goal: 5, progress: 50},
-        {start: 5, goal: 0, progress: 52},
-        {start: 0, goal: 6, progress: 54},
-        {start: 6, goal: 2, progress: 56},
-        {start: 2, goal: 7, progress: 57},
-        {start: 7, goal: 4, progress: 60},
-        {start: 4, goal: 1, progress: 62},
-        {start: 1, goal: 3, progress: 64},
-        {start: 3, goal: 2, progress: 66},
-        {start: 2, goal: 4, progress: 68},
-        {start: 4, goal: 0, progress: 70},
-        {start: 0, goal: 6, progress: 72},
-        {start: 6, goal: 7, progress: 74},
-        {start: 7, goal: 5, progress: 76},
-        {start: 5, goal: 7, progress: 78},
-        {start: 7, goal: 3, progress: 80},
-        {start: 3, goal: 5, progress: 82},
-        {start: 5, goal: 0, progress: 84},
-        {start: 0, goal: 2, progress: 86},
-        {start: 2, goal: 6, progress: 88},
-        {start: 6, goal: 4, progress: 90},
-        {start: 4, goal: 1, progress: 92},
-        {start: 1, goal: 2, progress: 94},
-        {start: 2, goal: 6, progress: 96},
-        {start: 6, goal: 3, progress: 98}
+        {start: 0, goal: 2, progress: 32},
+        {start: 2, goal: 3, progress: 33},
+        {start: 3, goal: 4, progress: 35},
+        {start: 4, goal: 1, progress: 36},
+        {start: 1, goal: 7, progress: 37},
+        {start: 7, goal: 5, progress: 39},
+        {start: 5, goal: 6, progress: 40},
+        {start: 6, goal: 0, progress: 41},
+        {start: 0, goal: 7, progress: 43},
+        {start: 7, goal: 6, progress: 44},
+        {start: 6, goal: 5, progress: 45},
+        {start: 5, goal: 3, progress: 47},
+        {start: 3, goal: 4, progress: 48},
+        {start: 4, goal: 2, progress: 49},
+        {start: 2, goal: 1, progress: 51},
+        {start: 1, goal: 4, progress: 52},
+        {start: 4, goal: 6, progress: 53},
+        {start: 6, goal: 1, progress: 55},
+        {start: 1, goal: 2, progress: 56},
+        {start: 2, goal: 5, progress: 57},
+        {start: 5, goal: 0, progress: 59},
+        {start: 0, goal: 3, progress: 60},
+        {start: 3, goal: 7, progress: 61},
+        {start: 7, goal: 3, progress: 63},
+        {start: 3, goal: 1, progress: 64},
+        {start: 1, goal: 5, progress: 65},
+        {start: 5, goal: 0, progress: 67},
+        {start: 0, goal: 6, progress: 68},
+        {start: 6, goal: 2, progress: 69},
+        {start: 2, goal: 7, progress: 71},
+        {start: 7, goal: 4, progress: 72},
+        {start: 4, goal: 1, progress: 73},
+        {start: 1, goal: 3, progress: 75},
+        {start: 3, goal: 2, progress: 76},
+        {start: 2, goal: 4, progress: 77},
+        {start: 4, goal: 0, progress: 79},
+        {start: 0, goal: 6, progress: 80},
+        {start: 6, goal: 7, progress: 81},
+        {start: 7, goal: 5, progress: 83},
+        {start: 5, goal: 7, progress: 84},
+        {start: 7, goal: 3, progress: 85},
+        {start: 3, goal: 5, progress: 87},
+        {start: 5, goal: 0, progress: 88},
+        {start: 0, goal: 2, progress: 89},
+        {start: 2, goal: 6, progress: 91},
+        {start: 6, goal: 4, progress: 92},
+        {start: 4, goal: 1, progress: 94},
+        {start: 1, goal: 2, progress: 95},
+        {start: 2, goal: 6, progress: 97},
+        {start: 6, goal: 3, progress: 99}
     ]
 
     var welcome_instructions = {
@@ -127,7 +198,6 @@
 
 	]
     }
-
 
     var reminder_to_return = {
 	type: 'instructions',
@@ -148,11 +218,29 @@
             type: 'instructions',
             show_clickable_nav: true,
             pages: [
-                "You are now beginning the first experiment, which investigates spatial learninhg.",
-                "In this experiment, you are exploring a house. The house has many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path."
+                "You are now beginning the first experiment, which investigates spatial learning.",
+                "In this experiment, you are exploring a house. The house has many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path.",
+                "To help you get started learning your way around the house, we'll first give you some trials where you only need to go through one door to get to the goal, and we'll let you retry if you don't pick the right one." 
             ]
 
         }
+
+        var post_force_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Great job! You will now move on to trials where you may have to go through more than one door, and you will have to explore to find the path; we will no longer tell you if you choose the wrong door, but we will provide you with feedback at the end of the trial on how well you did at finding the shortest path." 
+            ]
+        }
+
+        var room_forced_trials = {
+            type: 'two-door-navigation',
+            group: this_group_source,
+            room_assignment: this_room_assignment,
+            door_color_assignment: this_door_color_assignment,
+            door_generator_assignment: this_door_generator_assignment,
+            timeline: force_timeline 
+        };
 
         var room_trials = {
             type: 'two-door-navigation',
@@ -163,7 +251,7 @@
             timeline: block_timeline 
         };
 
-        var this_timeline = [welcome_instructions, room_instructions, room_trials, reminder_to_return, debrief]
+        var this_timeline = [welcome_instructions, room_instructions, room_forced_trials, post_force_instructions, room_trials, reminder_to_return, debrief]
     } else {
 	var fractal_instructions = {
             type: 'instructions',
@@ -171,6 +259,22 @@
             pages: [
                 "You are now beginning the first experiment, which investigates learning of relationships between visual patterns.",
                 "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g'). After you make each fractal, we'll give you feedback on how well you did." 
+            ]
+        }
+
+        var fractal_forced_trials = {
+            type: 'fractal-mutation',
+            group: this_group_source,
+            fractal_assignment: this_fractal_assignment,
+            mutagen_generator_assignment: this_mutagen_assignment,
+            timeline: force_timeline 
+        };
+
+        var post_force_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Great job! You will now move on to trials where you may have to cause more than one mutation, and you will have to try things out to make the target fractal; we will no longer tell you if you choose the wrong action, but we will provide you with feedback at the end of the trial on how well you did at finding the minimum number of mutations." 
             ]
         }
 
@@ -182,7 +286,7 @@
             timeline: block_timeline 
         };
  
-        var this_timeline = [welcome_instructions, fractal_instructions, fractal_trials, reminder_to_return, debrief]
+        var this_timeline = [welcome_instructions, fractal_instructions, fractal_forced_trials, post_force_instructions, fractal_trials, reminder_to_return, debrief]
     }
 
     var start_experiment = function() {
