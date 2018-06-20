@@ -713,7 +713,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     setTimeout(function() {
                         draw_current_room(current_location);
                         clickable = true;
-                    }, 750);
+                    }, 1500);
                 }, 500);
 
             } else {
