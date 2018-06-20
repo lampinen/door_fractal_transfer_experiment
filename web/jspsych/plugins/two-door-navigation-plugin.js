@@ -15,7 +15,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
     //optional: trial.progress, update of progress bar after
-    trial.force_sequence = (typeof trial.action_noise === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
+    trial.force_sequence = (typeof trial.force_sequence === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
