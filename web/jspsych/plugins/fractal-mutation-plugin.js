@@ -721,7 +721,9 @@ jsPsych.plugins['fractal-mutation'] = (function() {
                 location_rts.push(-1);
                 mutagen_history.push(-1);
                 action_history.push(-1); 
-                draw_current_setup(current_location);
+                setTimeout(function() {
+                    draw_current_setup(current_location);
+                }, 500);
             } else {
                 keyable = true;
                 if (trial.force_sequence) {

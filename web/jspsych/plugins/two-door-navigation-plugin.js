@@ -16,6 +16,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.start = one of group.elements
     //optional: trial.progress, update of progress bar after
     trial.force_sequence = (typeof trial.force_sequence === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
+    alert(trial.force_sequence)
     var original_force_sequence = trial.force_sequence;
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
@@ -693,13 +694,16 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     setTimeout(end_function, 2500); 
                 }, 500);
             } else if (forced_action_wrong) {
+                alert("wrong")
                 display_retry();
                 current_location = prev_location;
                 location_history.push(current_location);
                 location_rts.push(-1);
                 door_history.push(-1);
                 action_history.push(-1); 
-                draw_current_room(current_location);
+                setTimeout(function() {
+                    draw_current_room(current_location);
+                }, 500);
 
             } else {
                 clickable = true;
