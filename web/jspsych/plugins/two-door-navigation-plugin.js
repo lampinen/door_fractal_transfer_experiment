@@ -16,7 +16,6 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.start = one of group.elements
     //optional: trial.progress, update of progress bar after
     trial.force_sequence = (typeof trial.force_sequence === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
-    alert(trial.force_sequence)
     var original_force_sequence = trial.force_sequence;
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
@@ -667,6 +666,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         location_rts.push(curr_time - this_room_time);
         door_history.push(door_loc);
         var this_action = trial.door_generator_assignment[door_loc]; 
+        var prev_location = current_location;
         current_location = next_room(current_location, this_action);
         action_history.push(this_action); 
 
@@ -694,7 +694,6 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     setTimeout(end_function, 2500); 
                 }, 500);
             } else if (forced_action_wrong) {
-                alert("wrong")
                 display_retry();
                 current_location = prev_location;
                 location_history.push(current_location);
@@ -801,6 +800,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         "force_sequence": JSON.stringify(original_force_sequence),
         "location_rts": JSON.stringify(location_rts)
       };
+      console.log(trial_data);
 
       jsPsych.finishTrial(trial_data);
     }

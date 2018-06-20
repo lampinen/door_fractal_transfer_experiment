@@ -62,9 +62,16 @@
     var this_door_color_assignment = ["white", "black"];
     shuffle(this_door_color_assignment);
 
-    var force_timeline = [
-        {start: 0, goal: 1, progress: 0, force_sequence: [1, 1, 1]},
-    ]
+    var force_timeline;
+    if ((target_square_cycles && isomorphic) || (!target_square_cycles && !isomorphic)) { // first task sq
+        force_timeline = [
+            {start: 0, goal: 2, progress: 0, force_sequence: [0, 1, 0, 0]},
+        ]
+    } else {
+        force_timeline = [
+            {start: 0, goal: 1, progress: 0, force_sequence: [0]},
+        ]
+    }
 
     var block_timeline = [
         {start: 0, goal: 2, progress: 0},
@@ -150,7 +157,7 @@
             type: 'instructions',
             show_clickable_nav: true,
             pages: [
-                "You are now beginning the first experiment, which investigates spatial learninhg.",
+                "You are now beginning the first experiment, which investigates spatial learning.",
                 "In this experiment, you are exploring a house. The house has many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path."
             ]
 

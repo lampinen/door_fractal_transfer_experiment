@@ -756,6 +756,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         "force_sequence": JSON.stringify(original_force_sequence), 
         "location_rts": JSON.stringify(location_rts)
       };
+      console.log(trial_data);
 
       jsPsych.finishTrial(trial_data);
     }
