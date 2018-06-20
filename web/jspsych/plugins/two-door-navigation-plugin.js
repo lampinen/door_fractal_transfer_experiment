@@ -577,6 +577,15 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
 
     function get_percentile_string(start, goal, num_steps) {
+        //forcing feedback
+        if (trial.force_sequence !== false) {
+            if (action_history.length === original_force_sequence.length) {
+		return ["Congratulations!", "You got there in the minimum number of steps!"];
+            } else {
+                return ["Pretty good!", "But you could have done even better."];
+            }
+        }
+
         var quants = trial.group.distributions[start][goal];
         var pct = 10;
         if (num_steps <= quants.X90) {

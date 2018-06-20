@@ -608,6 +608,15 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     }
 
     function get_percentile_string(start, goal, num_steps) {
+        //forcing feedback
+        if (trial.force_sequence !== false) {
+            if (action_history.length === original_force_sequence.length) {
+                return ["Congratulations!", "You did it with the minimum number of mutations!"];
+            } else {
+                return ["Pretty good!", "But you could have done even better."];
+            }
+        }
+
         var quants = trial.group.distributions[start][goal];
         var pct = 10;
         if (num_steps <= quants.X90) {
