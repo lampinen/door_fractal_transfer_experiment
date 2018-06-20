@@ -15,6 +15,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
     //optional: trial.progress, update of progress bar after
+    trial.force_sequence = (typeof trial.action_noise === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
@@ -625,6 +626,23 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
     }
 
+    function display_retry() {
+        // reduce opacity of background
+        draw.globalAlpha = 0.9;
+        draw.fillStyle = "gray";
+        draw.fillRect(0, 0, canvas.width, canvas.height);
+
+        draw.globalAlpha = 1;
+        draw.textAlign = "center";
+        draw.fillStyle = "white";
+        var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
+        draw.font = "25px Arial";
+        draw.fillText("Sorry, that was incorrect.", canvas.width/2, canvas.height/2);
+        draw.font = "25px Arial";
+        draw.fillText("Try again.", canvas.width/2, canvas.height/2 + 50);
+
+    }
+
     canvas.addEventListener('mousedown', function(e) {
         if (!clickable) {
             return;
@@ -649,6 +667,18 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         var this_action = trial.door_generator_assignment[door_loc]; 
         current_location = next_room(current_location, this_action);
         action_history.push(this_action); 
+
+        // forcing
+        if (trial.force_sequence && this_action != trial.force_sequence[0]) {
+            location_history.push(current_location);
+            display_retry();
+            setTimeout(function() {
+                    draw_current_setup(current_location);
+                }, 500);
+            return;
+        }
+        trial.force_sequence.splice(0, 1); // pop from head of list
+
 
         // animate
         clickable = false;
@@ -756,6 +786,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
         "door_history": JSON.stringify(door_history),
+        "force_sequence": JSON.stringify(trial.force_sequence),
         "location_rts": JSON.stringify(location_rts)
       };
 

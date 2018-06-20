@@ -14,7 +14,8 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     //trial.goal = one of group.elements
     //trial.start = one of group.elements
     //optional: trial.progress, update of progress bar after
-
+    
+    trial.force_sequence = (typeof trial.action_noise === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
@@ -649,11 +650,21 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.font = "50px Helvetica";
         var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
         draw.fillText(achievement_strings[0], canvas.width/2, canvas.height/2);
-        draw.font = "25px Arial";
+        draw.font = "25px Helvetica";
         draw.fillText(achievement_strings[1], canvas.width/2, canvas.height/2 + 100);
+    }
 
-
-
+    function display_retry() {
+        draw.clearRect(0, 0, canvas.width, canvas.height);
+        draw.fillStyle = "White";
+        draw.fillRect(0, 0, canvas.width, canvas.height);
+        draw.fillStyle = "Black";
+        draw.textAlign = "center";
+        draw.font = "25px Helvetica";
+        var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
+        draw.fillText("Sorry, that was incorrect.", canvas.width/2, canvas.height/2);
+        draw.font = "25px Helvetica";
+        draw.fillText("Try again.", canvas.width/2, canvas.height/2 + 50);
     }
 
     var keyboard_callback = function(info) {
@@ -678,6 +689,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         mutagen_history.push(mutagen_loc);
         var this_action = trial.mutagen_generator_assignment[mutagen_loc]; 
         action_history.push(this_action); 
+
+        //forcing
+        if (trial.force_sequence && this_action != trial.force_sequence[0]) {
+            location_history.push(current_location);
+            display_retry();
+            setTimeout(function() {
+                    draw_current_setup(current_location);
+                }, 500); 
+            return;
+        } 
+        trial.force_sequence.splice(0, 1); // pop from head of list
 
         // animate
         keyable = false;
@@ -719,6 +741,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
         "mutagen_history": JSON.stringify(mutagen_history),
+        "force_sequence": JSON.stringify(trial.force_sequence), 
         "location_rts": JSON.stringify(location_rts)
       };
 
