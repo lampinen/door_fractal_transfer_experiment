@@ -713,7 +713,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     setTimeout(function() {
                         draw_current_room(current_location);
                         clickable = true;
-                    }, 500);
+                    }, 750);
                 }, 500);
 
             } else {
@@ -815,7 +815,6 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         "force_sequence": JSON.stringify(original_force_sequence),
         "location_rts": JSON.stringify(location_rts)
       };
-      console.log(trial_data);
 
       jsPsych.finishTrial(trial_data);
     }

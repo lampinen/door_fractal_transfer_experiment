@@ -670,11 +670,11 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         draw.fillRect(0, 0, canvas.width, canvas.height);
         draw.fillStyle = "Black";
         draw.textAlign = "center";
-        draw.font = "25px Helvetica";
+        draw.font = "35px Helvetica";
         var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
         draw.fillText("Sorry, that was incorrect.", canvas.width/2, canvas.height/2);
-        draw.font = "25px Helvetica";
-        draw.fillText("Try again.", canvas.width/2, canvas.height/2 + 50);
+        draw.font = "35px Helvetica";
+        draw.fillText("Try again.", canvas.width/2, canvas.height/2 + 75);
     }
 
     var keyboard_callback = function(info) {
@@ -734,7 +734,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
                     setTimeout(function() {
                         draw_current_setup(current_location);
                         keyable = true;
-                    }, 500);
+                    }, 750);
                 }, 500);
             } else {
                 keyable = true;
@@ -768,7 +768,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         "force_sequence": JSON.stringify(original_force_sequence), 
         "location_rts": JSON.stringify(location_rts)
       };
-      console.log(trial_data);
 
       jsPsych.finishTrial(trial_data);
     }
