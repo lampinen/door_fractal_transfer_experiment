@@ -691,15 +691,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         action_history.push(this_action); 
 
         //forcing
-        if (trial.force_sequence && this_action != trial.force_sequence[0]) {
-            location_history.push(current_location);
-            display_retry();
-            setTimeout(function() {
-                    draw_current_setup(current_location);
-                }, 500); 
-            return;
+        if (trial.force_sequence) {
+            if (this_action != trial.force_sequence[0]) {
+                location_history.push(current_location);
+                display_retry();
+                setTimeout(function() {
+                        draw_current_setup(current_location);
+                    }, 500); 
+                return;
+            }
+            trial.force_sequence.splice(0, 1); // pop from head of list
         } 
-        trial.force_sequence.splice(0, 1); // pop from head of list
 
         // animate
         keyable = false;
