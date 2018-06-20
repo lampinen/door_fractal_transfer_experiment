@@ -672,7 +672,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
         // forcing
         var forced_action_wrong = false;
-        if (trial.force_sequence) {
+        if (trial.force_sequence !== false) {
             if (this_action != trial.force_sequence[0]) {
                 forced_action_wrong = true;
             }
@@ -694,18 +694,24 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     setTimeout(end_function, 2500); 
                 }, 500);
             } else if (forced_action_wrong) {
-                display_retry();
-                current_location = prev_location;
-                location_history.push(current_location);
-                location_rts.push(-1);
-                door_history.push(-1);
-                action_history.push(-1); 
                 setTimeout(function() {
-                    draw_current_room(current_location);
+                    display_retry();
+                    current_location = prev_location;
+                    location_history.push(current_location);
+                    location_rts.push(-1);
+                    door_history.push(-1);
+                    action_history.push(-1); 
+                    setTimeout(function() {
+                        draw_current_room(current_location);
+                        clickable = true;
+                    }, 500);
                 }, 500);
 
             } else {
                 clickable = true;
+                if (trial.force_sequence !== false) {
+                    trial.force_sequence.splice(0, 1); // pop from head of list
+                }
             }
         })
 
