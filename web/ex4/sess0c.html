@@ -193,8 +193,8 @@
         show_clickable_nav: true,
 	pages: [
 	    "Hi, welcome to our HIT. Please read the following instructions carefully, failure to follow them may result in your work being rejected.<br /><br />Note that if you are colorblind, this task will probably not be possible for you, and you should click 'Return HIT.'",
-	    "We are researchers from the Stanford Department of Psychology who are interested in learning over time. Today's hit should take approximately 20 minutes.",
-	    "Because we are investigating learning over time, if you perform well on today's HIT, we will give you the opportunity to do several follow-up sessions. We will post follow-up HITs each day for the next three days. Each follow-up HIT will include the same experiment as this HIT, and an additional learning over time experiment, so the follow-up HITs will take approximately twice as long as todays (20 minutes per experiment), although as you learn the experiments they should take less time. Because we need data from all four HITS, you will be paid $2.50 for completing today's HIT, $5 each for the second and third HITs, and $10 for the fourth, for a total of $22.50 for approximately 2 hours and 20 minutes of work if you complete all four." 
+	    "We are researchers from the Stanford Department of Psychology who are interested in learning over time. Today's hit should take approximately 25 minutes.",
+	    "Because we are investigating learning over time, if you perform well on today's HIT, we will give you the opportunity to do several follow-up sessions. We will post follow-up HITs each day for the next three days. Each follow-up HIT will include a shorter version of the experiment in this HIT, and an additional learning over time experiment, so the follow-up HITs will take about 40 minutes total (20 minutes per experiment), although as you learn the experiments they should take less time. Because we need data from all four HITS, you will be paid $3 for completing today's HIT, $5 each for the second and third HITs, and $10 for the fourth, for a total of $23 for approximately 2 hours and 25 minutes of work if you complete all four." 
 
 	]
     }
@@ -296,7 +296,7 @@
 	}
         var turk_info = jsPsych.turk.turkInfo();
         if (turk_info.previewMode) {
-	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning under noise.<br /><br />This HIT will take about 20 minutes, and if you perform well you will be asked to return for similar (but 40 minute) HITs tomorrow and the following day. <br /><br />To encourage completion of all 4, you will be paid $2.50 for completing this first one, $5 each for the second and third, and $10 for the fourth, for a total of $22.50 if you complete all 4 HITs.<br /><br />NOTE: if you participated in one of our previous HITs or are colorblind, you are ineligible to participate in this experiment, sorry!";
+	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning under noise.<br /><br />This HIT will take about 20 minutes, and if you perform well you will be asked to return for similar (but 40 minute) HITs tomorrow and the following day. <br /><br />To encourage completion of all 4, you will be paid $3 for completing this first one, $5 each for the second and third, and $10 for the fourth, for a total of $23 if you complete all 4 HITs.<br /><br />NOTE: if you participated in one of our previous HITs or are colorblind, you are ineligible to participate in this experiment, sorry!";
             return;
         }
         var worker_id = turk_info.workerId;
