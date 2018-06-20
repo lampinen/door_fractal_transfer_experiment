@@ -16,6 +16,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     //trial.start = one of group.elements
     //optional: trial.progress, update of progress bar after
     trial.force_sequence = (typeof trial.force_sequence === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
+    var original_force_sequence = trial.force_sequence;
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
@@ -669,17 +670,13 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         action_history.push(this_action); 
 
         // forcing
+        var forced_action_wrong = false;
         if (trial.force_sequence) {
             if (this_action != trial.force_sequence[0]) {
-                location_history.push(current_location);
-                display_retry();
-                setTimeout(function() {
-                        draw_current_room(current_location);
-                    }, 500);
-                return;
+                forced_action_wrong = true;
             }
-            trial.force_sequence.splice(0, 1); // pop from head of list
-        }
+        } 
+
 
 
         // animate
@@ -695,6 +692,15 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                     display_congratulations();
                     setTimeout(end_function, 2500); 
                 }, 500);
+            } else if (forced_action_wrong) {
+                display_retry();
+                current_location = prev_location;
+                location_history.push(current_location);
+                location_rts.push(-1);
+                door_history.push(-1);
+                action_history.push(-1); 
+                draw_current_room(current_location);
+
             } else {
                 clickable = true;
             }
@@ -788,7 +794,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
         "door_history": JSON.stringify(door_history),
-        "force_sequence": JSON.stringify(trial.force_sequence),
+        "force_sequence": JSON.stringify(original_force_sequence),
         "location_rts": JSON.stringify(location_rts)
       };
 

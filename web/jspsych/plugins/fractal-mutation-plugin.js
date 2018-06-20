@@ -16,6 +16,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     //optional: trial.progress, update of progress bar after
     
     trial.force_sequence = (typeof trial.force_sequence === 'undefined') ? false : trial.force_sequence; //sequence of actions to force
+    var original_force_sequence = trial.force_sequence;
     trial.action_noise = (typeof trial.action_noise === 'undefined') ? 0.0 : trial.action_noise; // how often an action "misses"
     trial.canvas_height = trial.canvas_height || 400;
     trial.canvas_width = trial.canvas_width || 600;
@@ -691,21 +692,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         action_history.push(this_action); 
 
         //forcing
+        var forced_action_wrong = false;
         if (trial.force_sequence) {
             if (this_action != trial.force_sequence[0]) {
-                location_history.push(current_location);
-                display_retry();
-                setTimeout(function() {
-                        draw_current_setup(current_location);
-                    }, 500); 
-                return;
+                forced_action_wrong = true;
             }
-            trial.force_sequence.splice(0, 1); // pop from head of list
         } 
 
         // animate
         keyable = false;
         animate_mutation(mutagen_loc, function() {
+            var prev_location = current_location;
             current_location = next_fractal(current_location, this_action);
             draw_current_setup(current_location);
             location_history.push(current_location);
@@ -717,8 +714,19 @@ jsPsych.plugins['fractal-mutation'] = (function() {
                     display_congratulations();
                     setTimeout(end_function, 2500); 
                 }, 500);
+            } else if (forced_action_wrong) {
+                display_retry();
+                current_location = prev_location;
+                location_history.push(current_location);
+                location_rts.push(-1);
+                mutagen_history.push(-1);
+                action_history.push(-1); 
+                draw_current_setup(current_location);
             } else {
                 keyable = true;
+                if (trial.force_sequence) {
+                    trial.force_sequence.splice(0, 1); // pop from head of list
+                }
             }
         })
 
@@ -743,7 +751,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         "location_history": JSON.stringify(location_history),
         "action_history": JSON.stringify(action_history),
         "mutagen_history": JSON.stringify(mutagen_history),
-        "force_sequence": JSON.stringify(trial.force_sequence), 
+        "force_sequence": JSON.stringify(original_force_sequence), 
         "location_rts": JSON.stringify(location_rts)
       };
 
