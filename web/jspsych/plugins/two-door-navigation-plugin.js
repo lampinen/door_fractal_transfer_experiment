@@ -674,7 +674,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
                 location_history.push(current_location);
                 display_retry();
                 setTimeout(function() {
-                        draw_current_setup(current_location);
+                        draw_current_room(current_location);
                     }, 500);
                 return;
             }
