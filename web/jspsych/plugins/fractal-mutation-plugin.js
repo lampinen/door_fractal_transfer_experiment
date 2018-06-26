@@ -67,6 +67,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
     var mutagen_history = []; // redundant but nevertheless may be informative if there is e.g. a L-R click bias
 
     var location_rts = [];
+    var perfect = false; // Whether they perfectly solved the trial
 
     var start_time = (new Date()).getTime();
 
@@ -607,6 +608,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         return new_location;
     }
 
+    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
     function get_percentile_string(start, goal, num_steps) {
         //forcing feedback
         if (trial.force_sequence !== false) {
@@ -638,17 +640,17 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         }
 
         if (pct == 90) { 
-            return ["Congratulations!", "You did it with the minimum number of mutations!"];
+            perfect = true;
+            return ["Congratulations!", "You did it with the minimum number of mutations!", "+2" + cent_sign +" bonus!"];
         } else if (pct > 50) { 
-            return ["Pretty good!", "But you could have done even better."];
+            return ["Pretty good!", "But you could have done even better.", ""];
         } else {
-            return ["You did it.", "But you could have done it much quicker."];
+            return ["You did it.", "But you could have done it much quicker.", ""];
         }
     }
 
 
 
-//    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
 //    var earning_string = "(+4" + cent_sign + ")";
     var num_steps;
     function display_congratulations() {
@@ -661,7 +663,8 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         var achievement_strings = get_percentile_string(trial.start, trial.goal, num_steps);
         draw.fillText(achievement_strings[0], canvas.width/2, canvas.height/2);
         draw.font = "25px Helvetica";
-        draw.fillText(achievement_strings[1], canvas.width/2, canvas.height/2 + 100);
+        draw.fillText(achievement_strings[1], canvas.width/2, canvas.height/2 + 75);
+        draw.fillText(achievement_strings[2], canvas.width/2, canvas.height/2 + 150);
     }
 
     function display_retry() {
@@ -766,6 +769,7 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         "action_history": JSON.stringify(action_history),
         "mutagen_history": JSON.stringify(mutagen_history),
         "force_sequence": JSON.stringify(original_force_sequence), 
+        "perfect": perfect,
         "location_rts": JSON.stringify(location_rts)
       };
 

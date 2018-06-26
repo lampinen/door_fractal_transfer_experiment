@@ -60,6 +60,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     var door_history = []; // redundant but nevertheless may be informative if there is e.g. a L-R click bias
 
     var location_rts = [];
+    var perfect = false; // Whether they perfectly solved the trial
 
     var start_time = (new Date()).getTime();
 
@@ -607,11 +608,12 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         }
 
         if (pct == 90) { 
-            return ["Congratulations!", "You got there in the minimum number of steps!"];
+            perfect = true;
+            return ["Congratulations!", "You got there in the minimum number of steps!", "+2" + cent_sign +" bonus!"];
         } else if (pct > 50) { 
-            return ["Pretty good!", "But you could have done even better."];
+            return ["Pretty good!", "But you could have done even better.", ""];
         } else {
-            return ["You got there.", "But you could have gotten there much quicker."];
+            return ["You got there.", "But you could have gotten there much quicker.", ""];
         }
 
     }
@@ -633,6 +635,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         draw.fillText(achievement_strings[0], canvas.width/2, canvas.height/2);
         draw.font = "25px Arial";
         draw.fillText(achievement_strings[1], canvas.width/2, canvas.height/2 + 75);
+        draw.fillText(achievement_strings[2], canvas.width/2, canvas.height/2 + 150);
 
     }
 
@@ -813,6 +816,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         "action_history": JSON.stringify(action_history),
         "door_history": JSON.stringify(door_history),
         "force_sequence": JSON.stringify(original_force_sequence),
+        "perfect": perfect,
         "location_rts": JSON.stringify(location_rts)
       };
 
