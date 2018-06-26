@@ -651,7 +651,6 @@ jsPsych.plugins['fractal-mutation'] = (function() {
 
 
 
-//    var earning_string = "(+4" + cent_sign + ")";
     var num_steps;
     function display_congratulations() {
         draw.clearRect(0, 0, canvas.width, canvas.height);

@@ -577,6 +577,7 @@ jsPsych.plugins['two-door-navigation'] = (function() {
     }
 
 
+    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
     function get_percentile_string(start, goal, num_steps) {
         //forcing feedback
         if (trial.force_sequence !== false) {
@@ -618,7 +619,6 @@ jsPsych.plugins['two-door-navigation'] = (function() {
 
     }
 
-//    var cent_sign = String.fromCharCode(parseInt('00A2', 16));
 //    var earning_string = "+4" + cent_sign;
     var num_steps;
     function display_congratulations() {
