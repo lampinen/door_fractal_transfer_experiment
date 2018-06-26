@@ -582,9 +582,10 @@ jsPsych.plugins['two-door-navigation'] = (function() {
         //forcing feedback
         if (trial.force_sequence !== false) {
             if (action_history.length === original_force_sequence.length) {
-		return ["Congratulations!", "You got there in the minimum number of steps!"];
+                perfect = true;
+		return ["Congratulations!", "You got there in the minimum number of steps!", "+2" + cent_sign +" bonus!"];
             } else {
-                return ["Pretty good!", "But you could have done even better."];
+                return ["Pretty good!", "But you could have done even better.", ""];
             }
         }
 

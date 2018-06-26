@@ -613,9 +613,10 @@ jsPsych.plugins['fractal-mutation'] = (function() {
         //forcing feedback
         if (trial.force_sequence !== false) {
             if (action_history.length === original_force_sequence.length) {
-                return ["Congratulations!", "You did it with the minimum number of mutations!"];
+                perfect = true;
+                return ["Congratulations!", "You did it with the minimum number of mutations!", "+2" + cent_sign +" bonus!"];
             } else {
-                return ["Pretty good!", "But you could have done even better."];
+                return ["Pretty good!", "But you could have done even better.", ""];
             }
         }
 
