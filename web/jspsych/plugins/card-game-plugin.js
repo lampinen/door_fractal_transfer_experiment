@@ -1,6 +1,6 @@
 // two-card-navigation-plugin 
 // adapted from jspych demons
-
+~()!@-+ // TODO: needs forcing and bonuses etc to be up to date
 jsPsych.plugins['card-game'] = (function() {
 
   var plugin = {};
