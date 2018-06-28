@@ -113,7 +113,7 @@ chance_alignments_od = 1.56
 # Data loading
 ```{r}
 num_subjects = 16
-data_dir = "../anonymized_data/ex4"
+data_dir = "../anonymized_data/ex4_cont"
 drag_drop_target_locations_order = 1:8
 ```
 
@@ -158,7 +158,7 @@ for (i in 1:num_subjects) {
         this_trial$action_history = fromJSON(this_trial$action_history)
         this_trial$location_history = fromJSON(this_trial$location_history)[1:length(this_trial$action_history)] # chop off known last location
         
-        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "action_noise", "trial_index", "time_elapsed", "location_history", "action_history", "location_rts")])
+        this_trial_d = data.frame(this_trial[c("trial_type", "group", "start", "goal", "force_sequence", "perfect", "action_noise", "trial_index", "time_elapsed", "location_history", "action_history", "location_rts")])
         this_trial_d$session = s
 #        if (this_trial$trial_type == "two-door-navigation") {
 #          this_trial_d$object_history = list(fromJSON(this_trial$door_history))
@@ -320,7 +320,6 @@ question_data = question_data %>%
 any(is.na(question_data$question))
 ```
 
-TODO: check substrings
 ```{r}
 question_data = inner_join(question_data,
                            auxiliary_data %>%
@@ -389,8 +388,7 @@ main_data = main_data %>%
 ```{r}
 collapsed_main_data = main_data %>%
 #  filter(trial_index_by_type >= 50) %>%
-  group_by(subject_id, isomorphic, fractals_target, is_target_domain, target_square_cycles, group, trial_type, session,
-           education, age, gender, race, education_high) %>%
+  group_by(subject_id, isomorphic, fractals_target, is_target_domain, target_square_cycles, group, trial_type, session,) %>%
   summarize(pct_correct = sum(action_correct, na.rm=T)/sum(!is.na(action_correct)),
             median_rt = median(location_rts),
             pct_correct_se=sqrt(pct_correct * (1-pct_correct))/sqrt(n()),
@@ -561,14 +559,15 @@ summary(action_model)
 main outcome variable is number of steps needed to get to a goal
 ```{r}
 num_steps_per_trial_data = main_data %>%
-  group_by(subject_id, isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session, session_c, structure, trial_type, trial_index_by_type_z, education_high, start, goal) %>%
+  filter(force_sequence == "false") %>%
+  group_by(subject_id, isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session, session_c, trial_type, trial_index_by_type_z, start, goal) %>%
   summarize(num_steps_needed=n(),
             avg_rt_on_trial=mean(truncated_RT))
 ```
 
 ```{r}
 num_steps_summarized_data = num_steps_per_trial_data %>%
-  group_by(subject_id, isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session, session_c, structure, trial_type, education_high) %>%
+  group_by(subject_id, isomorphic, group, is_target_domain, fractals_target, target_square_cycles, session, session_c,  trial_type) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   mutate(num_steps_needed_95ci_lower=num_steps_needed-1.96*num_steps_needed_se,
@@ -583,7 +582,7 @@ num_steps_summarized_data = num_steps_per_trial_data %>%
 ```
 
 ```{r}
-ggplot(data=num_steps_summarized_data, aes(x=session, y=num_steps_needed, linetype=trial_type, color=structure, group=trial_type)) +
+ggplot(data=num_steps_summarized_data, aes(x=session, y=num_steps_needed, linetype=trial_type, color=group, group=trial_type)) +
   geom_line() +
   geom_point(size=2) +
   scale_color_brewer(palette="Set1") +
@@ -602,7 +601,7 @@ ggsave("./figures/ex4/ns_individual_curve_plot.png", width=10, height=10)
 
 ```{r}
 num_steps_fully_summarized_data = num_steps_summarized_data  %>%
-  group_by(isomorphic, group, is_target_domain, trial_type, fractals_target, target_square_cycles, session_c, structure) %>%
+  group_by(isomorphic, group, is_target_domain, trial_type, fractals_target, target_square_cycles, session_c) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -619,7 +618,7 @@ ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed
   geom_point(size=1.2) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
   geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_grid(is_target_domain + trial_type~ structure)
+  facet_grid(is_target_domain + trial_type~ group)
 ```
 ```{r}
 ggsave("figures/ex4/ns_basic_plot.png")
@@ -640,7 +639,7 @@ ggplot(data=num_steps_fully_summarized_data, aes(x=session_c, y=num_steps_needed
 
 ```{r}
 num_steps_fully_summarized_data_by_type = num_steps_summarized_data  %>%
-  group_by(isomorphic, group, session_c, session, is_target_domain, fractals_target, target_square_cycles, structure, trial_type) %>%
+  group_by(isomorphic, group, session_c, session, is_target_domain, fractals_target, target_square_cycles, trial_type) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -650,7 +649,7 @@ num_steps_fully_summarized_data_by_type = num_steps_summarized_data  %>%
 
 ```{r}
 num_steps_more_fully_summarized_data_by_type = num_steps_summarized_data  %>%
-  group_by(isomorphic, structure, session, is_target_domain, session_c, trial_type) %>%
+  group_by(isomorphic, group, session, is_target_domain, session_c, trial_type) %>%
   summarize(num_steps_needed_se=sd(num_steps_needed)/sqrt(n()),
             num_steps_needed=mean(num_steps_needed)) %>%
   ungroup() %>%
@@ -668,7 +667,7 @@ ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(is_target_do
   scale_x_continuous(breaks=1:4) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
 #  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_grid(structure ~ trial_type)
+  facet_grid(group ~ trial_type)
 ```
 
 ```{r}
