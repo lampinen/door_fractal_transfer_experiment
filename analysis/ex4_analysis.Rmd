@@ -684,7 +684,7 @@ ggplot(data=num_steps_more_fully_summarized_data_by_type %>% filter(!is_target_d
   scale_x_continuous(breaks=1:4) +
   geom_errorbar(aes(ymin=num_steps_needed_95ci_lower, ymax = num_steps_needed_95ci_upper), width=0.25, size=1.2) +
 #  geom_hline(aes(yintercept=1.833), linetype=2, alpha=0.5) +
-  facet_grid(structure ~ trial_type)
+  facet_grid(group~ trial_type)
 ```
 
 ```{r}
@@ -706,7 +706,7 @@ AIC(ns_time_dependent_model_0)
 AIC(ns_time_dependent_model_0.5)
 AIC(ns_time_dependent_model_1)
 AIC(ns_time_dependent_model_1.5)
-summary(ns_time_dependent_model_0.5) # min AIC
+summary(ns_time_dependent_model_1.5) # min AIC
 ```
 
 ```{r}
