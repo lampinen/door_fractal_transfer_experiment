@@ -2,18 +2,18 @@ from group_theory import *
 from optimal_path import *
 
 if __name__ == "__main__":
-    od = odd_cycles() 
+    tc = three_clusters() 
     sq = square_cycles() 
-    od_table = [[{} for j in range(8)] for i in range(8)] 
+    tc_table = [[{} for j in range(8)] for i in range(8)] 
 
     for state in xrange(8):
         for goal in xrange(8):
             if state == goal:
                 continue
-            solution_paths = BFS(state, goal, od) 
+            solution_paths = BFS(state, goal, tc) 
             optimal_path_length = len(solution_paths[0]) 
             if optimal_path_length == 1:
-                od_table[state][goal] = {"X90": 1,
+                tc_table[state][goal] = {"X90": 1,
                                          "X80": 1,
                                          "X70": 1,
                                          "X60": 2,
@@ -23,7 +23,7 @@ if __name__ == "__main__":
                                          "X20": 5,
                                          "X10": 6}
             elif optimal_path_length == 2:
-                od_table[state][goal] = {"X90": 2,
+                tc_table[state][goal] = {"X90": 2,
                                          "X80": 2.5,
                                          "X70": 3,
                                          "X60": 3.5,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
                                          "X20": 5.5,
                                          "X10": 6}
             elif optimal_path_length == 3:
-                od_table[state][goal] = {"X90": 3,
+                tc_table[state][goal] = {"X90": 3,
                                          "X80": 3.5,
                                          "X70": 4,
                                          "X60": 4.5,
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                                          "X20": 8,
                                          "X10": 10}
             elif optimal_path_length == 4:
-                od_table[state][goal] = {"X90": 4,
+                tc_table[state][goal] = {"X90": 4,
                                          "X80": 4.5,
                                          "X70": 5,
                                          "X60": 6,
@@ -101,8 +101,8 @@ if __name__ == "__main__":
                                          "X20": 10,
                                          "X10": 11}
 
-    with open("../../web/distributions/odd_cycles.json", "w") as fout:
-        fout.write(str(od_table).replace("'", '"'))
+    with open("../../web/distributions/three_clusters.json", "w") as fout:
+        fout.write(str(tc_table).replace("'", '"'))
     with open("../../web/distributions/square_cycles.json", "w") as fout:
         fout.write(str(sq_table).replace("'", '"'))
 
