@@ -374,7 +374,7 @@ three_clusters.prototype.get_elements = function() {
 }
 
 three_clusters.prototype.get_name = function() {
-    return "odd cycles (cube, non-group)"
+    return "three clusters (cube, non-group)"
 }
 
 // gets *SOME* generating set (actually the canonical one)
