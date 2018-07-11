@@ -272,7 +272,7 @@ class three_clusters(object):
         self.order = 8
         self.elements = range(8)
 
-    def get_some_generators():
+    def get_some_generators(self):
         return [0, 1]
 
 
@@ -285,37 +285,37 @@ class three_clusters(object):
         if (y == 0):
             if (x == 0):
                 res = 1
-             else if (x == 1):
+            elif (x == 1):
                 res = 0
-             else if (x == 2):
+            elif (x == 2):
                 res = 6
-             else if (x == 3):
+            elif (x == 3):
                 res = 7
-             else if (x == 4):
+            elif (x == 4):
                 res = 3
-             else if (x == 5):
+            elif (x == 5):
                 res = 2
-             else if (x == 6):
+            elif (x == 6):
                 res = 5
-             else: #7
+            else: #7
                 res = 4
             
-         else: # y == 0
+        else: # y == 0
             if (x == 0):
                 res = 3
-             else if (x == 1):
+            elif (x == 1):
                 res = 2
-             else if (x == 2):
+            elif (x == 2):
                 res = 5
-             else if (x == 3):
+            elif (x == 3):
                 res = 4
-             else if (x == 4):
+            elif (x == 4):
                 res = 0
-             else if (x == 5):
+            elif (x == 5):
                 res = 1
-             else if (x == 6):
+            elif (x == 6):
                 res = 7
-             else: #7
+            else: #7
                 res = 6
 
         return res
