@@ -1,0 +1,353 @@
+<!doctype html>
+<html>
+<head>
+    <title>Experiment</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="../util/group_theory.js"></script>
+    <script src="../util/etc.js"></script>
+    <script src="../jspsych/jspsych.js"></script>
+    <script src="../jspsych/plugins/jspsych-instructions.js"></script>
+    <script src="../jspsych/plugins/jspsych-survey-text.js"></script>
+    <script src="../jspsych/plugins/fractal-mutation-plugin.js"></script>
+    <script src="../jspsych/plugins/two-door-navigation-plugin.js"></script>
+    <link href="../jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <link href="../css/other.css" rel="stylesheet" type="text/css"></link>
+
+</head>
+<body>
+</body>
+<script src="//uniqueturker.myleott.com/lib.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var repeat_turker;
+    (function(){
+	var ut_id = "il_ex0_s0"; 
+
+	if (UTWorkerLimitReached(ut_id)) {
+	    repeat_turker = true;
+	    document.getElementsByTagName('body')[0].innerHTML = "You may have already participated in a previous experiment and be ineligible for this one, or you have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
+	}
+    })();
+</script>
+
+<script>
+    var target_square_cycles = false; // will fractal task be square_cycles (otherwise three_clusters) 
+    var isomorphic = true; // will two tasks be isomorphic?
+    var fractals_target = false; // will fractals be target task or doors?
+
+    if (target_square_cycles) {
+        var this_group_target = new square_cycles();
+        if (isomorphic) {
+            var this_group_source = new square_cycles();
+        } else {
+            var this_group_source = new three_clusters();
+        }
+    } else {
+        var this_group_target = new three_clusters;
+        if (isomorphic) {
+            var this_group_source = new three_clusters();
+        } else {
+            var this_group_source = new square_cycles();
+        }
+    }
+
+    var this_fractal_assignment = ['../images/blu_wht.png', '../images/cyn_red.png', '../images/grn_red.png', '../images/gry_blk.png', '../images/org_blu.png', '../images/pnk_blu.png', '../images/ylw_pnk.png', '../images/ylw_slt.png']; 
+    shuffle(this_fractal_assignment);
+        
+    var this_mutagen_assignment = [1, 0];
+    shuffle(this_mutagen_assignment);
+    var this_room_assignment = ["red", "green", "blue", "grey", "pink", "brown", "yellow", "purple"];
+    shuffle(this_room_assignment);
+    var this_door_generator_assignment = [1, 0];
+    shuffle(this_door_generator_assignment);
+    var this_door_color_assignment = ["white", "black"];
+    shuffle(this_door_color_assignment);
+
+    var force_timeline;
+    if ((target_square_cycles && isomorphic) || (!target_square_cycles && !isomorphic)) { // first task sq
+        force_timeline = [
+            {start: 0, goal: 1, progress: 0, force_sequence: [0]},
+            {start: 6, goal: 5, progress: 1, force_sequence: [0]},
+            {start: 1, goal: 0, progress: 2, force_sequence: [1]},
+            {start: 7, goal: 3, progress: 3, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 4, force_sequence: [0]},
+            {start: 5, goal: 1, progress: 5, force_sequence: [1]},
+            {start: 3, goal: 0, progress: 6, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 7, force_sequence: [1]},
+            {start: 0, goal: 4, progress: 8, force_sequence: [1]},
+            {start: 6, goal: 7, progress: 9, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 10, force_sequence: [0]},
+            {start: 7, goal: 6, progress: 11, force_sequence: [0]},
+            {start: 2, goal: 6, progress: 12, force_sequence: [1]},
+            {start: 5, goal: 4, progress: 13, force_sequence: [0]},
+            {start: 3, goal: 2, progress: 14, force_sequence: [1]},
+            {start: 4, goal: 7, progress: 15, force_sequence: [0]},
+            {start: 0, goal: 1, progress: 16, force_sequence: [0]},
+            {start: 6, goal: 5, progress: 17, force_sequence: [0]},
+            {start: 7, goal: 3, progress: 18, force_sequence: [1]},
+            {start: 2, goal: 6, progress: 19, force_sequence: [1]},
+            {start: 4, goal: 7, progress: 20, force_sequence: [0]},
+            {start: 1, goal: 0, progress: 21, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 22, force_sequence: [0]},
+            {start: 5, goal: 1, progress: 23, force_sequence: [1]},
+            {start: 3, goal: 0, progress: 24, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 25, force_sequence: [1]},
+            {start: 6, goal: 7, progress: 26, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 27, force_sequence: [0]},
+            {start: 7, goal: 6, progress: 28, force_sequence: [0]},
+            {start: 0, goal: 4, progress: 29, force_sequence: [1]},
+            {start: 3, goal: 2, progress: 30, force_sequence: [1]},
+            {start: 5, goal: 4, progress: 31, force_sequence: [0]}           
+        ]
+    } else {
+        force_timeline = [
+            {start: 0, goal: 1, progress: 0, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 1, force_sequence: [1]},
+            {start: 1, goal: 0, progress: 2, force_sequence: [1]},
+            {start: 7, goal: 4, progress: 3, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 4, force_sequence: [0]},
+            {start: 0, goal: 3, progress: 5, force_sequence: [1]},
+            {start: 6, goal: 7, progress: 6, force_sequence: [1]},
+            {start: 3, goal: 4, progress: 7, force_sequence: [0]},
+            {start: 5, goal: 7, progress: 8, force_sequence: [0]},
+            {start: 1, goal: 2, progress: 9, force_sequence: [0]},
+            {start: 4, goal: 0, progress: 10, force_sequence: [0]},
+            {start: 2, goal: 6, progress: 11, force_sequence: [1]},
+            {start: 5, goal: 2, progress: 12, force_sequence: [1]},
+            {start: 7, goal: 6, progress: 13, force_sequence: [0]},
+            {start: 3, goal: 1, progress: 14, force_sequence: [1]},
+            {start: 6, goal: 5, progress: 15, force_sequence: [0]},
+            {start: 7, goal: 4, progress: 16, force_sequence: [1]},
+            {start: 2, goal: 3, progress: 17, force_sequence: [0]},
+            {start: 6, goal: 5, progress: 18, force_sequence: [0]},
+            {start: 2, goal: 6, progress: 19, force_sequence: [1]},
+            {start: 5, goal: 7, progress: 20, force_sequence: [0]},
+            {start: 0, goal: 1, progress: 21, force_sequence: [0]},
+            {start: 4, goal: 5, progress: 22, force_sequence: [1]},
+            {start: 1, goal: 0, progress: 23, force_sequence: [1]},
+            {start: 3, goal: 4, progress: 24, force_sequence: [0]},
+            {start: 6, goal: 7, progress: 25, force_sequence: [1]},
+            {start: 1, goal: 2, progress: 26, force_sequence: [0]},
+            {start: 4, goal: 0, progress: 27, force_sequence: [0]},
+            {start: 5, goal: 2, progress: 28, force_sequence: [1]},
+            {start: 7, goal: 6, progress: 29, force_sequence: [0]},
+            {start: 0, goal: 3, progress: 30, force_sequence: [1]},
+            {start: 3, goal: 1, progress: 31, force_sequence: [1]}
+        ]
+    }
+
+    var block_timeline = [
+        {start: 0, goal: 2, progress: 32},
+        {start: 2, goal: 3, progress: 33},
+        {start: 3, goal: 4, progress: 35},
+        {start: 4, goal: 1, progress: 36},
+        {start: 1, goal: 7, progress: 37},
+        {start: 7, goal: 5, progress: 39},
+        {start: 5, goal: 6, progress: 40},
+        {start: 6, goal: 0, progress: 41},
+        {start: 0, goal: 7, progress: 43},
+        {start: 7, goal: 6, progress: 44},
+        {start: 6, goal: 5, progress: 45},
+        {start: 5, goal: 3, progress: 47},
+        {start: 3, goal: 4, progress: 48},
+        {start: 4, goal: 2, progress: 49},
+        {start: 2, goal: 1, progress: 51},
+        {start: 1, goal: 4, progress: 52},
+        {start: 4, goal: 6, progress: 53},
+        {start: 6, goal: 1, progress: 55},
+        {start: 1, goal: 2, progress: 56},
+        {start: 2, goal: 5, progress: 57},
+        {start: 5, goal: 0, progress: 59},
+        {start: 0, goal: 3, progress: 60},
+        {start: 3, goal: 7, progress: 61},
+        {start: 7, goal: 3, progress: 63},
+        {start: 3, goal: 1, progress: 64},
+        {start: 1, goal: 5, progress: 65},
+        {start: 5, goal: 0, progress: 67},
+        {start: 0, goal: 6, progress: 68},
+        {start: 6, goal: 2, progress: 69},
+        {start: 2, goal: 7, progress: 71},
+        {start: 7, goal: 4, progress: 72},
+        {start: 4, goal: 1, progress: 73},
+        {start: 1, goal: 3, progress: 75},
+        {start: 3, goal: 2, progress: 76},
+        {start: 2, goal: 4, progress: 77},
+        {start: 4, goal: 0, progress: 79},
+        {start: 0, goal: 6, progress: 80},
+        {start: 6, goal: 7, progress: 81},
+        {start: 7, goal: 5, progress: 83},
+        {start: 5, goal: 7, progress: 84},
+        {start: 7, goal: 3, progress: 85},
+        {start: 3, goal: 5, progress: 87},
+        {start: 5, goal: 0, progress: 88},
+        {start: 0, goal: 2, progress: 89},
+        {start: 2, goal: 6, progress: 91},
+        {start: 6, goal: 4, progress: 92},
+        {start: 4, goal: 1, progress: 94},
+        {start: 1, goal: 2, progress: 95},
+        {start: 2, goal: 6, progress: 97},
+        {start: 6, goal: 3, progress: 99}
+    ]
+
+    var welcome_instructions = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+	    "Hi, welcome to our HIT. Please read the following instructions carefully, failure to follow them may result in your work being rejected.<br /><br />Note that if you are colorblind, this task will probably not be possible for you, and you should click 'Return HIT.'",
+	    "We are researchers from the Stanford Department of Psychology who are interested in learning over time. Today's hit should take approximately 25 minutes.",
+	    "Because we are investigating learning over time, if you perform well on today's HIT, we will give you the opportunity to do several follow-up sessions. We will post follow-up HITs each day for the next three days. Each follow-up HIT will include a shorter version of the experiment in this HIT, and an additional learning over time experiment, so the follow-up HITs will take about 40 minutes total (20 minutes per experiment), although as you learn the experiments they should take less time. Because we need data from all four HITS, you will be paid $2.50 for completing today's HIT, $5 each for the second and third HITs, and $10 for the fourth, for a total of $22.50 + bonuses for approximately 2 hours and 25 minutes of work if you complete all four." 
+
+	]
+    }
+
+    var reminder_to_return = {
+	type: 'instructions',
+        show_clickable_nav: true,
+	pages: [
+            "Thanks, you've now completed the experiment for this session! You're almost done, we just have a final question and need to save your data. You should receive your payment shortly after completing the HIT, and your bonus payment sometime this evening. Please remember to come back tomorrow for the next session! (It will be called Learning over time experiment 2.) Remember you will be paid $5 each for completing the second and third HIT, and $9 for completing the fourth, so try to do all four!<br /><br />Click next to continue."
+	]
+    }
+
+    var debrief = {
+	type: 'survey-text',
+	questions: ["Do you have any comments on this HIT?"],
+        rows: [5]
+    }
+
+    if (fractals_target) {
+        var room_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "You are now beginning the first experiment, which investigates spatial learning.",
+                "In this experiment, you are exploring a house. The house has many rooms, each of a different color.  Your task will be to learn to navigate from any room to any other room, by learning the layout of the house. Each room will have a " + this_door_color_assignment[0] + " door on the left and a " + this_door_color_assignment[1] + " door on the right.  Click on a door to go through it. Each door will take you down a dark passage to another room, and over the experiment you will get a chance to learn where each door goes. After each trial, we'll give you feedback on how well you did at finding the quickest path, and we'll give you a bonus of 2 cents each time you find the quickest path.",
+                "To help you get started learning your way around the house, we'll first give you some trials where you only need to go through one door to get to the goal, and we'll let you retry if you don't pick the right one. Learning these simple trials will help you do better in the rest of the experiment, so pay attention!" 
+            ]
+
+        }
+
+        var post_force_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Great job! You will now move on to trials where you may have to go through more than one door, and you will have to explore to find the path; we will no longer tell you if you choose the wrong door, but we will provide you with feedback at the end of the trial on how well you did at finding the shortest path, and we'll still give you a bonus if you find the shortest path." 
+            ]
+        }
+
+        var room_forced_trials = {
+            type: 'two-door-navigation',
+            group: this_group_source,
+            room_assignment: this_room_assignment,
+            door_color_assignment: this_door_color_assignment,
+            door_generator_assignment: this_door_generator_assignment,
+            timeline: force_timeline 
+        };
+
+        var room_trials = {
+            type: 'two-door-navigation',
+            group: this_group_source,
+            room_assignment: this_room_assignment,
+            door_color_assignment: this_door_color_assignment,
+            door_generator_assignment: this_door_generator_assignment,
+            timeline: block_timeline 
+        };
+
+        var this_timeline = [welcome_instructions, room_instructions, room_forced_trials, post_force_instructions, room_trials, reminder_to_return, debrief]
+    } else {
+	var fractal_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "You are now beginning the first experiment, which investigates learning of relationships between visual patterns.",
+                "In this experiment, you are a scientist. This is a very exciting time, because astronauts have just discovered alien life on Saturn's moon Enceladus. These creatures form strange fractal colonies in a petri dish. It was accidentally discovered that pouring sulfuric acid onto the creatures or zapping them with gamma rays will cause them to mutate into one of the other fractals. These mutations follow patterns. Your job is to learn the relationships among the fractals so that you can make any particular fractal on demand, by using acid (pressing 'a' on your keyboard) or gamma rays (pressing 'g'). After you make each fractal, we'll give you feedback on how well you did, and we'll give you a bonus of 2 cents if you only used the minimum number of mutations.",
+                "To help you get started learning about the fractals, we'll first give you some trials where you only need one mutation to make the target fractal, and we'll let you retry if you don't pick the right one. Learning these simple trials will help you do better in the rest of the experiment, so pay attention!" 
+
+            ]
+        }
+
+        var fractal_forced_trials = {
+            type: 'fractal-mutation',
+            group: this_group_source,
+            fractal_assignment: this_fractal_assignment,
+            mutagen_generator_assignment: this_mutagen_assignment,
+            timeline: force_timeline 
+        };
+
+        var post_force_instructions = {
+            type: 'instructions',
+            show_clickable_nav: true,
+            pages: [
+                "Great job! You will now move on to trials where you may have to cause more than one mutation, and you will have to try things out to make the target fractal; we will no longer tell you if you choose the wrong action, but we will provide you with feedback at the end of the trial on how well you did at finding the minimum number of mutations, and you will still get a bonus for getting exactly the minimum." 
+            ]
+        }
+
+        var fractal_trials = {
+            type: 'fractal-mutation',
+            group: this_group_source,
+            fractal_assignment: this_fractal_assignment,
+            mutagen_generator_assignment: this_mutagen_assignment,
+            timeline: block_timeline 
+        };
+ 
+        var this_timeline = [welcome_instructions, fractal_instructions, fractal_forced_trials, post_force_instructions, fractal_trials, reminder_to_return, debrief]
+    }
+
+    var start_experiment = function() {
+	if (repeat_turker) {
+            return;
+	}
+        var turk_info = jsPsych.turk.turkInfo();
+        if (turk_info.previewMode) {
+	    document.getElementsByTagName('body')[0].innerHTML = "This HIT is the first in a series of 3 HITS for some psychological experiments on learning over time.<br /><br />This HIT will take about 20 minutes, and if you perform well you will be asked to return for similar (but 40 minute) HITs tomorrow and the following day. <br /><br />To encourage completion of all 4, you will be paid $2.50 for completing this first one, $5 each for the second and third, and $9 for the fourth, for a total of $21.50 if you complete all 4 HITs. Furthermore, each HIT will provide some bonuses for good performance.<br /><br />NOTE: if you participated in one of our previous HITs or are colorblind, you are ineligible to participate in this experiment, sorry!";
+            return;
+        }
+        var worker_id = turk_info.workerId;
+
+        //data necessary to recreate the same experience for this participant in future sessions
+        auxiliary_data = { 
+            "target_square_cycles": target_square_cycles,
+            "isomorphic": isomorphic,
+            "fractals_target": fractals_target,
+            "this_fractal_assignment": this_fractal_assignment,
+            "this_mutagen_assignment": this_mutagen_assignment,
+            "this_room_assignment": this_room_assignment,
+            "this_door_generator_assignment": this_door_generator_assignment,
+            "this_door_color_assignment": this_door_color_assignment
+        }
+
+
+        jsPsych.init({
+            timeline: this_timeline,
+            on_finish: function() {
+                document.getElementsByTagName('body')[0].innerHTML = "Thank you for completing this HIT. Please do not leave this page. Your responses are being saved, and your completion will be recorded as soon as that is done (should be no more than 1-2 minutes).";
+                var final_submit = function() {
+                    jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
+                };
+                var aux_submit = function() {
+                    saveData("aux/il/ex4/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
+                };
+		saveData("il/ex4/s0/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
+            }
+        });
+    };
+
+    // load distribution data, load images, start experiment
+    $.getJSON("../distributions/square_cycles.json", function(hb_result) {
+            $.getJSON("../distributions/three_clusters.json", function(ht_result) {
+		    if (this_group_target.get_name() == "square_cycles") {
+			this_group_target.distributions = hb_result;
+		    } else {
+			this_group_target.distributions = ht_result;
+                    }
+
+		    if (this_group_source.get_name() == "square_cycles") {
+			this_group_source.distributions = hb_result;
+		    } else {
+			this_group_source.distributions = ht_result;
+                    }
+                
+                    jsPsych.pluginAPI.preloadImages(this_fractal_assignment, function() {start_experiment();});
+                });
+        });
+
+</script>
+</html>
