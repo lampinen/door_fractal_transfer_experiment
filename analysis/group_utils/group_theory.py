@@ -267,3 +267,57 @@ class odd_cycles(object):
         
         return res
 
+class three_clusters(object):
+    def __init__(self):
+        self.order = 8
+        self.elements = range(8)
+
+    def get_some_generators():
+        return [0, 1]
+
+
+    def operation(self, x, y):
+        # only defined if y is an action 
+        if (y != 0 and y != 1):
+            print("three clusters operation error!")
+            return y
+        
+        if (y == 0):
+            if (x == 0):
+                res = 1
+             else if (x == 1):
+                res = 0
+             else if (x == 2):
+                res = 6
+             else if (x == 3):
+                res = 7
+             else if (x == 4):
+                res = 3
+             else if (x == 5):
+                res = 2
+             else if (x == 6):
+                res = 5
+             else: #7
+                res = 4
+            
+         else: # y == 0
+            if (x == 0):
+                res = 3
+             else if (x == 1):
+                res = 2
+             else if (x == 2):
+                res = 5
+             else if (x == 3):
+                res = 4
+             else if (x == 4):
+                res = 0
+             else if (x == 5):
+                res = 1
+             else if (x == 6):
+                res = 7
+             else: #7
+                res = 6
+
+        return res
+
+

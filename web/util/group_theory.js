@@ -359,6 +359,78 @@ odd_cycles.prototype.operation = function(x, y) {
     return res
 }
 
+// three clusters in cube (3+3+2) 
+function three_clusters() {
+    this.order = 8;
+    this.elements = range(8);
+}
+
+three_clusters.prototype.get_order = function() {
+    return this.order;
+}
+
+three_clusters.prototype.get_elements = function() {
+    return this.elements;
+}
+
+three_clusters.prototype.get_name = function() {
+    return "odd cycles (cube, non-group)"
+}
+
+// gets *SOME* generating set (actually the canonical one)
+three_clusters.prototype.get_some_generators = function() {
+    return [0, 1];
+}
+
+three_clusters.prototype.operation = function(x, y) {
+    // only defined if y is an action 
+    if (y != 0 && y != 1) {
+        alert("Odd cycles operation error!");
+        return y;
+    }
+
+    var res;
+    if (y == 0) {
+        if (x == 0) {
+            res = 1;
+        } else if (x == 1) {
+            res = 0;
+        } else if (x == 2) {
+            res = 6;
+        } else if (x == 3) {
+            res = 7;
+        } else if (x == 4) {
+            res = 3;
+        } else if (x == 5) {
+            res = 2;
+        } else if (x == 6) {
+            res = 5;
+        } else  { //7
+            res = 4;
+        }
+    } else { // y == 0
+        if (x == 0) {
+            res = 3;
+        } else if (x == 1) {
+            res = 2;
+        } else if (x == 2) {
+            res = 5;
+        } else if (x == 3) {
+            res = 4;
+        } else if (x == 4) {
+            res = 0;
+        } else if (x == 5) {
+            res = 1;
+        } else if (x == 6) {
+            res = 7;
+        } else  { //7
+            res = 6;
+        }
+    }
+    
+    return res
+}
+
 // hexagon with 2-cycles
 
 function hexagon_bi() {
