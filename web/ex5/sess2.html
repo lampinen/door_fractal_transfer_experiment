@@ -19,7 +19,7 @@
 <script type="text/javascript">
     var repeat_turker;
     (function(){
-        var ut_id = "il_ex4_s2"; 
+        var ut_id = "il_ex5_s2"; 
         var turk_info = jsPsych.turk.turkInfo();
         var worker_id = turk_info.workerId;
         if (UTWorkerLimitReached(ut_id)) {
@@ -35,7 +35,7 @@
 
     var auxiliary_data; 
 
-    load_data("il/ex4/s1/" + worker_id + ".json", function(result) { 
+    load_data("il/ex5/s1/" + worker_id + ".json", function(result) { 
         auxiliary_data = result;
         build_experiment();
         },
@@ -262,9 +262,9 @@
 			jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
 		    };
 		    var aux_submit = function() {
-			saveData("aux/il/ex4/s2/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
+			saveData("aux/il/ex5/s2/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
 		    };
-		    saveData("il/ex4/s2/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
+		    saveData("il/ex5/s2/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
 		}
             });
         };

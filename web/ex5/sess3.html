@@ -23,7 +23,7 @@
 <script type="text/javascript">
     var repeat_turker;
     (function(){
-        var ut_id = "il_ex4_s3";
+        var ut_id = "il_ex5_s3";
         if (UTWorkerLimitReached(ut_id)) {
             repeat_turker = true;
             document.getElementsByTagName('body')[0].innerHTML = "You have already completed this session of this experiment. Please click 'Return HIT' and come back for the next session tomorrow! (If you think you have received this message in error, please contact the HIT creator directly.)";
@@ -37,7 +37,7 @@
 
     var auxiliary_data; 
 
-    load_data("il/ex4/s2/" + worker_id + ".json", function(results) { 
+    load_data("il/ex5/s2/" + worker_id + ".json", function(results) { 
         auxiliary_data = results;
         build_experiment();
         },
@@ -451,7 +451,7 @@
 		    var final_submit = function() {
 			jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
 		    };
-		    saveData("il/ex4/s3/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
+		    saveData("il/ex5/s3/" + worker_id + ".json", jsPsych.data.dataAsJSON(), final_submit, final_submit);
 		}
             });
         };

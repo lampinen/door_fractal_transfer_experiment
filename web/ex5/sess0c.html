@@ -324,9 +324,9 @@
                     jsPsych.turk.submitToTurk({"completion_time": (new Date().getTime())});
                 };
                 var aux_submit = function() {
-                    saveData("aux/il/ex4/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
+                    saveData("aux/il/ex5/" + worker_id + ".json", JSON.stringify(auxiliary_data), final_submit, final_submit);
                 };
-		saveData("il/ex4/s0/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
+		saveData("il/ex5/s0/" + worker_id + ".json", jsPsych.data.dataAsJSON(), aux_submit, aux_submit);
             }
         });
     };
