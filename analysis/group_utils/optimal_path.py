@@ -206,32 +206,32 @@ if __name__ == "__main__":
 #    print(np.mean(ht_table))
 
     sq = square_cycles() 
-    od = odd_cycles() 
+    tc = three_clusters() 
     sq_table = np.full([8, 8], fill_value=-1)
 
-    od_table = np.full([8, 8], fill_value=-1)
+    tc_table = np.full([8, 8], fill_value=-1)
 
     for state in xrange(8):
         for goal in xrange(8):
             sq_table[state, goal] = BFS_unique_optimal_action(state, goal, sq) 
-            od_table[state, goal] = BFS_unique_optimal_action(state, goal, od) 
+            tc_table[state, goal] = BFS_unique_optimal_action(state, goal, tc) 
 
     np.savetxt("sq_table.csv", sq_table, fmt='%i', delimiter=',')
-    np.savetxt("od_table.csv", od_table, fmt='%i', delimiter=',')
+    np.savetxt("tc_table.csv", tc_table, fmt='%i', delimiter=',')
 
     sq_table = np.full([8, 8], fill_value=-1)
 
-    od_table = np.full([8, 8], fill_value=-1)
+    tc_table = np.full([8, 8], fill_value=-1)
 
     for state in xrange(8):
         for goal in xrange(8):
             solution_paths = BFS(state, goal, sq) 
             sq_table[state, goal] = len(solution_paths[0]) 
-            solution_paths = BFS(state, goal, od) 
-            od_table[state, goal] = len(solution_paths[0]) 
+            solution_paths = BFS(state, goal, tc) 
+            tc_table[state, goal] = len(solution_paths[0]) 
 
     sq_table = sq_table[sq_table != -1]
-    od_table = od_table[od_table != -1]
+    tc_table = tc_table[tc_table != -1]
 
     print(np.mean(sq_table))
-    print(np.mean(od_table))
+    print(np.mean(tc_table))
