@@ -2580,6 +2580,23 @@ summary(dist_sim_model)
 ```
 
 ```{r}
+dist_corr_data = dist_corr_data %>%
+  mutate(fmd_nsn=fractal_num_steps_needed-door_num_steps_needed)
+```
+
+```{r}
+dist_sim_model = lm(fmd_nsn ~ (isomorphic + structure)  *  (min_L1), data=dist_corr_data)
+summary(dist_sim_model)
+```
+
+```{r}
+ggplot(data=dist_corr_data, aes(x=min_L1, y=fmd_nsn, color=isomorphic)) +
+  geom_point() +
+  geom_smooth(method="lm") +
+  facet_wrap(~structure)
+```
+
+```{r}
 ggplot(data=dist_corr_data, aes(x=avg_num_steps_z, y=min_L1, color=isomorphic)) +
   geom_point() +
   geom_smooth(method="lm") +
