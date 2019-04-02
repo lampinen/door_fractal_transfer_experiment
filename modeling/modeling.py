@@ -69,7 +69,11 @@ class transfer_model(object):
         optimizer = tf.train.GradientDescentOptimizer(learning_rate)
         self.train = optimizer.minimize(self.loss)	
 
-        self.sess = sess = tf.Session()
+
+        sess_config = tf.ConfigProto()
+        sess_config.gpu_options.allow_growth = True
+
+        self.sess = sess = tf.Session(config=sess_config)
 
         sess.run(tf.global_variables_initializer())
 
@@ -97,7 +101,7 @@ class transfer_model(object):
         Args:
             store: if True, stores experiences in memory buffer.
         """
-        this_graph = graphs[task_num]
+        this_graph = self.graphs[task_num]
         curr_loc = start_i
         these_memories = []
         for step in range(1, max_steps_per_trial + 1):
